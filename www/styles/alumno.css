@@ -566,3 +566,190 @@
   #app-alumno{ box-shadow:0 0 60px rgba(0,0,0,.5); }
   body{ background:#050505; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   BLOQUE A — App nativa feel
+   ══════════════════════════════════════════════════════════ */
+
+/* A1 — Sombras reales en tarjetas */
+.stat-rings-card,.month-calendar-wrap,.hoy-card-dark,.progreso-semanal-card,
+.nota-coach-dark,.nutri-resumen-card,.nutri-comida-blk,.perfil-stat,.gym-section,
+.cupon-card,.fotos-grid .foto-item {
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.4),
+    0 4px 12px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.05);
+}
+
+/* A2 — Transiciones entre páginas */
+@keyframes slideInRight {
+  from { opacity:0; transform:translateX(20px) scale(0.98); }
+  to   { opacity:1; transform:translateX(0) scale(1); }
+}
+.page-transition-enter {
+  animation: slideInRight 0.28s cubic-bezier(0.32,0.72,0,1) forwards;
+}
+
+/* A3 — Feedback táctil en todo lo clickeable */
+.tap-feedback, .hoy-card-dark, .quick-link-card, .hcd-icon,
+button:not(.toggle-switch):not(.btn-next-intake), .ali-check,
+.semana-selector .sd-btn, .opcion-pill, .agua-vaso, .habito-tl-btn,
+.perfil-list-row, .perfil-stat, [onclick] {
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+.hoy-card-dark:active, .quick-link-card:active { transform:scale(0.97); opacity:0.9; }
+.habito-tl-card:active { transform:scale(0.98); }
+.ali-check:active { transform:scale(0.9); }
+
+/* A4 — Glassmorphism en nav y header */
+#bottom-nav {
+  background: rgba(10,10,10,0.88) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+#app-header {
+  background: rgba(10,10,10,0.88) !important;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+/* A6 — Borde gradiente en tarjeta de progreso */
+.progreso-semanal-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px !important;
+}
+.progreso-semanal-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(200,224,0,0.35), rgba(200,224,0,0) 55%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* A7 — Tipografía hero */
+.stat-number-hero {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -2.5px;
+  line-height: 0.95;
+}
+.stat-label-small {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.35);
+}
+
+/* ── B4 — Quick action cards rediseñadas ─────────────────── */
+.quick-action-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #1C1C1C 0%, #141414 100%);
+  border-radius: 18px;
+  padding: 18px;
+  margin: 0 20px 12px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: transform 0.15s, border-color 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.quick-action-card:active {
+  transform: scale(0.97);
+  border-color: rgba(200,224,0,0.3);
+}
+.quick-action-icon-bg {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 24px;
+}
+.quick-action-icon-bg.gym   { background: rgba(200,224,0,0.12); }
+.quick-action-icon-bg.foto  { background: rgba(10,132,255,0.12); }
+.quick-action-icon-bg.habit { background: rgba(255,149,0,0.12); }
+.quick-action-title { font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 2px; }
+.quick-action-sub   { font-size: 13px; color: rgba(255,255,255,0.4); }
+.quick-action-arrow {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-left: auto;
+}
+
+/* ── Notificaciones / Búsqueda modal ─────────────────────── */
+.modal-bottom {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 9999;
+  display: flex; align-items: flex-end;
+}
+.modal-bottom-sheet {
+  width: 100%; max-width: 430px; margin: 0 auto;
+  background: #141414;
+  border-radius: 20px 20px 0 0;
+  padding: 0 20px calc(20px + env(safe-area-inset-bottom));
+  max-height: 75vh;
+  overflow-y: auto;
+}
+.modal-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  margin: 12px auto 16px;
+}
+.modal-title {
+  font-size: 18px; font-weight: 700; color: #FFF;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.modal-close-btn {
+  background: rgba(255,255,255,0.08); border: none; color: #FFF;
+  border-radius: 50%; width: 30px; height: 30px;
+  font-size: 18px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+}
+.notif-item {
+  padding: 14px 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.06);
+  display: flex; gap: 12px;
+}
+.notif-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(200,224,0,0.12);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 16px;
+}
+.search-input {
+  flex: 1; height: 48px;
+  background: #1C1C1C;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50px;
+  padding: 0 18px; color: #FFF;
+  font-size: 15px; font-family: inherit; outline: none;
+}
+.search-result-row {
+  padding: 14px 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+}
+.search-result-row:active { opacity: 0.7; }
+.search-icon-box {
+  width: 40px; height: 40px; background: #1C1C1C;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}

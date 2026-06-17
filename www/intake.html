@@ -1,273 +1,477 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Formulario de Inscripción — FitApp</title>
-<style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  :root{
-    --bg:#0A0A0A; --surface:#141414; --surface2:#1C1C1C;
-    --accent:#C8E000; --text:#FFFFFF; --muted:rgba(255,255,255,.4);
-    --border:rgba(255,255,255,.08); --red:#FF453A;
-  }
-  body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);}
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-
-  .intake-wrap{max-width:480px;margin:0 auto;padding:24px 20px 60px;}
-  .intake-logo{font-size:22px;font-weight:800;color:var(--accent);margin-bottom:32px;text-align:center;}
-  .step-dots{display:flex;gap:8px;justify-content:center;margin-bottom:28px;}
-  .step-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s;}
-  .step-dot.active{background:var(--accent);width:24px;border-radius:99px;}
-  .step-dot.done{background:rgba(200,224,0,.4);}
-
-  .step{display:none;animation:fadeIn .3s;}
-  .step.active{display:block;}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-
-  h2{font-size:22px;font-weight:800;margin-bottom:6px;}
-  .step-sub{font-size:14px;color:var(--muted);margin-bottom:24px;}
-
-  .form-group{margin-bottom:16px;}
-  label{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
-  input,select,textarea{
-    width:100%;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;
-    padding:0 16px;color:var(--text);font-size:15px;font-family:inherit;outline:none;
-    transition:border .2s;
-  }
-  input:focus,select:focus,textarea:focus{border-color:rgba(200,224,0,.4);}
-  textarea{height:100px;padding:14px 16px;resize:none;}
-  select option{background:#1C1C1C;}
-
-  .pills-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
-  .pill-opt{
-    padding:8px 16px;border-radius:99px;border:1px solid var(--border);
-    background:transparent;color:rgba(255,255,255,.6);font-size:13px;font-weight:600;cursor:pointer;
-    font-family:inherit;transition:all .2s;
-  }
-  .pill-opt.sel{background:var(--accent);color:#1C1C1E;border-color:var(--accent);}
-
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-
-  .btn-next{
-    width:100%;height:52px;background:var(--accent);color:#1C1C1E;border:none;border-radius:50px;
-    font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;margin-top:8px;
-  }
-  .btn-back{
-    width:100%;height:44px;background:transparent;color:var(--muted);border:none;
-    font-size:14px;font-family:inherit;cursor:pointer;margin-top:6px;
-  }
-  .error-msg{color:var(--red);font-size:13px;margin-top:8px;display:none;}
-
-  /* Step 5 final */
-  .final-card{text-align:center;padding:32px 0;}
-  .final-icon{font-size:64px;margin-bottom:16px;}
-  .final-title{font-size:24px;font-weight:800;margin-bottom:8px;}
-  .final-sub{font-size:14px;color:var(--muted);line-height:1.6;}
-  .wa-btn{
-    display:flex;align-items:center;justify-content:center;gap:10px;
-    height:52px;background:#25D366;color:#FFF;border:none;border-radius:50px;
-    font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;
-    width:100%;margin-top:24px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Cuestionario de inicio — FitApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body { font-family:'Inter',sans-serif; background:#0A0A0A; color:#FFF; min-height:100dvh; }
+    .container { max-width:430px; margin:0 auto; padding:0 20px; }
+    .step { display:none; min-height:100dvh; flex-direction:column; padding:56px 0 32px; }
+    .step.active { display:flex; animation:fadeIn 0.3s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+    .progress-bar { position:fixed; top:0; left:0; right:0; height:3px; background:rgba(255,255,255,0.08); z-index:100; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,#A8BC00,#C8E000); transition:width 0.4s ease; }
+    h1 { font-size:26px; font-weight:800; letter-spacing:-0.5px; margin-bottom:8px; line-height:1.2; }
+    .subtitle { font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:28px; line-height:1.5; }
+    .input-group { margin-bottom:14px; }
+    .input-label { font-size:12px; font-weight:600; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; display:block; }
+    input[type=text],input[type=number],input[type=tel],textarea {
+      width:100%; height:52px; background:#141414; border:1px solid rgba(255,255,255,0.08);
+      border-radius:12px; padding:0 16px; color:#FFF; font-size:16px; font-family:inherit;
+      outline:none; transition:border-color 0.2s; -webkit-appearance:none;
+    }
+    textarea { height:90px; padding:14px 16px; resize:none; line-height:1.5; }
+    input:focus,textarea:focus { border-color:rgba(200,224,0,0.5); }
+    .pills-group { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+    .pill { height:40px; padding:0 16px; background:#141414; border:1.5px solid rgba(255,255,255,0.08); border-radius:50px; font-size:14px; font-weight:500; color:rgba(255,255,255,0.65); cursor:pointer; display:flex; align-items:center; white-space:nowrap; transition:all 0.15s; font-family:inherit; }
+    .pill.selected { background:rgba(200,224,0,0.12); border-color:#C8E000; color:#C8E000; }
+    .pill:active { transform:scale(0.95); }
+    .btn-next { width:100%; height:54px; background:#C8E000; color:#1C1C1E; border:none; border-radius:50px; font-size:16px; font-weight:700; font-family:inherit; cursor:pointer; margin-top:auto; box-shadow:0 4px 20px rgba(200,224,0,0.25); transition:transform 0.15s; }
+    .btn-next:active { transform:scale(0.97); }
+    .btn-back { background:none; border:none; color:rgba(255,255,255,0.4); font-size:14px; font-family:inherit; cursor:pointer; padding:10px 0 20px; align-self:flex-start; }
+    .step-counter { font-size:12px; color:rgba(255,255,255,0.3); margin-bottom:16px; font-weight:600; }
+    .checkbox-item { display:flex; align-items:flex-start; gap:12px; padding:16px 0; cursor:pointer; }
+    .checkbox-circle { width:24px; height:24px; border-radius:50%; border:2px solid rgba(255,255,255,0.2); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all 0.2s; margin-top:1px; }
+    .checkbox-circle.checked { background:#C8E000; border-color:#C8E000; }
+    .success-screen { display:none; min-height:100dvh; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 20px; }
+    .success-screen.active { display:flex; animation:fadeIn 0.4s ease; }
+    .row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  </style>
 </head>
 <body>
-<div class="intake-wrap">
-  <div class="intake-logo">FitApp</div>
-  <div class="step-dots" id="step-dots">
-    <div class="step-dot active" id="dot-0"></div>
-    <div class="step-dot" id="dot-1"></div>
-    <div class="step-dot" id="dot-2"></div>
-    <div class="step-dot" id="dot-3"></div>
-    <div class="step-dot" id="dot-4"></div>
-  </div>
 
-  <!-- STEP 1: Datos personales -->
-  <div class="step active" id="step-0">
-    <h2>¡Hola! 👋</h2>
-    <p class="step-sub">Cuéntanos un poco sobre ti para personalizar tu experiencia.</p>
-    <div class="form-group"><label>Nombre completo</label><input id="s1-nombre" placeholder="Ej: María García"></div>
-    <div class="form-group"><label>Email</label><input id="s1-email" type="email" placeholder="tu@email.com"></div>
-    <div class="row2">
-      <div class="form-group"><label>Teléfono / WhatsApp</label><input id="s1-tel" placeholder="+34 600..."></div>
-      <div class="form-group"><label>Edad</label><input id="s1-edad" type="number" placeholder="25"></div>
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:5%"></div></div>
+
+<!-- PASO 1 -->
+<div class="step active" id="step-1">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <div class="step-counter">PREGUNTA 1 DE 20</div>
+    <div style="font-size:13px;font-weight:600;color:#C8E000;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;" id="coach-greeting">Bienvenido</div>
+    <h1>¿Cuál es tu nombre completo?</h1>
+    <p class="subtitle">Así te conoceremos en la app y tu coach sabrá quién eres.</p>
+    <div class="input-group">
+      <input type="text" id="q1-nombre" placeholder="Nombre y apellido" autofocus>
     </div>
-    <div class="row2">
-      <div class="form-group"><label>Sexo</label>
-        <select id="s1-sexo"><option value="">Seleccionar</option><option value="hombre">Hombre</option><option value="mujer">Mujer</option><option value="otro">Otro</option></select>
+    <button class="btn-next" onclick="irPaso(2)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 2 -->
+<div class="step" id="step-2">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(1)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 2 DE 20</div>
+    <h1>¿Cuántos años tienes?</h1>
+    <p class="subtitle">Nos ayuda a calibrar la intensidad de tu plan.</p>
+    <div class="input-group">
+      <input type="number" id="q2-edad" placeholder="25" min="14" max="80">
+    </div>
+    <button class="btn-next" onclick="irPaso(3)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 3 -->
+<div class="step" id="step-3">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(2)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 3 DE 20</div>
+    <h1>¿Cuál es tu número de WhatsApp?</h1>
+    <p class="subtitle">Tu coach lo usará para el seguimiento diario.</p>
+    <div class="input-group">
+      <input type="tel" id="q3-whatsapp" placeholder="099 123 4567">
+    </div>
+    <button class="btn-next" onclick="irPaso(4)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 4 -->
+<div class="step" id="step-4">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(3)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 4 DE 20</div>
+    <h1>Tu peso y altura actual</h1>
+    <p class="subtitle">Es el punto de partida para medir tu progreso.</p>
+    <div class="row-2">
+      <div class="input-group">
+        <label class="input-label">Peso (kg)</label>
+        <input type="number" id="q4-peso" placeholder="70" step="0.1">
       </div>
-      <div class="form-group"><label>Ciudad</label><input id="s1-ciudad" placeholder="Madrid"></div>
-    </div>
-    <p class="error-msg" id="err-0">Por favor completa todos los campos.</p>
-    <button class="btn-next" onclick="nextStep(0)">Continuar →</button>
-  </div>
-
-  <!-- STEP 2: Objetivo -->
-  <div class="step" id="step-1">
-    <h2>¿Cuál es tu objetivo? 🎯</h2>
-    <p class="step-sub">Selecciona el que más te representa.</p>
-    <div class="pills-wrap" id="pills-objetivo">
-      <button class="pill-opt" data-val="perdida_grasa">Perder grasa</button>
-      <button class="pill-opt" data-val="ganancia_muscular">Ganar músculo</button>
-      <button class="pill-opt" data-val="mantenimiento">Mantenerme</button>
-      <button class="pill-opt" data-val="definicion">Definición</button>
-      <button class="pill-opt" data-val="salud">Mejorar mi salud</button>
-      <button class="pill-opt" data-val="rendimiento">Rendimiento</button>
-    </div>
-    <div class="form-group" style="margin-top:20px;"><label>¿Tienes algún objetivo extra?</label><textarea id="s2-objetivo-extra" placeholder="Ej: Quiero correr un 10K en 6 meses..."></textarea></div>
-    <p class="error-msg" id="err-1">Por favor selecciona un objetivo.</p>
-    <button class="btn-next" onclick="nextStep(1)">Continuar →</button>
-    <button class="btn-back" onclick="prevStep(1)">← Atrás</button>
-  </div>
-
-  <!-- STEP 3: Nivel y experiencia -->
-  <div class="step" id="step-2">
-    <h2>Tu experiencia 💪</h2>
-    <p class="step-sub">Selecciona tu nivel actual de entrenamiento.</p>
-    <div class="pills-wrap" id="pills-nivel">
-      <button class="pill-opt" data-val="principiante">Principiante (0-6 meses)</button>
-      <button class="pill-opt" data-val="intermedio">Intermedio (1-3 años)</button>
-      <button class="pill-opt" data-val="avanzado">Avanzado (+3 años)</button>
-    </div>
-    <div class="form-group" style="margin-top:20px;"><label>¿Cuántos días por semana puedes entrenar?</label>
-      <div class="pills-wrap" id="pills-dias">
-        <button class="pill-opt" data-val="2">2 días</button>
-        <button class="pill-opt" data-val="3">3 días</button>
-        <button class="pill-opt" data-val="4">4 días</button>
-        <button class="pill-opt" data-val="5">5 días</button>
-        <button class="pill-opt" data-val="6+">6+ días</button>
+      <div class="input-group">
+        <label class="input-label">Altura (cm)</label>
+        <input type="number" id="q4-altura" placeholder="170">
       </div>
     </div>
-    <div class="form-group"><label>¿Tienes alguna lesión o limitación física?</label><textarea id="s3-lesion" placeholder="Ej: Tengo problemas de rodilla derecha..."></textarea></div>
-    <p class="error-msg" id="err-2">Por favor selecciona tu nivel y días disponibles.</p>
-    <button class="btn-next" onclick="nextStep(2)">Continuar →</button>
-    <button class="btn-back" onclick="prevStep(2)">← Atrás</button>
+    <button class="btn-next" onclick="irPaso(5)">Continuar →</button>
   </div>
+</div>
 
-  <!-- STEP 4: Cuerpo y hábitos -->
-  <div class="step" id="step-3">
-    <h2>Tu cuerpo y hábitos 📏</h2>
-    <p class="step-sub">Esta info nos ayuda a personalizar tu plan.</p>
-    <div class="row2">
-      <div class="form-group"><label>Peso actual (kg)</label><input id="s4-peso" type="number" step="0.1" placeholder="70"></div>
-      <div class="form-group"><label>Altura (cm)</label><input id="s4-altura" type="number" placeholder="175"></div>
+<!-- PASO 5 -->
+<div class="step" id="step-5">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(4)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 5 DE 20</div>
+    <h1>¿Qué quieres lograr?</h1>
+    <p class="subtitle">Puedes elegir más de una opción.</p>
+    <div class="pills-group" id="q5-objetivos">
+      <button class="pill" onclick="togglePill(this,'q5')">Perder grasa</button>
+      <button class="pill" onclick="togglePill(this,'q5')">Ganar músculo</button>
+      <button class="pill" onclick="togglePill(this,'q5')">Definirme</button>
+      <button class="pill" onclick="togglePill(this,'q5')">Mejorar salud</button>
+      <button class="pill" onclick="togglePill(this,'q5')">Más energía</button>
+      <button class="pill" onclick="togglePill(this,'q5')">Rendimiento deportivo</button>
     </div>
-    <div class="form-group"><label>¿Cómo describes tu alimentación actual?</label>
-      <div class="pills-wrap" id="pills-dieta">
-        <button class="pill-opt" data-val="muy_mala">Muy mala</button>
-        <button class="pill-opt" data-val="irregular">Irregular</button>
-        <button class="pill-opt" data-val="normal">Normal</button>
-        <button class="pill-opt" data-val="buena">Buena</button>
-        <button class="pill-opt" data-val="muy_buena">Muy buena</button>
-      </div>
-    </div>
-    <div class="form-group"><label>¿Cuántas horas duermes de media?</label>
-      <div class="pills-wrap" id="pills-sueno">
-        <button class="pill-opt" data-val="menos5">Menos de 5h</button>
-        <button class="pill-opt" data-val="5-6">5-6 h</button>
-        <button class="pill-opt" data-val="7-8">7-8 h</button>
-        <button class="pill-opt" data-val="mas8">Más de 8h</button>
-      </div>
-    </div>
-    <div class="form-group"><label>¿Algo más que quieras contarnos?</label><textarea id="s4-extra" placeholder="Alergias, preferencias, horarios..."></textarea></div>
-    <button class="btn-next" onclick="nextStep(3)">Enviar formulario ✓</button>
-    <button class="btn-back" onclick="prevStep(3)">← Atrás</button>
+    <button class="btn-next" onclick="irPaso(6)">Continuar →</button>
   </div>
+</div>
 
-  <!-- STEP 5: Final -->
-  <div class="step" id="step-4">
-    <div class="final-card">
-      <div class="final-icon">🎉</div>
-      <div class="final-title">¡Formulario enviado!</div>
-      <p class="final-sub">Hemos guardado tu información. Tu coach se pondrá en contacto contigo pronto para comenzar tu transformación.</p>
-      <button class="wa-btn" id="btn-wa">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFF"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Contactar por WhatsApp
-      </button>
+<!-- PASO 6 -->
+<div class="step" id="step-6">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(5)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 6 DE 20</div>
+    <h1>¿En cuánto tiempo te gustaría verlo?</h1>
+    <p class="subtitle">Para ajustar el ritmo de tu plan.</p>
+    <div class="pills-group">
+      <button class="pill" onclick="togglePill(this,'q6')">1–3 meses</button>
+      <button class="pill" onclick="togglePill(this,'q6')">3–6 meses</button>
+      <button class="pill" onclick="togglePill(this,'q6')">6–12 meses</button>
+      <button class="pill" onclick="togglePill(this,'q6')">Sin prisa, quiero hacerlo bien</button>
     </div>
+    <button class="btn-next" onclick="irPaso(7)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 7 -->
+<div class="step" id="step-7">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(6)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 7 DE 20</div>
+    <h1>¿Has tenido coach o entrenador antes?</h1>
+    <p class="subtitle">Sin juicios, solo queremos conocer tu camino.</p>
+    <div class="pills-group">
+      <button class="pill" onclick="togglePill(this,'q7')">Sí</button>
+      <button class="pill" onclick="togglePill(this,'q7')">No, primera vez</button>
+    </div>
+    <button class="btn-next" onclick="irPaso(8)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 8 -->
+<div class="step" id="step-8">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(7)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 8 DE 20</div>
+    <h1>¿Qué funcionó y qué no?</h1>
+    <p class="subtitle">Si nunca has tenido coach, puedes dejarlo en blanco.</p>
+    <div class="input-group">
+      <textarea id="q8-experiencia" placeholder="Cuéntanos brevemente..."></textarea>
+    </div>
+    <button class="btn-next" onclick="irPaso(9)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 9 -->
+<div class="step" id="step-9">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(8)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 9 DE 20</div>
+    <h1>¿Cuántos días entrenas actualmente?</h1>
+    <p class="subtitle">Tu nivel de partida real, sin presión.</p>
+    <div class="pills-group">
+      <button class="pill" onclick="togglePill(this,'q9')">0 días</button>
+      <button class="pill" onclick="togglePill(this,'q9')">1–2 días</button>
+      <button class="pill" onclick="togglePill(this,'q9')">3–4 días</button>
+      <button class="pill" onclick="togglePill(this,'q9')">5 o más días</button>
+    </div>
+    <button class="btn-next" onclick="irPaso(10)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 10 -->
+<div class="step" id="step-10">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(9)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 10 DE 20</div>
+    <h1>¿Qué tipo de entrenamiento haces o has hecho?</h1>
+    <p class="subtitle">Puedes elegir varios.</p>
+    <div class="pills-group" id="q10-tipos">
+      <button class="pill" onclick="togglePill(this,'q10')">Pesas</button>
+      <button class="pill" onclick="togglePill(this,'q10')">Cardio</button>
+      <button class="pill" onclick="togglePill(this,'q10')">CrossFit</button>
+      <button class="pill" onclick="togglePill(this,'q10')">Yoga/Pilates</button>
+      <button class="pill" onclick="togglePill(this,'q10')">Deportes</button>
+      <button class="pill" onclick="togglePill(this,'q10')">Ninguno todavía</button>
+    </div>
+    <button class="btn-next" onclick="irPaso(11)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 11 -->
+<div class="step" id="step-11">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(10)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 11 DE 20</div>
+    <h1>¿Tienes alguna lesión actual o pasada?</h1>
+    <p class="subtitle">Esto es clave para que tu rutina sea segura.</p>
+    <div class="pills-group" id="q11-lesiones">
+      <button class="pill" onclick="togglePill(this,'q11')">Rodilla</button>
+      <button class="pill" onclick="togglePill(this,'q11')">Espalda baja</button>
+      <button class="pill" onclick="togglePill(this,'q11')">Hombro</button>
+      <button class="pill" onclick="togglePill(this,'q11')">Cuello</button>
+      <button class="pill" onclick="togglePill(this,'q11')">Muñeca/codo</button>
+      <button class="pill" onclick="togglePill(this,'q11')">Tobillo</button>
+      <button class="pill" onclick="togglePill(this,'q11')">Ninguna</button>
+    </div>
+    <div class="input-group">
+      <textarea id="q11-detalle" placeholder="Detalla brevemente si elegiste alguna lesión (opcional)"></textarea>
+    </div>
+    <button class="btn-next" onclick="irPaso(12)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 12 -->
+<div class="step" id="step-12">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(11)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 12 DE 20</div>
+    <h1>¿Tienes acceso a gimnasio?</h1>
+    <p class="subtitle">Para adaptar los ejercicios al equipo disponible.</p>
+    <div class="pills-group">
+      <button class="pill" onclick="togglePill(this,'q12')">Sí, siempre</button>
+      <button class="pill" onclick="togglePill(this,'q12')">A veces</button>
+      <button class="pill" onclick="togglePill(this,'q12')">Entreno en casa</button>
+    </div>
+    <button class="btn-next" onclick="irPaso(13)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 13 -->
+<div class="step" id="step-13">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(12)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 13 DE 20</div>
+    <h1>¿Tienes alergias o intolerancias alimentarias?</h1>
+    <p class="subtitle">Para que tu plan de comidas sea 100% seguro.</p>
+    <div class="pills-group" id="q13-alergias">
+      <button class="pill" onclick="togglePill(this,'q13')">Gluten</button>
+      <button class="pill" onclick="togglePill(this,'q13')">Lácteos</button>
+      <button class="pill" onclick="togglePill(this,'q13')">Mariscos</button>
+      <button class="pill" onclick="togglePill(this,'q13')">Nueces</button>
+      <button class="pill" onclick="togglePill(this,'q13')">Huevo</button>
+      <button class="pill" onclick="togglePill(this,'q13')">Ninguna</button>
+    </div>
+    <button class="btn-next" onclick="irPaso(14)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 14 -->
+<div class="step" id="step-14">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(13)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 14 DE 20</div>
+    <h1>¿Tienes alguna condición médica?</h1>
+    <p class="subtitle">Esto es confidencial y solo lo verá tu coach.</p>
+    <div class="pills-group" id="q14-condiciones">
+      <button class="pill" onclick="togglePill(this,'q14')">Diabetes</button>
+      <button class="pill" onclick="togglePill(this,'q14')">Hipertensión</button>
+      <button class="pill" onclick="togglePill(this,'q14')">Hipotiroidismo</button>
+      <button class="pill" onclick="togglePill(this,'q14')">Asma</button>
+      <button class="pill" onclick="togglePill(this,'q14')">Ninguna</button>
+    </div>
+    <button class="btn-next" onclick="irPaso(15)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 15 -->
+<div class="step" id="step-15">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(14)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 15 DE 20</div>
+    <h1>¿Tomas alguna medicación actualmente?</h1>
+    <p class="subtitle">Algunos medicamentos afectan el rendimiento o el apetito.</p>
+    <div class="pills-group">
+      <button class="pill" onclick="togglePill(this,'q15')">No</button>
+      <button class="pill" onclick="togglePill(this,'q15')">Sí</button>
+    </div>
+    <div class="input-group">
+      <input type="text" id="q15-cual" placeholder="¿Cuál? (opcional)">
+    </div>
+    <button class="btn-next" onclick="irPaso(16)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 16 -->
+<div class="step" id="step-16">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(15)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 16 DE 20</div>
+    <h1>¿Qué alimentos no te gustan o no puedes comer?</h1>
+    <p class="subtitle">Así diseñamos un plan que sí vas a poder seguir.</p>
+    <div class="input-group">
+      <textarea id="q16-no-gusta" placeholder="Ej: hígado, brócoli, pescado..."></textarea>
+    </div>
+    <button class="btn-next" onclick="irPaso(17)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 17 -->
+<div class="step" id="step-17">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(16)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 17 DE 20</div>
+    <h1>¿A qué hora prefieres entrenar?</h1>
+    <p class="subtitle">Para programar tus sesiones en el horario ideal.</p>
+    <div class="pills-group">
+      <button class="pill" onclick="togglePill(this,'q17')">Mañana (6–10h)</button>
+      <button class="pill" onclick="togglePill(this,'q17')">Mediodía (11–14h)</button>
+      <button class="pill" onclick="togglePill(this,'q17')">Tarde (15–18h)</button>
+      <button class="pill" onclick="togglePill(this,'q17')">Noche (19–22h)</button>
+    </div>
+    <button class="btn-next" onclick="irPaso(18)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 18 -->
+<div class="step" id="step-18">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(17)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 18 DE 20</div>
+    <h1>¿Cuánta agua tomas al día?</h1>
+    <p class="subtitle">La hidratación afecta directamente tu rendimiento.</p>
+    <div class="pills-group">
+      <button class="pill" onclick="togglePill(this,'q18')">Menos de 1 litro</button>
+      <button class="pill" onclick="togglePill(this,'q18')">1–2 litros</button>
+      <button class="pill" onclick="togglePill(this,'q18')">Más de 2 litros</button>
+    </div>
+    <button class="btn-next" onclick="irPaso(19)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 19 -->
+<div class="step" id="step-19">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(18)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 19 DE 20</div>
+    <h1>¿Cada cuánto quieres revisar tu progreso?</h1>
+    <p class="subtitle">Define la frecuencia de seguimiento con tu coach.</p>
+    <div class="pills-group">
+      <button class="pill" onclick="togglePill(this,'q19')">Cada semana</button>
+      <button class="pill" onclick="togglePill(this,'q19')">Cada 2 semanas</button>
+      <button class="pill" onclick="togglePill(this,'q19')">Cada mes</button>
+    </div>
+    <button class="btn-next" onclick="irPaso(20)">Continuar →</button>
+  </div>
+</div>
+
+<!-- PASO 20 -->
+<div class="step" id="step-20">
+  <div class="container" style="display:flex;flex-direction:column;flex:1;">
+    <button class="btn-back" onclick="irPaso(19)">← Atrás</button>
+    <div class="step-counter">PREGUNTA 20 DE 20 · ÚLTIMA</div>
+    <h1>¿Algo más que tu coach deba saber?</h1>
+    <p class="subtitle">Cuéntanos lo que creas importante.</p>
+    <div class="input-group">
+      <textarea id="q20-nota" placeholder="Escribe aquí cualquier detalle adicional..."></textarea>
+    </div>
+    <div class="checkbox-item" onclick="toggleTerminos()">
+      <div class="checkbox-circle" id="check-terminos">
+        <svg id="check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="3" stroke-linecap="round" style="display:none;"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <span style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.4;">Confirmo que esta información es verídica y entiendo que mi coach la usará para diseñar mi plan personalizado.</span>
+    </div>
+    <button class="btn-next" id="btn-enviar" onclick="enviarFormulario()" style="opacity:0.5;" disabled>Enviar mis respuestas →</button>
+  </div>
+</div>
+
+<!-- ÉXITO -->
+<div class="success-screen" id="success">
+  <div class="container">
+    <div style="font-size:60px;margin-bottom:20px;">🎉</div>
+    <h1 style="margin-bottom:12px;">¡Perfecto, <span id="nombre-success"></span>!</h1>
+    <p style="font-size:15px;color:rgba(255,255,255,0.55);line-height:1.6;margin-bottom:28px;">
+      Tu coach ya tiene toda tu información. En menos de 24 horas tendrás tu rutina y plan de alimentación listos en la app.
+    </p>
+    <button onclick="enviarPorWhatsApp()" style="width:100%;height:54px;background:#25D366;color:#FFF;border:none;border-radius:50px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+      📱 Confirmar por WhatsApp
+    </button>
   </div>
 </div>
 
 <script>
-var data = {};
-var currentStep = 0;
+(function() {
+  'use strict';
+  var params = new URLSearchParams(window.location.search);
+  var coachNombre = params.get('coach') || 'tu coach';
+  var coachWA = params.get('wa') || '';
+  document.getElementById('coach-greeting').textContent = 'Cuestionario de ' + coachNombre;
 
-function pillGroup(groupId, key){
-  document.getElementById(groupId).querySelectorAll(".pill-opt").forEach(function(b){
-    b.addEventListener("click", function(){
-      document.getElementById(groupId).querySelectorAll(".pill-opt").forEach(function(x){ x.classList.remove("sel"); });
-      b.classList.add("sel");
-      data[key] = b.getAttribute("data-val");
+  var _datos = {};
+  var _terminos = false;
+  var TOTAL_PASOS = 20;
+  var MULTI_GRUPOS = ['q5-objetivos','q10-tipos','q11-lesiones','q13-alergias','q14-condiciones'];
+
+  window.irPaso = function(paso) {
+    document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+    var el = document.getElementById('step-' + paso);
+    if (el) el.classList.add('active');
+    document.getElementById('progress').style.width = ((paso / TOTAL_PASOS) * 100) + '%';
+    window.scrollTo(0, 0);
+  };
+
+  window.togglePill = function(btn, grupo) {
+    var grupoEl = btn.closest('.pills-group');
+    var isMulti = grupoEl && MULTI_GRUPOS.indexOf(grupoEl.id) !== -1;
+    if (!isMulti) grupoEl.querySelectorAll('.pill').forEach(function(p) { p.classList.remove('selected'); });
+    btn.classList.toggle('selected');
+    var sel = [];
+    grupoEl.querySelectorAll('.pill.selected').forEach(function(p) { sel.push(p.textContent.trim()); });
+    _datos[grupo] = isMulti ? sel : sel[0];
+  };
+
+  window.toggleTerminos = function() {
+    _terminos = !_terminos;
+    var c = document.getElementById('check-terminos');
+    var i = document.getElementById('check-icon');
+    var b = document.getElementById('btn-enviar');
+    c.classList.toggle('checked', _terminos);
+    i.style.display = _terminos ? 'block' : 'none';
+    b.disabled = !_terminos;
+    b.style.opacity = _terminos ? '1' : '0.5';
+  };
+
+  window.enviarFormulario = function() {
+    if (!_terminos) return;
+    ['q1-nombre','q2-edad','q3-whatsapp','q4-peso','q4-altura','q8-experiencia','q11-detalle','q15-cual','q16-no-gusta','q20-nota'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) _datos[id] = el.value;
     });
-  });
-}
-pillGroup("pills-objetivo","objetivo");
-pillGroup("pills-nivel","nivel");
-pillGroup("pills-dias","dias_semana");
-pillGroup("pills-dieta","dieta");
-pillGroup("pills-sueno","sueno");
+    var intake = { id: 'intake_' + Date.now(), fecha: new Date().toISOString().split('T')[0], coach: coachNombre, datos: _datos };
+    var intakes = JSON.parse(localStorage.getItem('fitapp_intakes') || '[]');
+    intakes.push(intake);
+    localStorage.setItem('fitapp_intakes', JSON.stringify(intakes));
+    document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById('success').classList.add('active');
+    document.getElementById('nombre-success').textContent = (_datos['q1-nombre'] || '').split(' ')[0];
+    window._datosFinales = _datos;
+  };
 
-function updateDots(step){
-  for(var i=0;i<5;i++){
-    var d = document.getElementById("dot-"+i);
-    d.className = "step-dot" + (i<step?" done":(i===step?" active":""));
-  }
-}
-
-function nextStep(from){
-  document.getElementById("err-"+from).style.display="none";
-
-  if(from===0){
-    if(!document.getElementById("s1-nombre").value.trim()||!document.getElementById("s1-email").value.trim()){
-      document.getElementById("err-0").style.display="block"; return;
-    }
-    data.nombre   = document.getElementById("s1-nombre").value.trim();
-    data.email    = document.getElementById("s1-email").value.trim();
-    data.telefono = document.getElementById("s1-tel").value.trim();
-    data.edad     = document.getElementById("s1-edad").value;
-    data.sexo     = document.getElementById("s1-sexo").value;
-    data.ciudad   = document.getElementById("s1-ciudad").value.trim();
-  }
-  if(from===1){
-    if(!data.objetivo){ document.getElementById("err-1").style.display="block"; return; }
-    data.objetivo_extra = document.getElementById("s2-objetivo-extra").value.trim();
-  }
-  if(from===2){
-    if(!data.nivel||!data.dias_semana){ document.getElementById("err-2").style.display="block"; return; }
-    data.lesion = document.getElementById("s3-lesion").value.trim();
-  }
-  if(from===3){
-    data.peso   = document.getElementById("s4-peso").value;
-    data.altura = document.getElementById("s4-altura").value;
-    data.extra  = document.getElementById("s4-extra").value.trim();
-    data.fecha  = new Date().toISOString().split("T")[0];
-    // Guardar
-    var intakes = JSON.parse(localStorage.getItem("fitapp_intakes")||"[]");
-    intakes.push(data);
-    localStorage.setItem("fitapp_intakes", JSON.stringify(intakes));
-    // WhatsApp link
-    var msg = "Hola, acabo de completar el formulario de FitApp!\n" +
-      "Nombre: " + data.nombre + "\nObjetivo: " + (data.objetivo||"").replace("_"," ") + "\nTeléfono: " + (data.telefono||"—");
-    document.getElementById("btn-wa").onclick = function(){
-      window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
-    };
-  }
-
-  document.getElementById("step-"+from).classList.remove("active");
-  currentStep = from+1;
-  document.getElementById("step-"+currentStep).classList.add("active");
-  updateDots(currentStep);
-  window.scrollTo(0,0);
-}
-
-function prevStep(from){
-  document.getElementById("step-"+from).classList.remove("active");
-  currentStep = from-1;
-  document.getElementById("step-"+currentStep).classList.add("active");
-  updateDots(currentStep);
-  window.scrollTo(0,0);
-}
+  window.enviarPorWhatsApp = function() {
+    var d = window._datosFinales || {};
+    var arr = function(v) { return Array.isArray(v) ? v.join(', ') : (v || '-'); };
+    var texto = '🏋️ *Cuestionario de inicio — FitApp*\n\n' +
+      '*Datos personales*\n• Nombre: ' + (d['q1-nombre']||'-') + '\n• Edad: ' + (d['q2-edad']||'-') + '\n• WhatsApp: ' + (d['q3-whatsapp']||'-') + '\n• Peso/Altura: ' + (d['q4-peso']||'-') + 'kg / ' + (d['q4-altura']||'-') + 'cm\n\n' +
+      '*Objetivo*\n• Quiere lograr: ' + arr(d.q5) + '\n• Tiempo: ' + (d.q6||'-') + '\n• Coach antes: ' + (d.q7||'-') + '\n• Experiencia: ' + (d['q8-experiencia']||'-') + '\n\n' +
+      '*Estado físico*\n• Días entreno: ' + (d.q9||'-') + '\n• Tipo entreno: ' + arr(d.q10) + '\n• Lesiones: ' + arr(d.q11) + ' ' + (d['q11-detalle']||'') + '\n• Acceso gym: ' + (d.q12||'-') + '\n\n' +
+      '*Salud y alimentación*\n• Alergias: ' + arr(d.q13) + '\n• Condición médica: ' + arr(d.q14) + '\n• Medicación: ' + (d.q15||'-') + ' ' + (d['q15-cual']||'') + '\n• No le gusta: ' + (d['q16-no-gusta']||'-') + '\n\n' +
+      '*Preferencias*\n• Horario: ' + (d.q17||'-') + '\n• Agua/día: ' + (d.q18||'-') + '\n• Revisión: ' + (d.q19||'-') + '\n• Nota: ' + (d['q20-nota']||'-') + '\n\n' +
+      '_Enviado desde FitApp ✅_';
+    window.open('https://wa.me/' + (coachWA || '593999999999') + '?text=' + encodeURIComponent(texto), '_blank');
+  };
+})();
 </script>
 </body>
 </html>
