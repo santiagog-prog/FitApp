@@ -269,9 +269,7 @@
           "</div>";
       });
 
-      if(ej.video_url){
-        html += renderBotonVideo(ej);
-      }
+      html += renderBotonVideo(ej);
 
       html += "</div></div>"; // cierre body + card
     });
@@ -466,6 +464,12 @@
 
   function renderFotoEjercicio(ej, cssClass){
     var foto = ej.foto || ej.foto_url || "";
+    // Si no tiene foto, buscar en la biblioteca por nombre
+    if(!foto){
+      var bib = window.db.getEjercicios();
+      var match = bib.filter(function(e){ return e.nombre === ej.nombre; })[0];
+      if(match) foto = match.foto || match.foto_url || "";
+    }
     var cls = cssClass || "";
     var wrapStyle = cls ? "" : "width:52px;height:52px;border-radius:10px;background:#1C1C1C;flex-shrink:0;display:flex;align-items:center;justify-content:center;";
     if(foto){
@@ -481,6 +485,12 @@
   function renderBotonVideo(ej){
     var nombre = (ej.nombre||"").replace(/'/g,"");
     var url = ej.video_url || "";
+    if(!url){
+      var bib = window.db.getEjercicios();
+      var match = bib.filter(function(e){ return e.nombre === ej.nombre; })[0];
+      if(match) url = match.video_url || "";
+    }
+    if(!url) return "";
     return "<button onclick=\"window.abrirModalVideo('" + url + "','" + nombre + "')\" " +
       "style='width:100%;height:44px;background:rgba(10,132,255,0.1);border:1px solid rgba(10,132,255,0.25);border-radius:12px;" +
       "color:#0A84FF;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:10px;" +
