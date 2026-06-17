@@ -382,7 +382,7 @@
         '<div style="font-size:20px;font-weight:800;margin-bottom:6px;">Configurar análisis IA</div>' +
         '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;line-height:1.5;">Necesitas una API Key de OpenAI para analizar fotos de comida. Se guarda solo en tu dispositivo.</div>' +
         '<input id="modal-api-key-input" type="password" placeholder="sk-..." autocomplete="off" style="width:100%;height:52px;background:#1C1C1C;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:0 16px;color:#FFF;font-size:15px;font-family:inherit;outline:none;box-sizing:border-box;">' +
-        '<div style="font-size:11px;color:rgba(255,255,255,0.35);margin:8px 0 20px;">Obtén tu key en platform.openai.com → API Keys</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin:10px 0 20px;line-height:1.5;">Obtén tu key en <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" style="color:#C8E000;font-weight:600;text-decoration:none;">platform.openai.com → API Keys</a> · Crea cuenta gratis y genera una clave</div>' +
         '<button id="modal-api-key-save" style="width:100%;height:54px;background:#C8E000;color:#1C1C1E;border:none;border-radius:99px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;">Guardar y escanear</button>' +
         '<button id="modal-api-key-cancel" style="width:100%;height:44px;background:none;border:none;color:rgba(255,255,255,0.4);font-size:14px;font-family:inherit;cursor:pointer;margin-top:8px;">Cancelar</button>' +
       '</div>';

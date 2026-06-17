@@ -52,8 +52,12 @@
     // También sumar pasos del cardio.js si existe
     try {
       var cardioKey = "fitapp_pasos_" + alumnoId + "_" + fecha.replace(/-/g,"");
-      var cp = JSON.parse(localStorage.getItem(cardioKey)||"0");
-      pasosActual = Math.max(pasosActual, cp);
+      var cardioRaw = localStorage.getItem(cardioKey);
+      if(cardioRaw){
+        var cardioData = JSON.parse(cardioRaw);
+        var cp = typeof cardioData === "object" ? (cardioData.pasos||0) : (Number(cardioData)||0);
+        if(!isNaN(cp)) pasosActual = Math.max(pasosActual, cp);
+      }
     } catch(e){}
     var actividadScore = Math.round(score(pasosActual, pasosObj, 25));
 
