@@ -144,51 +144,45 @@
 <!-- ── SPLASH LOGIN ── -->
 <style>
   @keyframes lsUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes lsOut{from{opacity:1}to{opacity:0;transform:scale(.96)}}
+  @keyframes lsOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.95)}}
   @keyframes lsIn{from{opacity:0}to{opacity:1}}
-  #login-splash{ animation:lsIn .25s ease both; }
-  #login-splash .ls-logo  { animation:lsUp .55s .1s cubic-bezier(.34,1.56,.64,1) both; }
-  #login-splash .ls-title { animation:lsUp .55s .25s cubic-bezier(.34,1.56,.64,1) both; }
-  #login-splash .ls-sub   { animation:lsUp .5s .4s ease both; }
-  #login-splash .ls-foot  { animation:lsUp .5s .55s ease both; }
+  #login-splash .ls-logo  { opacity:0; animation:lsUp .6s .1s cubic-bezier(.34,1.56,.64,1) both; }
+  #login-splash .ls-title { opacity:0; animation:lsUp .6s .28s cubic-bezier(.34,1.56,.64,1) both; }
+  #login-splash .ls-sub   { opacity:0; animation:lsUp .5s .45s ease both; }
+  #login-splash .ls-foot  { opacity:0; animation:lsUp .5s .6s ease both; }
 </style>
-<div id="login-splash" style="position:fixed;inset:0;z-index:99999;background:#080808;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px 0;text-align:center;">
-  <!-- Logo -->
-  <div class="ls-logo" style="margin:0 auto 32px;">
-    <svg width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
-      <!-- App icon background -->
-      <rect width="96" height="96" rx="22" fill="#0D1800"/>
-      <rect width="96" height="96" rx="22" fill="url(#lg1)"/>
-      <defs>
-        <linearGradient id="lg1" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#1a2d00"/>
-          <stop offset="100%" stop-color="#0a0a0a"/>
-        </linearGradient>
-      </defs>
-      <!-- Barbell horizontal -->
-      <rect x="28" y="44" width="40" height="8" rx="4" fill="#C8E000"/>
-      <!-- Left collar -->
-      <rect x="20" y="39" width="10" height="18" rx="3" fill="#C8E000"/>
-      <!-- Right collar -->
-      <rect x="66" y="39" width="10" height="18" rx="3" fill="#C8E000"/>
-      <!-- Left end cap -->
-      <rect x="14" y="43" width="7" height="10" rx="2.5" fill="rgba(200,224,0,0.55)"/>
-      <!-- Right end cap -->
-      <rect x="75" y="43" width="7" height="10" rx="2.5" fill="rgba(200,224,0,0.55)"/>
-      <!-- Center grip texture lines -->
-      <rect x="44" y="44" width="2" height="8" rx="1" fill="rgba(0,0,0,0.3)"/>
-      <rect x="50" y="44" width="2" height="8" rx="1" fill="rgba(0,0,0,0.3)"/>
-      <!-- Accent dot top right -->
-      <circle cx="76" cy="20" r="5" fill="#C8E000" opacity=".35"/>
-      <circle cx="76" cy="20" r="2.5" fill="#C8E000"/>
-    </svg>
+<!-- El splash NO tiene justify-content:center; el footer usa margin-top:auto dentro de un flex-column -->
+<div id="login-splash" style="position:fixed;inset:0;z-index:99999;background:#080808;display:flex;flex-direction:column;align-items:center;animation:lsIn .2s ease both;">
+  <!-- Centro: ocupa todo el espacio disponible y centra el contenido -->
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 32px;width:100%;">
+    <!-- Logo SVG sin IDs de gradiente para evitar conflictos -->
+    <div class="ls-logo" style="margin-bottom:32px;">
+      <svg width="100" height="100" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+        <rect width="96" height="96" rx="22" fill="#0F1500"/>
+        <rect width="96" height="96" rx="22" fill="#162100" opacity=".8"/>
+        <!-- Barra central de mancuerna -->
+        <rect x="30" y="44" width="36" height="8" rx="4" fill="#C8E000"/>
+        <!-- Placa izquierda interior -->
+        <rect x="19" y="38" width="12" height="20" rx="4" fill="#C8E000"/>
+        <!-- Placa izquierda exterior -->
+        <rect x="11" y="42" width="9" height="12" rx="3" fill="#C8E000" opacity=".55"/>
+        <!-- Placa derecha interior -->
+        <rect x="65" y="38" width="12" height="20" rx="4" fill="#C8E000"/>
+        <!-- Placa derecha exterior -->
+        <rect x="76" y="42" width="9" height="12" rx="3" fill="#C8E000" opacity=".55"/>
+        <!-- Grip central -->
+        <rect x="43" y="44" width="2" height="8" rx="1" fill="#0F1500" opacity=".5"/>
+        <rect x="51" y="44" width="2" height="8" rx="1" fill="#0F1500" opacity=".5"/>
+        <!-- Punto acento esquina -->
+        <circle cx="77" cy="19" r="6" fill="#C8E000" opacity=".25"/>
+        <circle cx="77" cy="19" r="3" fill="#C8E000"/>
+      </svg>
+    </div>
+    <div class="ls-title" style="font-size:58px;font-weight:900;color:#FFF;letter-spacing:-3.5px;line-height:1;">Fit<span style="color:#C8E000;">App</span></div>
+    <div class="ls-sub" style="font-size:15px;font-weight:600;color:rgba(255,255,255,0.38);margin-top:14px;letter-spacing:.3px;">Esto cambiará tu vida</div>
   </div>
-  <!-- Title -->
-  <div class="ls-title" style="font-size:58px;font-weight:900;color:#FFF;letter-spacing:-3.5px;line-height:1;">Fit<span style="color:#C8E000;">App</span></div>
-  <!-- Subtitle -->
-  <div class="ls-sub" style="font-size:15px;font-weight:600;color:rgba(255,255,255,0.4);margin-top:14px;letter-spacing:.3px;">Esto cambiará tu vida</div>
-  <!-- Credit — pushed to bottom via margin-top:auto + padding-bottom -->
-  <div class="ls-foot" style="margin-top:auto;padding-bottom:calc(env(safe-area-inset-bottom,0px)+32px);font-size:11px;color:rgba(255,255,255,0.18);letter-spacing:.6px;">App desarrollada por Santiago Guamán</div>
+  <!-- Footer: al fondo por estar fuera del centro-flex -->
+  <div class="ls-foot" style="width:100%;text-align:center;padding-bottom:calc(env(safe-area-inset-bottom,0px)+36px);font-size:11px;color:rgba(255,255,255,0.18);letter-spacing:.8px;">App desarrollada por Santiago Guamán</div>
 </div>
 <script>
   (function(){
@@ -197,7 +191,7 @@
       if(!s) return;
       s.style.animation = "lsOut .45s ease both";
       setTimeout(function(){ s.remove(); }, 450);
-    }, 3000);
+    }, 3200);
   })();
 </script>
 

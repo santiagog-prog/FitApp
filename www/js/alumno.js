@@ -55,52 +55,90 @@
     "Hoy es el día. Siempre lo es."
   ];
 
+  // Logo SVG inline (sin IDs de gradiente para evitar conflictos entre instancias)
+  var LOGO_SVG =
+    '<svg width="84" height="84" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">' +
+      '<rect width="96" height="96" rx="22" fill="#0F1500"/>' +
+      '<rect width="96" height="96" rx="22" fill="#162100" opacity=".8"/>' +
+      '<rect x="30" y="44" width="36" height="8" rx="4" fill="#C8E000"/>' +
+      '<rect x="19" y="38" width="12" height="20" rx="4" fill="#C8E000"/>' +
+      '<rect x="11" y="42" width="9" height="12" rx="3" fill="#C8E000" opacity=".55"/>' +
+      '<rect x="65" y="38" width="12" height="20" rx="4" fill="#C8E000"/>' +
+      '<rect x="76" y="42" width="9" height="12" rx="3" fill="#C8E000" opacity=".55"/>' +
+      '<rect x="43" y="44" width="2" height="8" rx="1" fill="#0F1500" opacity=".5"/>' +
+      '<rect x="51" y="44" width="2" height="8" rx="1" fill="#0F1500" opacity=".5"/>' +
+      '<circle cx="77" cy="19" r="6" fill="#C8E000" opacity=".25"/>' +
+      '<circle cx="77" cy="19" r="3" fill="#C8E000"/>' +
+    '</svg>';
+
   function mostrarSplashAlumno(alumno, callback){
     var frase = FRASES_SPLASH[new Date().getDay() % FRASES_SPLASH.length];
-    var splash = document.createElement("div");
-    splash.id = "alumno-splash";
-    splash.style.cssText = [
-      "position:fixed;inset:0;z-index:99999;",
-      "background:#080808;",
-      "display:flex;flex-direction:column;align-items:center;justify-content:center;",
-      "padding:40px 32px;text-align:center;",
-      "animation:splashFadeIn .4s ease both;"
-    ].join("");
-    splash.innerHTML =
-      '<div style="opacity:0;animation:splashUp .5s .15s ease both;">' +
-          '<svg width="88" height="88" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" style="margin:0 auto 28px;display:block;">' +
-          '<defs><linearGradient id="slg" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1a2d00"/><stop offset="100%" stop-color="#0a0a0a"/></linearGradient></defs>' +
-          '<rect width="96" height="96" rx="22" fill="url(#slg)"/>' +
-          '<rect x="28" y="44" width="40" height="8" rx="4" fill="#C8E000"/>' +
-          '<rect x="20" y="39" width="10" height="18" rx="3" fill="#C8E000"/>' +
-          '<rect x="66" y="39" width="10" height="18" rx="3" fill="#C8E000"/>' +
-          '<rect x="14" y="43" width="7" height="10" rx="2.5" fill="rgba(200,224,0,0.55)"/>' +
-          '<rect x="75" y="43" width="7" height="10" rx="2.5" fill="rgba(200,224,0,0.55)"/>' +
-          '<circle cx="76" cy="20" r="5" fill="#C8E000" opacity=".3"/>' +
-          '<circle cx="76" cy="20" r="2.5" fill="#C8E000"/>' +
-        '</svg>' +
-        '<div style="font-size:13px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;">Bienvenido de vuelta</div>' +
-        '<div style="font-size:36px;font-weight:900;color:#FFF;letter-spacing:-1.5px;line-height:1.1;margin-bottom:20px;">' + alumno.nombre + '</div>' +
-        '<div style="font-size:16px;color:rgba(255,255,255,0.45);line-height:1.6;max-width:260px;font-style:italic;">"' + frase + '"</div>' +
-      '</div>';
+    var rutina  = window.db.getRutinaPorId(alumno.rutina_id);
+    var plan    = window.db.getPlanPorId ? window.db.getPlanPorId(alumno.plan_alimentacion_id) : null;
 
-    // Inject keyframes once
     if(!document.getElementById("splash-keyframes")){
-      var style = document.createElement("style");
-      style.id = "splash-keyframes";
-      style.textContent = [
-        "@keyframes splashFadeIn{from{opacity:0}to{opacity:1}}",
-        "@keyframes splashUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}",
-        "@keyframes splashFadeOut{from{opacity:1}to{opacity:0}}"
-      ].join("");
-      document.head.appendChild(style);
+      var ks = document.createElement("style");
+      ks.id = "splash-keyframes";
+      ks.textContent =
+        "@keyframes spFadeIn{from{opacity:0}to{opacity:1}}" +
+        "@keyframes spUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}" +
+        "@keyframes spFadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.96)}}";
+      document.head.appendChild(ks);
     }
 
+    var splash = document.createElement("div");
+    splash.id  = "alumno-splash";
+    // Flex-column SIN justify-content:center para que el footer baje al fondo
+    splash.style.cssText =
+      "position:fixed;inset:0;z-index:99999;background:#080808;" +
+      "display:flex;flex-direction:column;align-items:center;" +
+      "animation:spFadeIn .35s ease both;";
+
+    splash.innerHTML =
+      // ── Centro ──
+      '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 32px;width:100%;">' +
+        // Logo
+        '<div style="opacity:0;animation:spUp .6s .1s cubic-bezier(.34,1.56,.64,1) both;margin-bottom:28px;">' + LOGO_SVG + '</div>' +
+        // Saludo
+        '<div style="opacity:0;animation:spUp .55s .25s ease both;">' +
+          '<div style="font-size:12px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">Bienvenido</div>' +
+          '<div style="font-size:40px;font-weight:900;color:#FFF;letter-spacing:-2px;line-height:1.05;margin-bottom:6px;">' + alumno.nombre + '</div>' +
+          '<div style="font-size:14px;color:rgba(255,255,255,0.38);font-style:italic;max-width:260px;line-height:1.5;">"' + frase + '"</div>' +
+        '</div>' +
+        // Cards programa
+        '<div style="opacity:0;animation:spUp .5s .4s ease both;margin-top:28px;width:100%;max-width:300px;display:flex;flex-direction:column;gap:8px;">' +
+          '<div style="background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;">' +
+            '<span style="font-size:20px;">🏋️</span>' +
+            '<div style="text-align:left;">' +
+              '<div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Tu rutina</div>' +
+              '<div style="font-size:14px;font-weight:700;color:#FFF;margin-top:1px;">' + (rutina ? rutina.nombre : 'Por asignar') + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;">' +
+            '<span style="font-size:20px;">🥗</span>' +
+            '<div style="text-align:left;">' +
+              '<div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Plan alimentación</div>' +
+              '<div style="font-size:14px;font-weight:700;color:#FFF;margin-top:1px;">' + (plan ? plan.nombre : 'Por asignar') + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      // ── Footer al fondo ──
+      '<div style="opacity:0;animation:spUp .4s .55s ease both;width:100%;text-align:center;padding-bottom:calc(env(safe-area-inset-bottom,0px)+32px);">' +
+        '<button id="sp-btn-entrar" style="height:52px;padding:0 48px;background:#C8E000;color:#1C1C1E;border:none;border-radius:99px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:-.2px;">Empezar →</button>' +
+      '</div>';
+
     document.body.appendChild(splash);
-    setTimeout(function(){
-      splash.style.animation = "splashFadeOut .5s ease both";
-      setTimeout(function(){ splash.remove(); callback(); }, 500);
-    }, 4500);
+
+    function cerrar(){
+      splash.style.animation = "spFadeOut .4s ease both";
+      setTimeout(function(){ splash.remove(); callback(); }, 400);
+    }
+
+    // Botón manual + auto-cierre a los 5 segundos
+    var btn = document.getElementById("sp-btn-entrar");
+    if(btn) btn.addEventListener("click", cerrar);
+    setTimeout(cerrar, 5000);
   }
 
   document.addEventListener("DOMContentLoaded", function(){
@@ -109,9 +147,8 @@
       btn.addEventListener("click", function(){ showPage(this.getAttribute("data-tab")); });
     });
     var alumno = window.db.getAlumnoPorId(window.ALUMNO_ID);
-    var splashVisto = localStorage.getItem("fitapp_splash_" + window.ALUMNO_ID + "_" + new Date().toDateString());
-    if(alumno && !splashVisto){
-      localStorage.setItem("fitapp_splash_" + window.ALUMNO_ID + "_" + new Date().toDateString(), "1");
+    // Mostrar splash SIEMPRE al entrar (cada vez que se abre la app)
+    if(alumno){
       mostrarSplashAlumno(alumno, function(){ showPage("inicio"); });
     } else {
       showPage("inicio");
