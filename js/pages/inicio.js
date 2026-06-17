@@ -493,6 +493,67 @@
       "</div>";
     }
 
+    // ── Tabla de progreso semanal ───────────────────────
+    (function(){
+      var labels7  = ["L","M","X","J","V","S","D"];
+      var hoyD7    = new Date();
+      var diffLun7 = (hoyD7.getDay() + 6) % 7;
+      var semData  = [];
+      for(var wi7=0; wi7<7; wi7++){
+        var d7 = new Date(hoyD7); d7.setDate(hoyD7.getDate()-diffLun7+wi7);
+        var f7 = d7.getFullYear()+"-"+pad2(d7.getMonth()+1)+"-"+pad2(d7.getDate());
+        var nutW   = window.db.getNutricion(alumno.id, f7);
+        var kcalW  = 0;
+        if(nutW.extras) nutW.extras.forEach(function(a){ kcalW+=(a.calorias||0); });
+        var scansW = window.db.getFoodScans(alumno.id, f7);
+        scansW.forEach(function(s){ kcalW+=(s.calorias||0); });
+        var pasosW = (function(){
+          var k7 = d7.getFullYear()+""+pad2(d7.getMonth()+1)+""+pad2(d7.getDate());
+          try{ var dp7=JSON.parse(localStorage.getItem("fitapp_pasos_"+alumno.id+"_"+k7)||"null"); return dp7?(dp7.pasos||0):0; }catch(e){ return 0; }
+        })();
+        var entW = registros.filter(function(r){ return r.fecha===f7; }).length;
+        var habW = window.db.getHabitoChecks(alumno.id);
+        var habHoyW = habW[f7] || {};
+        var habDoneW = Object.keys(habHoyW).filter(function(k){ return habHoyW[k]; }).length;
+        semData.push({ label:labels7[wi7], dia:d7.getDate(), kcal:kcalW, pasos:pasosW, entreno:entW, habitos:habDoneW, esHoy:wi7===diffLun7 });
+      }
+      var planObj2 = window.db.getPlanPorId(alumno.plan_alimentacion_id);
+      var kcalMeta = planObj2 ? (planObj2.calorias_objetivo||2000) : 2000;
+
+      html += '<div style="margin:0 20px 14px;">';
+      html += '<div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;margin-bottom:10px;">Progreso semanal</div>';
+      html += '<div style="background:#141414;border-radius:20px;overflow:hidden;">';
+      // Header row
+      html += '<div style="display:grid;grid-template-columns:36px 1fr 1fr 1fr 1fr;gap:0;border-bottom:1px solid rgba(255,255,255,0.05);">';
+      html += '<div style="padding:10px 8px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);text-align:center;"></div>';
+      ['Kcal','Pasos','Entreno','Hábitos'].forEach(function(h){
+        html += '<div style="padding:10px 6px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-align:center;text-transform:uppercase;letter-spacing:.4px;">'+h+'</div>';
+      });
+      html += '</div>';
+      // Data rows
+      semData.forEach(function(row){
+        var rowBg = row.esHoy ? 'background:rgba(200,224,0,0.05);' : '';
+        var dayColor = row.esHoy ? '#C8E000' : 'rgba(255,255,255,0.6)';
+        var kcalPct = Math.min(100, Math.round(row.kcal/kcalMeta*100));
+        var pasosPct = Math.min(100, Math.round(row.pasos/10000*100));
+        function cell(pct, color, val, fmt){
+          var dot = pct>=80 ? '●' : pct>=40 ? '◐' : pct>0 ? '○' : '·';
+          var dc  = pct>=80 ? color : pct>=40 ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.15)';
+          return '<div style="padding:10px 6px;text-align:center;">' +
+            '<div style="font-size:11px;color:'+dc+';font-weight:700;">'+(pct>0?fmt:'—')+'</div>' +
+          '</div>';
+        }
+        html += '<div style="display:grid;grid-template-columns:36px 1fr 1fr 1fr 1fr;gap:0;border-bottom:1px solid rgba(255,255,255,0.04);'+rowBg+'">';
+        html += '<div style="padding:10px 0;text-align:center;"><div style="font-size:10px;font-weight:700;color:'+dayColor+';">'+row.label+'</div><div style="font-size:9px;color:rgba(255,255,255,0.2);">'+row.dia+'</div></div>';
+        html += cell(kcalPct, '#FF9F0A', row.kcal, row.kcal>0?(row.kcal>999?(Math.round(row.kcal/100)/10)+'k':row.kcal):'—');
+        html += cell(pasosPct,'#5AC8FA', row.pasos, row.pasos>0?(row.pasos>999?(Math.round(row.pasos/100)/10)+'k':row.pasos):'—');
+        html += '<div style="padding:10px 6px;text-align:center;"><div style="font-size:14px;">'+(row.entreno>0?'✅':'·')+'</div></div>';
+        html += '<div style="padding:10px 6px;text-align:center;"><div style="font-size:11px;font-weight:700;color:'+(row.habitos>0?'#BF5AF2':'rgba(255,255,255,0.15)')+';">'+(row.habitos>0?row.habitos:'—')+'</div></div>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    })();
+
     // ── Stats row compacto ──────────────────────────────
     html += "<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 20px 14px;'>";
     // Racha
