@@ -48,6 +48,68 @@
     }
   };
 
+  // ── GUARDAR SEGURO (cuota localStorage) ─────────────────
+  window.guardarSeguro = function(key, valor){
+    try {
+      localStorage.setItem(key, JSON.stringify(valor));
+      return true;
+    } catch(e){
+      if(e.name === "QuotaExceededError"){
+        window.mostrarToast("⚠️ Espacio lleno. Elimina fotos o videos antiguos en Más → Fotos.");
+      }
+      return false;
+    }
+  };
+
+  // ── TOASTS HUMANIZADOS ──────────────────────────────────
+  window.toastConfirmacionCoach = function(accion){
+    var mensajes = {
+      foto_progreso:  "Jimmy verá tu evolución en tu próxima revisión 📸",
+      video_tecnica:  "Tu video está listo — Jimmy lo revisará pronto 🎥",
+      sesion_completa:"¡Bien hecho! Tu coach puede ver que completaste esto 💪",
+      habito:         "Sigue así — la constancia es lo que más valora tu coach 🔥"
+    };
+    window.mostrarToast(mensajes[accion] || "✓ Guardado");
+  };
+
+  // ── ONBOARDING PRIMERA VEZ ──────────────────────────────
+  window.mostrarBienvenidaPrimeraVez = function(alumno){
+    var yaVisto = localStorage.getItem("fitapp_bienvenida_" + alumno.id);
+    if(yaVisto) return false;
+    var rutina = window.db.getRutinaPorId(alumno.rutina_id);
+    var plan   = window.db.getPlanPorId ? window.db.getPlanPorId(alumno.plan_alimentacion_id) : null;
+    var gymInfo = window.db.getGymInfo();
+    var coachNombre = (gymInfo && gymInfo.nombre_coach) ? gymInfo.nombre_coach : "tu coach";
+
+    var container = document.getElementById("app-alumno") || document.body;
+    var overlay = document.createElement("div");
+    overlay.id = "bienvenida-overlay";
+    overlay.style.cssText = "position:fixed;inset:0;background:#0A0A0A;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;overflow-y:auto;";
+    overlay.innerHTML =
+      '<div style="max-width:340px;width:100%;">' +
+        '<div style="font-size:13px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;">Bienvenido</div>' +
+        '<div style="font-size:32px;font-weight:900;color:#FFF;margin-bottom:8px;letter-spacing:-1px;">Hola, ' + alumno.nombre + ' 👋</div>' +
+        '<div style="font-size:15px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:32px;">' + coachNombre + ' preparó esto especialmente para ti.</div>' +
+        '<div style="background:#141414;border-radius:16px;padding:18px 20px;margin-bottom:12px;text-align:left;">' +
+          '<div style="font-size:11px;color:rgba(255,255,255,.35);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Tu programa</div>' +
+          '<div style="font-size:16px;font-weight:700;color:#FFF;">' + (rutina ? rutina.nombre : "Por asignar") + '</div>' +
+        '</div>' +
+        '<div style="background:#141414;border-radius:16px;padding:18px 20px;margin-bottom:32px;text-align:left;">' +
+          '<div style="font-size:11px;color:rgba(255,255,255,.35);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Tu plan de alimentación</div>' +
+          '<div style="font-size:16px;font-weight:700;color:#FFF;">' + (plan ? plan.nombre : "Por asignar") + '</div>' +
+        '</div>' +
+        '<button id="btn-empezar-bienvenida" style="width:100%;height:56px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:17px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:-0.3px;">Empezar →</button>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    document.getElementById("btn-empezar-bienvenida").addEventListener("click", function(){
+      localStorage.setItem("fitapp_bienvenida_" + alumno.id, "true");
+      overlay.style.opacity = "0";
+      overlay.style.transition = "opacity 0.4s";
+      setTimeout(function(){ overlay.remove(); }, 400);
+    });
+    return true;
+  };
+
   window.mostrarMedallasNuevas = function(ids){
     if(!ids || !ids.length) return;
     ids.forEach(function(id, i){

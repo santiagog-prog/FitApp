@@ -69,7 +69,37 @@
       });
       html += "</div>";
     }
+    // Videos de técnica pendientes
+    var pendientesHtml = "";
+    var totalPend = 0;
+    alumnos.forEach(function(alumno){
+      var videos = [];
+      try { videos = JSON.parse(localStorage.getItem("fitapp_videos_tecnica_"+alumno.id)||"[]"); } catch(e){}
+      videos.filter(function(v){ return !v.revisado; }).forEach(function(v){
+        totalPend++;
+        pendientesHtml += '<div style="background:#1C1C1C;border-radius:12px;padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">' +
+          '<div><div style="font-size:14px;font-weight:600;">' + alumno.nombre + ' — ' + v.ejercicio + '</div>' +
+          '<div style="font-size:12px;color:#777;margin-top:3px;">' + v.fecha + (v.hora?" · "+v.hora:"") + ' · ' + (v.tamano_mb||"?") + ' MB</div></div>' +
+          '<button class="btn-coach secondary" onclick="window._marcarVideoRevisado(\''+alumno.id+'\',\''+v.id+'\')">Revisado</button>' +
+        '</div>';
+      });
+    });
+    if(totalPend > 0 || pendientesHtml){
+      html += '<div class="coach-card"><h3 style="margin-bottom:12px;">📹 Videos de técnica pendientes (' + totalPend + ')</h3>' +
+        (pendientesHtml || '<div style="color:#555;text-align:center;padding:16px;">Sin videos pendientes</div>') +
+      '</div>';
+    }
+
     $("#sec-dashboard").innerHTML = html;
+  };
+
+  window._marcarVideoRevisado = function(alumnoId, videoId){
+    var key = "fitapp_videos_tecnica_"+alumnoId;
+    var videos = [];
+    try { videos = JSON.parse(localStorage.getItem(key)||"[]"); } catch(e){}
+    var idx = videos.findIndex(function(v){ return v.id===videoId; });
+    if(idx>=0){ videos[idx].revisado = true; try { localStorage.setItem(key, JSON.stringify(videos)); } catch(e){} }
+    window.render_dashboard();
   };
 
   // ── ALUMNOS ──────────────────────────────────────────────

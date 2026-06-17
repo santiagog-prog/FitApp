@@ -243,6 +243,8 @@
   window.init_inicio = function(){
     var alumno = window.db.getAlumnoPorId(window.ALUMNO_ID);
     if(!alumno) return;
+    // Onboarding primera vez
+    if(window.mostrarBienvenidaPrimeraVez && window.mostrarBienvenidaPrimeraVez(alumno)) return;
 
     // Header
     var header = document.getElementById("app-header");
@@ -276,6 +278,10 @@
       var ahImg = document.getElementById("ah-avatar-img");
       ahImg.src = savedPhoto;
       ahImg.style.display = "block";
+      // Foto de perfil como fondo suave del header
+      header.style.backgroundImage = "linear-gradient(rgba(10,10,10,0.72) 0%, rgba(10,10,10,0.98) 100%), url('" + savedPhoto + "')";
+      header.style.backgroundSize = "cover";
+      header.style.backgroundPosition = "center top";
     }
 
     var rutina   = window.db.getRutinaPorId(alumno.rutina_id);

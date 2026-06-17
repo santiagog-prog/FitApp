@@ -753,3 +753,8 @@ button:not(.toggle-switch):not(.btn-next-intake), .ali-check,
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
 }
+
+/* ── JERARQUÍA CSS — PARTE 3 ─────────────────────────── */
+.next-action-card  { min-height: 140px; }
+.next-action-title { font-size: 22px; }
+.stats-rings svg   { width: 56px; height: 56px; }

@@ -1,28 +1,56 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
 :root{
-  --bg:          #0A0A0A;
-  --surface:     #141414;
-  --surface2:    #1C1C1C;
-  --surface3:    #242424;
-  --accent:      #C8E000;
-  --accent-dim:  rgba(200,224,0,0.12);
-  --green:       #34C759;
-  --green-dim:   rgba(52,199,89,0.15);
-  --orange:      #FF9500;
-  --blue:        #0A84FF;
-  --red:         #FF453A;
-  --text:        #FFFFFF;
-  --text-muted:  rgba(255,255,255,0.4);
-  --text-dim:    rgba(255,255,255,0.2);
-  --border:      rgba(255,255,255,0.06);
-  --font-ui:     'Inter', sans-serif;
-  --font-data:   'Space Mono', monospace;
-  --radius-sm:   10px;
-  --radius:      14px;
-  --radius-lg:   20px;
-  --radius-xl:   24px;
-  --radius-pill: 50px;
+  /* Backgrounds */
+  --bg:           #0A0A0A;
+  --bg-base:      #0A0A0A;
+  --surface:      #141414;
+  --bg-card:      #141414;
+  --surface2:     #1C1C1C;
+  --bg-card-2:    #1C1C1C;
+  --surface3:     #242424;
+  /* Accent */
+  --accent:       #C8E000;
+  --accent-dark:  #A8BC00;
+  --accent-dim:   rgba(200,224,0,0.12);
+  /* Semantic */
+  --green:        #34C759;
+  --success:      #34C759;
+  --green-dim:    rgba(52,199,89,0.15);
+  --orange:       #FF9500;
+  --warning:      #FF9500;
+  --blue:         #0A84FF;
+  --red:          #FF453A;
+  --error:        #FF453A;
+  /* Text */
+  --text:         #FFFFFF;
+  --text-primary: #FFFFFF;
+  --text-muted:   rgba(255,255,255,0.4);
+  --text-secondary:rgba(255,255,255,0.5);
+  --text-dim:     rgba(255,255,255,0.2);
+  --text-tertiary:rgba(255,255,255,0.3);
+  --border:       rgba(255,255,255,0.06);
+  /* Fonts */
+  --font-ui:      'Inter', sans-serif;
+  --font-data:    'Space Mono', monospace;
+  /* Radii */
+  --radius-sm:    10px;
+  --radius:       14px;
+  --radius-lg:    20px;
+  --radius-xl:    24px;
+  --radius-pill:  50px;
+}
+
+/* Skeleton loader */
+.skeleton{
+  background:linear-gradient(90deg,#141414 25%,#1C1C1C 50%,#141414 75%);
+  background-size:200% 100%;
+  animation:skeletonPulse 1.4s ease-in-out infinite;
+  border-radius:12px;
+}
+@keyframes skeletonPulse{
+  0%  { background-position: 200% 0; }
+  100%{ background-position:-200% 0; }
 }
 
 *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }

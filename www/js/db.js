@@ -243,6 +243,28 @@
       return racha;
     },
 
+    // ── VÍNCULOS (comparativa entre alumnos) ──
+    vincularAlumnos: function(alumnoId1, alumnoId2){
+      var vinculos = get("vinculos") || [];
+      var yaExiste = vinculos.find(function(v){ return (v.alumno1===alumnoId1&&v.alumno2===alumnoId2)||(v.alumno1===alumnoId2&&v.alumno2===alumnoId1); });
+      if(yaExiste) return yaExiste;
+      var v = { id:"vinc_"+Date.now(), alumno1:alumnoId1, alumno2:alumnoId2, fecha:fechaHoy(), confirmado_por:[alumnoId1] };
+      vinculos.push(v); set("vinculos", vinculos); return v;
+    },
+    confirmarVinculo: function(vinculoId, alumnoId){
+      var vinculos = get("vinculos") || [];
+      var v = vinculos.find(function(x){ return x.id===vinculoId; });
+      if(v && v.confirmado_por.indexOf(alumnoId)===-1){ v.confirmado_por.push(alumnoId); set("vinculos", vinculos); }
+      return v;
+    },
+    rechazarVinculo: function(vinculoId){
+      set("vinculos", (get("vinculos")||[]).filter(function(v){ return v.id!==vinculoId; }));
+    },
+    getVinculoDe: function(alumnoId){
+      return (get("vinculos")||[]).find(function(v){ return v.alumno1===alumnoId||v.alumno2===alumnoId; })||null;
+    },
+    vinculoEstaActivo: function(vinculo){ return vinculo && vinculo.confirmado_por.length===2; },
+
     // ── MEDALLAS ──
     checkMedallas: function(alumnoId){
       var self = this;
