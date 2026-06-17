@@ -1,0 +1,9 @@
+{
+  "appId": "com.fitapp.coachalumno",
+  "appName": "FitApp",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "backgroundColor": "#F2F2F2"
+}

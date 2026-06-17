@@ -42,13 +42,13 @@
     html += '</div>';
 
     html += '<div style="padding:0 20px;">';
-    html += itemRow("camera",   "#0A84FF", "Fotos de progreso",      "Sube tu foto semanal y compara evolución",         "window.irAPagina('fotos')");
-    html += itemRow("target",   "#FF9500", "Mis hábitos",            "Marca tus hábitos diarios y mira tus rachas",      "window.irAPagina('habitos')");
-    html += itemRow("shoe",     "#C8E000", "Cardio y pasos",         "Registra tus pasos y sesiones de cardio",          "window.irAPagina('cardio')");
-    html += itemRow("building", "#34C759", "Mi gimnasio",            "Horarios, contacto y promociones",                 "window.irAPagina('gym')");
-    html += itemRow("users",    "#C8E000", "Reto entre amigos",      "Compara tu constancia con un amigo",               "window.irAPagina('perfil')");
-    html += itemRow("video",    "#FF6B5B", "Videos de técnica",      "Historial de videos enviados a tu coach",          "window._abrirHistorialVideos()");
-    html += itemRow("person",   "rgba(255,255,255,0.6)", "Mi perfil","Datos personales, foto y preferencias",            "window.irAPagina('perfil')");
+    html += itemRow("person",   "#C8E000",  "Mi perfil",             "Datos personales, foto y preferencias",            "window.irAPagina('perfil')");
+    html += itemRow("camera",   "#0A84FF",  "Fotos de progreso",     "Sube tu foto semanal y compara evolución",         "window.irAPagina('fotos')");
+    html += itemRow("target",   "#FF9500",  "Mis hábitos",           "Marca tus hábitos diarios y mira tus rachas",      "window.irAPagina('habitos')");
+    html += itemRow("shoe",     "#5AC8FA",  "Cardio y pasos",        "Registra tus pasos y sesiones de cardio",          "window.irAPagina('cardio')");
+    html += itemRow("users",    "#BF5AF2",  "Reto entre amigos",     "Compara tu constancia con un amigo",               "window.irAPagina('perfil')");
+    html += itemRow("video",    "#FF6B5B",  "Videos de técnica",     "Historial de videos enviados a tu coach",          "window._abrirHistorialVideos()");
+    html += itemRow("building", "#34C759",  "Mi gimnasio",           "Horarios, contacto y promociones",                 "window.irAPagina('gym')");
 
     var wa = gymInfo && gymInfo.whatsapp ? gymInfo.whatsapp.replace(/[^0-9]/g,"") : "";
     if(wa){

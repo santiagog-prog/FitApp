@@ -1,0 +1,20 @@
+{
+  "name": "fitapp-coach-alumno",
+  "version": "1.0.0",
+  "description": "FitApp — app de coach y alumno para gimnasios, lista para empaquetar como app nativa con Capacitor.",
+  "private": true,
+  "scripts": {
+    "sync": "npx cap sync",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios",
+    "copy:www": "node scripts/copy-www.js"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/ios": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}

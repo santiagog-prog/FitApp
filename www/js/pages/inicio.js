@@ -352,6 +352,62 @@
       html += "</div></div></div>";
     }
 
+    // ── Donut macros del día ─────────────────────────────
+    (function(){
+      var fechaMacros = window.db.fechaHoy();
+      var nutM = window.db.getNutricion(alumno.id, fechaMacros);
+      var protM=0, carbsM=0, grasM=0;
+      var sumarAlimentos = function(lista){ if(!lista) return; lista.forEach(function(a){ protM+=(a.proteina||0); carbsM+=(a.carbohidratos||0); grasM+=(a.grasas||0); }); };
+      sumarAlimentos(nutM.alimentos); sumarAlimentos(nutM.extras);
+      var scansM = window.db.getFoodScans(alumno.id, fechaMacros);
+      scansM.forEach(function(s){ protM+=(s.proteinas||0); carbsM+=(s.carbohidratos||0); grasM+=(s.grasas||0); });
+      protM = Math.round(protM); carbsM = Math.round(carbsM); grasM = Math.round(grasM);
+      var total = protM + carbsM + grasM;
+
+      // Colores
+      var cProt = "#0A84FF"; var cCarbs = "#FF9F0A"; var cGras = "#BF5AF2";
+
+      // SVG donut
+      var R = 46, CX = 60, CY = 60, stroke = 10;
+      var circ = 2 * Math.PI * R;
+
+      function arcOffset(val){ return total > 0 ? circ - (val/total)*circ : circ; }
+      function arcRotate(prevVals){ var s = 0; prevVals.forEach(function(v){ s += v; }); return total > 0 ? -90 + (s/total)*360 : -90; }
+
+      var offProt  = arcOffset(protM);
+      var offCarbs = arcOffset(carbsM);
+      var offGras  = arcOffset(grasM);
+      var rotProt  = arcRotate([]);
+      var rotCarbs = arcRotate([protM]);
+      var rotGras  = arcRotate([protM, carbsM]);
+
+      var svgDonut = total > 0
+        ? '<svg width="120" height="120" viewBox="0 0 120 120">' +
+            '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="'+stroke+'"/>' +
+            '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cProt+'" stroke-width="'+stroke+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offProt.toFixed(1)+'" transform="rotate('+rotProt+' '+CX+' '+CY+')" stroke-linecap="butt"/>' +
+            '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cCarbs+'" stroke-width="'+stroke+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offCarbs.toFixed(1)+'" transform="rotate('+rotCarbs+' '+CX+' '+CY+')" stroke-linecap="butt"/>' +
+            '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cGras+'" stroke-width="'+stroke+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offGras.toFixed(1)+'" transform="rotate('+rotGras+' '+CX+' '+CY+')" stroke-linecap="butt"/>' +
+            '<text x="'+CX+'" y="55" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="900" fill="#FFF">'+total+'</text>' +
+            '<text x="'+CX+'" y="70" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="rgba(255,255,255,0.4)">gramos</text>' +
+          '</svg>'
+        : '<svg width="120" height="120" viewBox="0 0 120 120">' +
+            '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="'+stroke+'"/>' +
+            '<text x="'+CX+'" y="'+CY+'" text-anchor="middle" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="11" fill="rgba(255,255,255,0.3)">Sin datos</text>' +
+          '</svg>';
+
+      html += '<div style="background:#141414;border-radius:20px;margin:0 20px 14px;padding:20px;">' +
+        '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Macros de hoy</div>' +
+        '<div style="display:flex;align-items:center;gap:20px;">' +
+          svgDonut +
+          '<div style="flex:1;display:flex;flex-direction:column;gap:10px;">' +
+            '<div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:50%;background:'+cProt+';flex-shrink:0;"></div><div style="flex:1;"><div style="font-size:12px;color:rgba(255,255,255,0.5);">Proteína</div><div style="font-size:18px;font-weight:800;color:#FFF;">'+protM+'<span style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);margin-left:2px;">g</span></div></div></div>' +
+            '<div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:50%;background:'+cCarbs+';flex-shrink:0;"></div><div style="flex:1;"><div style="font-size:12px;color:rgba(255,255,255,0.5);">Carbos</div><div style="font-size:18px;font-weight:800;color:#FFF;">'+carbsM+'<span style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);margin-left:2px;">g</span></div></div></div>' +
+            '<div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:50%;background:'+cGras+';flex-shrink:0;"></div><div style="flex:1;"><div style="font-size:12px;color:rgba(255,255,255,0.5);">Grasas</div><div style="font-size:18px;font-weight:800;color:#FFF;">'+grasM+'<span style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.4);margin-left:2px;">g</span></div></div></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    })();
+
     // ── Objetivos del día ────────────────────────────────
     var objetivos = window.db.getObjetivos(alumno.id);
     var fechaHoyStr0 = window.db.fechaHoy();

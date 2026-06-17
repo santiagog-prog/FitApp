@@ -1,0 +1,67 @@
+html:has(body.coach-body){ background:#0F0F0F; }
+body.coach-body{ background:#0F0F0F; color:#fff; min-height:100vh; letter-spacing:-.01em; }
+#coach-app{ display:flex; min-height:100vh; }
+#coach-sidebar{
+  width:260px; background:#1A1A1A; flex-shrink:0; display:flex; flex-direction:column; padding:22px 0;
+  position:fixed; top:0; left:0; height:100vh; border-right:1px solid #2E2E2E;
+}
+#coach-sidebar .cs-logo{ font-size:1.4rem; font-weight:800; padding:0 22px 26px; color: var(--color-accent); letter-spacing:.01em; }
+#coach-sidebar nav{ flex:1; padding:0 10px; }
+#coach-sidebar nav button{
+  display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:none; border:none; border-left:3px solid transparent; color:#aaa;
+  padding:12px 16px; font-size:.92rem; font-weight:500; cursor:pointer; border-radius:0 10px 10px 0; margin-bottom:2px;
+}
+#coach-sidebar nav button.active{ color:#fff; background:#242424; border-left-color: var(--color-accent); }
+#coach-sidebar .cs-foot{ padding:18px 22px; border-top:1px solid #2E2E2E; font-size:.82rem; color:#888; }
+#coach-main{ flex:1; margin-left:260px; padding:32px 36px; max-width:1240px; }
+#coach-main h1{ font-size:1.8rem; font-weight:800; margin-bottom:20px; }
+
+.coach-grid-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+.cstat{ background:#1A1A1A; border-radius:14px; padding:20px; }
+.cstat .cs-val{ font-size:1.9rem; font-weight:700; font-family:var(--font-data); color: var(--color-accent); }
+.cstat .cs-label{ font-size:.8rem; color:#999; margin-top:5px; }
+
+.coach-card{ background:#1A1A1A; border-radius:14px; padding:22px; margin-bottom:16px; }
+.coach-table{ width:100%; border-collapse:collapse; font-size:.88rem; }
+.coach-table th{ text-align:left; color:#999; padding:10px 8px; border-bottom:1px solid #2A2A2A; font-weight:500; }
+.coach-table td{ padding:10px 8px; border-bottom:1px solid #242424; }
+
+.btn-coach{ background: var(--color-accent); color:#1C1C1E; border:none; border-radius:10px; padding:11px 20px; font-weight:700; cursor:pointer; font-size:.88rem; }
+.btn-coach.secondary{ background:#2A2A2A; color:#fff; }
+.btn-coach.danger{ background:#FF453A; color:#fff; }
+
+.alumnos-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }
+.alumno-card{ background:#1A1A1A; border-radius:14px; padding:20px; cursor:pointer; }
+.alumno-card .ac-avatar{ width:48px; height:48px; border-radius:50%; background: var(--color-accent-dark); color:#1C1C1E; display:flex; align-items:center; justify-content:center; font-weight:700; margin-bottom:12px; }
+.alumno-card h3{ font-size:1rem; margin-bottom:4px; font-weight:600; }
+.alumno-card p{ font-size:.8rem; color:#999; }
+
+.coach-tabs{ display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
+.coach-tabs button{ background:#1A1A1A; border:1px solid #2A2A2A; color:#aaa; padding:10px 18px; border-radius:50px; cursor:pointer; font-size:.85rem; font-weight:600; }
+.coach-tabs button.active{ background: var(--color-accent); color:#1C1C1E; border-color: var(--color-accent); }
+
+.coach-form label{ display:block; font-size:.8rem; color:#999; margin:12px 0 5px; font-weight:500; }
+.coach-form input, .coach-form select, .coach-form textarea{
+  width:100%; padding:11px 13px; border-radius:10px; border:1px solid #333; background:#0F0F0F; color:#fff; font-family:var(--font-family);
+}
+.coach-form input:focus, .coach-form select:focus, .coach-form textarea:focus{ outline:none; border-color: var(--color-accent); }
+.coach-form .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+#coach-modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:9000; display:flex; align-items:center; justify-content:center; padding:20px; }
+#coach-modal-overlay .modal-box{ background:#1A1A1A; border:1px solid #2A2A2A; border-radius:18px; padding:26px; width:100%; max-width:560px; max-height:86vh; overflow-y:auto; box-shadow: var(--shadow-modal); }
+#coach-modal-overlay .modal-box h2{ font-size:1.2rem; margin-bottom:18px; font-weight:700; }
+
+.dia-builder-block{ background:#0F0F0F; border-radius:12px; padding:16px; margin-bottom:12px; border:1px solid #2A2A2A; }
+.ejercicio-builder-row{ background:#222; border-radius:10px; padding:11px 14px; margin-bottom:8px; font-size:.85rem; display:flex; justify-content:space-between; align-items:center; }
+
+.icono-picker-coach{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.icono-picker-coach span{ width:40px; height:40px; border-radius:10px; background:#0F0F0F; border:2px solid transparent; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.1rem; }
+.icono-picker-coach span.sel{ border-color: var(--color-accent); }
+
+@media(max-width:800px){
+  #coach-sidebar{ width:64px; }
+  #coach-sidebar .cs-logo{ display:none; }
+  #coach-sidebar nav button span.label{ display:none; }
+  #coach-main{ margin-left:64px; padding:18px; }
+  .coach-grid-stats{ grid-template-columns:1fr 1fr; }
+}

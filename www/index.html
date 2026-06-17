@@ -141,6 +141,34 @@
 </head>
 <body>
 
+<!-- ── SPLASH LOGIN ── -->
+<div id="login-splash" style="position:fixed;inset:0;z-index:99999;background:#080808;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;">
+  <style>
+    @keyframes lsUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes lsOut{from{opacity:1}to{opacity:0}}
+    #login-splash .ls-logo { animation:lsUp .5s .05s ease both; }
+    #login-splash .ls-title { animation:lsUp .5s .2s ease both; }
+    #login-splash .ls-sub   { animation:lsUp .5s .35s ease both; }
+    #login-splash .ls-foot  { animation:lsUp .5s .5s ease both; }
+  </style>
+  <div class="ls-logo" style="width:80px;height:80px;border-radius:24px;background:rgba(200,224,0,0.1);border:1px solid rgba(200,224,0,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;">
+    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#C8E000" stroke-width="1.8" stroke-linecap="round"><path d="M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4"/></svg>
+  </div>
+  <div class="ls-title" style="font-size:52px;font-weight:900;color:#FFF;letter-spacing:-3px;line-height:1;">Fit<span style="color:#C8E000;">App</span></div>
+  <div class="ls-sub" style="font-size:16px;font-weight:600;color:rgba(255,255,255,0.45);margin-top:12px;letter-spacing:.2px;">Esto cambiará tu vida</div>
+  <div class="ls-foot" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+28px);left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:.5px;">App desarrollada por Santiago Guamán</div>
+</div>
+<script>
+  (function(){
+    setTimeout(function(){
+      var s = document.getElementById("login-splash");
+      if(!s) return;
+      s.style.animation = "lsOut .5s ease both";
+      setTimeout(function(){ s.remove(); }, 500);
+    }, 2800);
+  })();
+</script>
+
 <!-- HERO -->
 <div class="hero">
   <div class="hero-bg"></div>
