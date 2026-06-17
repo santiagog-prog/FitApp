@@ -270,6 +270,16 @@
       });
 
       html += renderBotonVideo(ej);
+      // Botón grabar técnica
+      var ejKeyEsc = (ej.id||ej.nombre||"").replace(/'/g,"").replace(/"/g,"");
+      var ejNombreEsc = (ej.nombre||"").replace(/'/g,"").replace(/"/g,"");
+      html += "<button onclick=\"window._grabarTecnica('" + ejKeyEsc + "','" + ejNombreEsc + "')\" " +
+        "style='width:100%;height:44px;background:rgba(255,69,58,0.08);border:1px solid rgba(255,69,58,0.2);border-radius:12px;" +
+        "color:#FF6B5B;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:8px;" +
+        "display:flex;align-items:center;justify-content:center;gap:8px;'>" +
+        "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5'><path d='M23 7l-7 5 7 5V7z'/><rect x='1' y='5' width='15' height='14' rx='2'/></svg>" +
+        "Grabar mi técnica para el coach" +
+      "</button>";
 
       html += "</div></div>"; // cierre body + card
     });
@@ -505,4 +515,72 @@
     state.selectedDate = null;
     renderLista();
   };
+
+  // ── GRABAR TÉCNICA ───────────────────────────────────────
+  window._grabarTecnica = function(ejercicioId, nombreEjercicio){
+    var inputId = "video-tecnica-input-" + ejercicioId;
+    var input = document.getElementById(inputId);
+    if(!input){
+      input = document.createElement("input");
+      input.type = "file"; input.accept = "video/*"; input.capture = "environment";
+      input.id = inputId; input.style.display = "none";
+      document.body.appendChild(input);
+    }
+    input.onchange = function(){
+      var file = input.files[0];
+      if(!file) return;
+      if(file.size > 30 * 1024 * 1024){ window.mostrarToast("Video muy pesado. Máximo 30MB."); return; }
+      _procesarVideoTecnica(file, ejercicioId, nombreEjercicio);
+    };
+    input.click();
+  };
+
+  function _procesarVideoTecnica(file, ejercicioId, nombreEjercicio){
+    var alumnoId = window.db.getAlumnoActual();
+    var alumno = window.db.getAlumnoPorId(alumnoId);
+    var gymInfo = window.db.getGymInfo();
+    window.mostrarToast("📹 Preparando tu video...");
+    var videosKey = "fitapp_videos_tecnica_" + alumnoId;
+    try { var videos = JSON.parse(localStorage.getItem(videosKey)||"[]"); } catch(e){ var videos = []; }
+    var nuevoVideo = {
+      id: "vid_" + Date.now(), ejercicio: nombreEjercicio,
+      fecha: window.db.fechaHoy(),
+      hora: new Date().toLocaleTimeString("es-EC",{hour:"2-digit",minute:"2-digit"}),
+      tamano_mb: (file.size/(1024*1024)).toFixed(1), revisado: false
+    };
+    videos.push(nuevoVideo);
+    try { localStorage.setItem(videosKey, JSON.stringify(videos)); } catch(e){}
+    _mostrarModalEnviarTecnica(file, nombreEjercicio, alumno, gymInfo);
+  }
+
+  function _mostrarModalEnviarTecnica(file, nombreEjercicio, alumno, gymInfo){
+    var videoURL = URL.createObjectURL(file);
+    var modal = document.createElement("div");
+    modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;";
+    var nombreEsc = (nombreEjercicio||"").replace(/'/g,"\\'");
+    modal.innerHTML =
+      '<div style="width:100%;max-width:400px;background:#141414;border-radius:20px;padding:24px;text-align:center;">' +
+        '<div style="font-size:40px;margin-bottom:12px;">📹</div>' +
+        '<div style="font-size:18px;font-weight:700;color:#FFF;margin-bottom:6px;">Video listo</div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">Técnica de "' + nombreEjercicio + '"</div>' +
+        '<video src="' + videoURL + '" style="width:100%;border-radius:12px;margin-bottom:20px;max-height:240px;" controls playsinline></video>' +
+        '<button id="btn-enviar-tecnica-wa" style="width:100%;height:52px;background:#25D366;color:#FFF;border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A8.86 8.86 0 0012.05 4a8.94 8.94 0 00-7.74 13.4L3 21l3.74-1.27a8.93 8.93 0 004.31 1.1h0a8.95 8.95 0 008.94-8.94 8.85 8.85 0 00-2.39-6.57z"/></svg>' +
+          'Avisar a mi coach por WhatsApp' +
+        '</button>' +
+        '<button id="btn-cerrar-tecnica" style="width:100%;height:44px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);border:none;border-radius:50px;font-size:14px;font-family:inherit;cursor:pointer;">Guardar para después</button>' +
+      '</div>';
+    modal.addEventListener("click", function(e){ if(e.target===modal) modal.remove(); });
+    document.body.appendChild(modal);
+    document.getElementById("btn-cerrar-tecnica").addEventListener("click", function(){ modal.remove(); });
+    document.getElementById("btn-enviar-tecnica-wa").addEventListener("click", function(){
+      var wa = (gymInfo && gymInfo.whatsapp ? gymInfo.whatsapp : "").replace(/[^0-9]/g,"");
+      if(!wa){ window.mostrarToast("Tu coach no tiene WhatsApp configurado"); return; }
+      var alumnoNombre = alumno ? alumno.nombre : "tu alumno";
+      var mensaje = "🎥 *Revisión de técnica*\n\nHola, soy " + alumnoNombre + ".\nAcabo de hacer \"" + nombreEjercicio + "\" y quiero que revises mi técnica.\n\n_Te adjunto el video desde mi galería ahora mismo._";
+      window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(mensaje), "_blank");
+      window.mostrarToast("✓ Abre WhatsApp y adjunta el video de tu galería");
+      modal.remove();
+    });
+  }
 })();

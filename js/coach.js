@@ -69,7 +69,151 @@
       });
       html += "</div>";
     }
+    // Videos de técnica pendientes
+    var pendientesHtml = "";
+    var totalPend = 0;
+    alumnos.forEach(function(alumno){
+      var videos = [];
+      try { videos = JSON.parse(localStorage.getItem("fitapp_videos_tecnica_"+alumno.id)||"[]"); } catch(e){}
+      videos.filter(function(v){ return !v.revisado; }).forEach(function(v){
+        totalPend++;
+        pendientesHtml += '<div style="background:#1C1C1C;border-radius:12px;padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">' +
+          '<div><div style="font-size:14px;font-weight:600;">' + alumno.nombre + ' — ' + v.ejercicio + '</div>' +
+          '<div style="font-size:12px;color:#777;margin-top:3px;">' + v.fecha + (v.hora?" · "+v.hora:"") + ' · ' + (v.tamano_mb||"?") + ' MB</div></div>' +
+          '<button class="btn-coach secondary" onclick="window._marcarVideoRevisado(\''+alumno.id+'\',\''+v.id+'\')">Revisado</button>' +
+        '</div>';
+      });
+    });
+    if(totalPend > 0 || pendientesHtml){
+      html += '<div class="coach-card"><h3 style="margin-bottom:12px;">📹 Videos de técnica pendientes (' + totalPend + ')</h3>' +
+        (pendientesHtml || '<div style="color:#555;text-align:center;padding:16px;">Sin videos pendientes</div>') +
+      '</div>';
+    }
+
+    // ── Detección de riesgo de abandono ──────────────────
+    var riesgoHtml = "";
+    alumnos.forEach(function(a){
+      var regs7  = window.db.getActividadReciente(a.id, 7);
+      var regs14 = window.db.getActividadReciente(a.id, 14);
+      var regs28 = window.db.getActividadReciente(a.id, 28);
+      var promAnt = regs28.length / 4; // promedio semanal últimas 4 semanas
+      var pct = promAnt > 0 ? Math.round((1 - regs7.length / promAnt) * 100) : 0;
+      var diasSinEntreno = 0;
+      var allRegs = window.db.getRegistros(a.id);
+      if(allRegs.length){
+        diasSinEntreno = Math.round((new Date() - new Date(allRegs[allRegs.length-1].fecha)) / 86400000);
+      }
+      if(pct >= 30 || diasSinEntreno >= 5){
+        var msg = "";
+        if(pct >= 50) msg = "Ha reducido su actividad un " + pct + "% en los últimos 7 días.";
+        else if(diasSinEntreno >= 7) msg = "Lleva " + diasSinEntreno + " días sin entrenar.";
+        else msg = "Actividad reducida " + pct + "% respecto a su media.";
+        var waTxt = encodeURIComponent("Hola " + a.nombre + ", ¿todo bien? Notamos que has bajado el ritmo últimamente. Aquí estamos para ayudarte 💪");
+        riesgoHtml += '<div class="risk-card">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<div class="risk-card-name">⚠️ ' + a.nombre + ' ' + (a.apellido||"") + '</div>' +
+            '<a class="btn-coach secondary" target="_blank" rel="noopener" href="https://wa.me/?text=' + waTxt + '" style="font-size:12px;padding:6px 12px;">WhatsApp</a>' +
+          '</div>' +
+          '<div class="risk-card-msg">' + msg + '</div>' +
+        '</div>';
+      }
+    });
+    if(riesgoHtml){
+      html += '<div class="coach-card"><h3 style="margin-bottom:12px;color:#FF453A;">🚨 Alumnos en riesgo de abandono</h3>' + riesgoHtml + '</div>';
+    }
+
+    // ── Objetivos asignados ──────────────────────────────
+    html += '<div class="coach-card"><h3 style="margin-bottom:12px;">🎯 Objetivos por alumno</h3>';
+    if(alumnos.length === 0){
+      html += '<div style="color:#555;text-align:center;padding:16px;">Sin alumnos</div>';
+    } else {
+      var TIPOS_OBJ = [
+        { tipo:"pasos",    nombre:"Pasos diarios",     unidad:"pasos",  meta:10000, icono:"👟" },
+        { tipo:"agua",     nombre:"Agua diaria",        unidad:"ml",     meta:3000,  icono:"💧" },
+        { tipo:"proteina", nombre:"Proteína diaria",    unidad:"g",      meta:180,   icono:"💪" },
+        { tipo:"calorias", nombre:"Calorías diarias",   unidad:"kcal",   meta:2400,  icono:"🔥" },
+        { tipo:"sueno",    nombre:"Horas de sueño",     unidad:"horas",  meta:8,     icono:"😴" },
+        { tipo:"entreno",  nombre:"Sesiones semanales", unidad:"sesiones",meta:4,    icono:"🏋️" }
+      ];
+      html += '<select id="sel-alumno-obj" style="width:100%;height:40px;background:#1C1C1C;border:1px solid #333;border-radius:10px;color:#FFF;padding:0 12px;font-family:inherit;font-size:14px;margin-bottom:12px;">';
+      alumnos.forEach(function(a){ html += '<option value="' + a.id + '">' + a.nombre + ' ' + (a.apellido||"") + '</option>'; });
+      html += '</select>';
+      html += '<div id="obj-alumno-list"></div>';
+      html += '<div style="margin-top:10px;background:#1C1C1C;border-radius:12px;padding:12px;">';
+      html += '<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Agregar objetivo</div>';
+      html += '<select id="sel-tipo-obj" style="width:100%;height:36px;background:#242424;border:1px solid #333;border-radius:8px;color:#FFF;padding:0 10px;font-family:inherit;font-size:13px;margin-bottom:8px;">';
+      TIPOS_OBJ.forEach(function(t){ html += '<option value="' + t.tipo + '">' + t.icono + ' ' + t.nombre + '</option>'; });
+      html += '</select>';
+      html += '<input id="inp-meta-obj" type="number" placeholder="Meta (ej: 10000)" style="width:100%;height:36px;background:#242424;border:1px solid #333;border-radius:8px;color:#FFF;padding:0 10px;font-family:inherit;font-size:13px;margin-bottom:8px;">';
+      html += '<button id="btn-add-obj" class="btn-coach" style="width:100%;height:36px;font-size:13px;">+ Agregar objetivo</button>';
+      html += '</div>';
+    }
+    html += '</div>';
+
     $("#sec-dashboard").innerHTML = html;
+
+    // Bind: selector alumno → mostrar objetivos
+    var selA = document.getElementById("sel-alumno-obj");
+    if(selA){
+      function renderObjetivosAlumno(){
+        var aid = selA.value;
+        var objs = window.db.getObjetivos(aid);
+        var TIPOS_OBJ_LOCAL = [
+          { tipo:"pasos",icono:"👟" },{ tipo:"agua",icono:"💧" },{ tipo:"proteina",icono:"💪" },
+          { tipo:"calorias",icono:"🔥" },{ tipo:"sueno",icono:"😴" },{ tipo:"entreno",icono:"🏋️" }
+        ];
+        var listEl = document.getElementById("obj-alumno-list");
+        if(!listEl) return;
+        if(!objs.length){ listEl.innerHTML = '<div style="color:#555;font-size:13px;padding:4px 0;">Sin objetivos asignados</div>'; return; }
+        listEl.innerHTML = objs.map(function(o){
+          var ic = (TIPOS_OBJ_LOCAL.find(function(t){ return t.tipo===o.tipo; })||{}).icono || "🎯";
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #242424;">' +
+            '<div style="font-size:13px;">' + ic + ' ' + o.nombre + ' — <span style="color:#C8E000;font-weight:700;">' + (o.meta||0).toLocaleString() + ' ' + (o.unidad||"") + '</span></div>' +
+            '<button onclick="window._deleteObjetivoCoach(\'' + aid + '\',\'' + o.id + '\')" style="background:none;border:none;color:#FF453A;font-size:18px;cursor:pointer;">✕</button>' +
+          '</div>';
+        }).join('');
+      }
+      renderObjetivosAlumno();
+      selA.addEventListener("change", renderObjetivosAlumno);
+
+      var btnAddObj = document.getElementById("btn-add-obj");
+      if(btnAddObj){
+        var TIPOS_ALL = [
+          { tipo:"pasos",nombre:"Pasos diarios",unidad:"pasos" },
+          { tipo:"agua",nombre:"Agua diaria",unidad:"ml" },
+          { tipo:"proteina",nombre:"Proteína diaria",unidad:"g" },
+          { tipo:"calorias",nombre:"Calorías diarias",unidad:"kcal" },
+          { tipo:"sueno",nombre:"Horas de sueño",unidad:"horas" },
+          { tipo:"entreno",nombre:"Sesiones semanales",unidad:"sesiones" }
+        ];
+        btnAddObj.addEventListener("click", function(){
+          var aid2 = selA.value;
+          var tipo = (document.getElementById("sel-tipo-obj")||{}).value;
+          var meta = parseFloat((document.getElementById("inp-meta-obj")||{}).value);
+          if(!tipo || !meta) return;
+          var tipoInfo = TIPOS_ALL.find(function(t){ return t.tipo===tipo; }) || {};
+          var obj = { id:"obj_"+Date.now(), tipo:tipo, nombre:tipoInfo.nombre||tipo, unidad:tipoInfo.unidad||"", meta:meta, fecha_creacion:window.db.fechaHoy() };
+          window.db.saveObjetivo(aid2, obj);
+          renderObjetivosAlumno();
+          window.mostrarToast("✅ Objetivo asignado");
+          var inp = document.getElementById("inp-meta-obj"); if(inp) inp.value = "";
+        });
+      }
+    }
+  };
+
+  window._deleteObjetivoCoach = function(alumnoId, objId){
+    window.db.deleteObjetivo(alumnoId, objId);
+    window.render_dashboard();
+  };
+
+  window._marcarVideoRevisado = function(alumnoId, videoId){
+    var key = "fitapp_videos_tecnica_"+alumnoId;
+    var videos = [];
+    try { videos = JSON.parse(localStorage.getItem(key)||"[]"); } catch(e){}
+    var idx = videos.findIndex(function(v){ return v.id===videoId; });
+    if(idx>=0){ videos[idx].revisado = true; try { localStorage.setItem(key, JSON.stringify(videos)); } catch(e){} }
+    window.render_dashboard();
   };
 
   // ── ALUMNOS ──────────────────────────────────────────────

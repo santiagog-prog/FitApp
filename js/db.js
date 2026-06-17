@@ -228,6 +228,75 @@
     setAlumnoActual: function(id){ return set("alumno_actual", id); },
     clearSesion:     function(){ localStorage.removeItem(PREFIX + "alumno_actual"); },
 
+    // ── OPENAI KEY ──
+    saveOpenAIKey: function(k){ return set("openai_key", k); },
+    getOpenAIKey:  function(){ return get("openai_key") || ""; },
+
+    // ── FOOD SCANS (Vision AI) ──
+    getFoodScans:  function(alumnoId, fecha){ return get("food_scans_" + alumnoId + "_" + (fecha||fechaHoy())) || []; },
+    saveFoodScan:  function(alumnoId, scan){
+      var fecha = scan.fecha || fechaHoy();
+      var list = this.getFoodScans(alumnoId, fecha);
+      list.push(scan);
+      return set("food_scans_" + alumnoId + "_" + fecha, list);
+    },
+    getFoodScansHistorial: function(alumnoId, dias){
+      var result = [];
+      for(var i=0; i<(dias||7); i++){
+        var d = new Date(); d.setDate(d.getDate()-i);
+        var f = d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
+        result = result.concat(this.getFoodScans(alumnoId, f));
+      }
+      return result;
+    },
+
+    // ── OBJETIVOS (coach asigna) ──
+    getObjetivos:  function(alumnoId){ return get("objetivos_" + alumnoId) || []; },
+    saveObjetivos: function(alumnoId, lista){ return set("objetivos_" + alumnoId, lista); },
+    saveObjetivo:  function(alumnoId, obj){
+      var list = this.getObjetivos(alumnoId);
+      var idx  = list.findIndex(function(x){ return x.id===obj.id; });
+      if(idx>=0) list[idx]=obj; else list.push(obj);
+      return set("objetivos_" + alumnoId, list);
+    },
+    deleteObjetivo: function(alumnoId, id){
+      return set("objetivos_" + alumnoId, this.getObjetivos(alumnoId).filter(function(o){ return o.id!==id; }));
+    },
+
+    // ── PROGRESO DIARIO (pasos, agua, sueño manual) ──
+    getProgresoDiario: function(alumnoId, fecha){
+      return get("progreso_" + alumnoId + "_" + (fecha||fechaHoy())) || { pasos:0, agua_ml:0, sueno_h:0, calorias_activas:0 };
+    },
+    saveProgresoDiario: function(alumnoId, fecha, datos){
+      return set("progreso_" + alumnoId + "_" + (fecha||fechaHoy()), datos);
+    },
+    patchProgresoDiario: function(alumnoId, fecha, patch){
+      var d = this.getProgresoDiario(alumnoId, fecha);
+      Object.keys(patch).forEach(function(k){ d[k] = patch[k]; });
+      return this.saveProgresoDiario(alumnoId, fecha, d);
+    },
+
+    // ── FITSCORE ──
+    getFitScore:  function(alumnoId, fecha){ return get("fitscore_" + alumnoId + "_" + (fecha||fechaHoy())) || null; },
+    saveFitScore: function(alumnoId, fecha, scoreObj){ return set("fitscore_" + alumnoId + "_" + (fecha||fechaHoy()), scoreObj); },
+    getFitScoreHistorial: function(alumnoId, dias){
+      var result = [];
+      for(var i=(dias||7)-1; i>=0; i--){
+        var d = new Date(); d.setDate(d.getDate()-i);
+        var f = d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
+        var s = this.getFitScore(alumnoId, f);
+        result.push({ fecha:f, score: s ? s.total : null });
+      }
+      return result;
+    },
+
+    // ── ACTIVIDAD RECIENTE (para detección de riesgo coach) ──
+    getActividadReciente: function(alumnoId, dias){
+      var registros = this.getRegistros(alumnoId);
+      var corte = new Date(); corte.setDate(corte.getDate() - (dias||7));
+      return registros.filter(function(r){ return new Date(r.fecha) >= corte; });
+    },
+
     // ── RACHAS ──
     calcularRacha: function(alumnoId){
       var registros = this.getRegistros(alumnoId);
@@ -242,6 +311,28 @@
       }
       return racha;
     },
+
+    // ── VÍNCULOS (comparativa entre alumnos) ──
+    vincularAlumnos: function(alumnoId1, alumnoId2){
+      var vinculos = get("vinculos") || [];
+      var yaExiste = vinculos.find(function(v){ return (v.alumno1===alumnoId1&&v.alumno2===alumnoId2)||(v.alumno1===alumnoId2&&v.alumno2===alumnoId1); });
+      if(yaExiste) return yaExiste;
+      var v = { id:"vinc_"+Date.now(), alumno1:alumnoId1, alumno2:alumnoId2, fecha:fechaHoy(), confirmado_por:[alumnoId1] };
+      vinculos.push(v); set("vinculos", vinculos); return v;
+    },
+    confirmarVinculo: function(vinculoId, alumnoId){
+      var vinculos = get("vinculos") || [];
+      var v = vinculos.find(function(x){ return x.id===vinculoId; });
+      if(v && v.confirmado_por.indexOf(alumnoId)===-1){ v.confirmado_por.push(alumnoId); set("vinculos", vinculos); }
+      return v;
+    },
+    rechazarVinculo: function(vinculoId){
+      set("vinculos", (get("vinculos")||[]).filter(function(v){ return v.id!==vinculoId; }));
+    },
+    getVinculoDe: function(alumnoId){
+      return (get("vinculos")||[]).find(function(v){ return v.alumno1===alumnoId||v.alumno2===alumnoId; })||null;
+    },
+    vinculoEstaActivo: function(vinculo){ return vinculo && vinculo.confirmado_por.length===2; },
 
     // ── MEDALLAS ──
     checkMedallas: function(alumnoId){

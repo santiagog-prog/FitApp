@@ -82,6 +82,22 @@
       html += "</div>";
     }
 
+    // Comparativa entre alumnos
+    html += "<div style='margin:16px 20px 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase;'>Reto entre amigos</div>";
+    html += "<div id='comparativa-card' style='background:var(--surface);border-radius:16px;padding:18px;margin:8px 20px 0;'></div>";
+
+    // ── Ajustes IA ──
+    var currentApiKey = window.db.getOpenAIKey();
+    html += "<div style='padding:8px 20px;'>" +
+      "<div style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;'>" +
+        "<div style='font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:12px;'>Ajustes IA · Food Vision</div>" +
+        "<div style='font-size:13px;font-weight:600;margin-bottom:6px;'>OpenAI API Key</div>" +
+        "<input id='openai-key-input' class='api-key-field' type='password' placeholder='sk-...' autocomplete='off'>" +
+        "<div style='font-size:11px;color:var(--text-muted);margin-top:6px;'>Para Escanear Comida con IA (Nutrición). Se guarda solo en este dispositivo.</div>" +
+        "<button id='btn-save-api-key' style='margin-top:10px;width:100%;height:42px;background:var(--accent);border:none;border-radius:99px;color:#1C1C1E;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;'>Guardar API Key</button>" +
+      "</div>" +
+    "</div>";
+
     // Logout
     html += "<div style='padding:20px 20px 32px;'>" +
       "<button id='btn-logout' style='width:100%;height:48px;background:rgba(255,69,58,0.1);border:1px solid rgba(255,69,58,0.3);border-radius:50px;color:#FF453A;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;'>Cerrar sesión</button>" +
@@ -89,6 +105,17 @@
 
     document.getElementById("page-perfil").innerHTML = html;
     window.db.marcarNotasLeidas(alumno.id);
+
+    // API Key input: poner valor actual después de renderizar
+    var akInput = document.getElementById("openai-key-input");
+    if(akInput && currentApiKey) akInput.value = currentApiKey;
+
+    document.getElementById("btn-save-api-key").addEventListener("click", function(){
+      var v = (document.getElementById("openai-key-input").value || "").trim();
+      if(!v){ window.mostrarToast("⚠️ Introduce tu API Key"); return; }
+      window.db.saveOpenAIKey(v);
+      window.mostrarToast("✅ API Key guardada");
+    });
 
     // Bind toggles
     function bindToggle(id, key){
@@ -109,6 +136,8 @@
       window.db.clearSesion();
       location.href = "../index.html";
     });
+
+    _renderComparativaCard(alumno.id);
 
     // Avatar foto editable
     var savedPhoto = localStorage.getItem("fitapp_avatar_" + alumno.id);
@@ -144,6 +173,93 @@
       reader.readAsDataURL(file);
     });
   };
+
+  // ── COMPARATIVA ─────────────────────────────────────────
+  function _calcPctMes(alumnoId){
+    var registros = window.db.getRegistros(alumnoId);
+    var hoy = new Date();
+    var delMes = registros.filter(function(r){ var f=new Date(r.fecha); return f.getMonth()===hoy.getMonth()&&f.getFullYear()===hoy.getFullYear(); });
+    var esperados = Math.max(1, Math.ceil(hoy.getDate()*(4/7)));
+    return Math.min(100, Math.round((delMes.length/esperados)*100));
+  }
+
+  function _renderComparativaCard(alumnoId){
+    var container = document.getElementById("comparativa-card");
+    if(!container) return;
+    var vinculo = window.db.getVinculoDe(alumnoId);
+
+    // Solicitud pendiente donde yo soy el receptor (alumno2)
+    if(vinculo && !window.db.vinculoEstaActivo(vinculo) && vinculo.confirmado_por.indexOf(alumnoId)===-1){
+      var solicitante = window.db.getAlumnoPorId(vinculo.alumno1);
+      container.innerHTML =
+        '<div style="font-size:14px;font-weight:700;color:#FFF;margin-bottom:8px;">🤝 Solicitud de reto</div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:16px;">' + (solicitante?solicitante.nombre:"Alguien") + ' quiere comparar su progreso contigo.</div>' +
+        '<div style="display:flex;gap:10px;">' +
+          '<button id="btn-aceptar-vinculo" style="flex:1;height:46px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;">Aceptar</button>' +
+          '<button id="btn-rechazar-vinculo" style="flex:1;height:46px;background:rgba(255,69,58,0.1);color:#FF453A;border:1px solid rgba(255,69,58,0.3);border-radius:50px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;">Rechazar</button>' +
+        '</div>';
+      document.getElementById("btn-aceptar-vinculo").addEventListener("click", function(){
+        window.db.confirmarVinculo(vinculo.id, alumnoId);
+        window.mostrarToast && window.mostrarToast("✓ ¡Reto activado!");
+        _renderComparativaCard(alumnoId);
+      });
+      document.getElementById("btn-rechazar-vinculo").addEventListener("click", function(){
+        window.db.rechazarVinculo(vinculo.id);
+        window.mostrarToast && window.mostrarToast("Solicitud rechazada");
+        _renderComparativaCard(alumnoId);
+      });
+      return;
+    }
+
+    if(!vinculo){
+      container.innerHTML =
+        '<div style="font-size:14px;font-weight:600;color:#FFF;margin-bottom:6px;">¿Entrenas con alguien?</div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:14px;">Vincula tu progreso con un amigo y vean juntos quién cumple más.</div>' +
+        '<input id="codigo-vincular" type="tel" inputmode="numeric" placeholder="Código de la otra persona" style="width:100%;height:46px;background:#1C1C1C;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 14px;color:#FFF;font-family:inherit;font-size:15px;margin-bottom:10px;box-sizing:border-box;">' +
+        '<button id="btn-solicitar-vinculo" style="width:100%;height:46px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;">Vincular</button>';
+      document.getElementById("btn-solicitar-vinculo").addEventListener("click", function(){
+        var codigo = (document.getElementById("codigo-vincular").value||"").trim();
+        if(!codigo){ window.mostrarToast && window.mostrarToast("Escribe el código"); return; }
+        var otro = window.db.getAlumnoPorCodigo(codigo);
+        if(!otro){ window.mostrarToast && window.mostrarToast("Código no encontrado"); return; }
+        if(otro.id===alumnoId){ window.mostrarToast && window.mostrarToast("No puedes vincularte contigo mismo"); return; }
+        window.db.vincularAlumnos(alumnoId, otro.id);
+        window.mostrarToast && window.mostrarToast("✓ Solicitud enviada a " + otro.nombre);
+        _renderComparativaCard(alumnoId);
+      });
+      return;
+    }
+
+    if(!window.db.vinculoEstaActivo(vinculo)){
+      var otroIdPend = vinculo.alumno1===alumnoId ? vinculo.alumno2 : vinculo.alumno1;
+      var otroPend = window.db.getAlumnoPorId(otroIdPend);
+      container.innerHTML =
+        '<div style="font-size:14px;font-weight:600;color:#FFF;margin-bottom:6px;">⏳ Esperando confirmación</div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,0.4);">' + (otroPend?otroPend.nombre:"Tu invitado") + ' debe aceptar la solicitud desde su app.</div>';
+      return;
+    }
+
+    var otroId = vinculo.alumno1===alumnoId ? vinculo.alumno2 : vinculo.alumno1;
+    var otro = window.db.getAlumnoPorId(otroId);
+    var miRacha = window.db.calcularRacha(alumnoId);
+    var suRacha = window.db.calcularRacha(otroId);
+    var miPct = _calcPctMes(alumnoId);
+    var suPct = _calcPctMes(otroId);
+
+    function vsRow(miVal, suVal, label){
+      return '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:12px;">' +
+        '<div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:' + (miVal>=suVal?"#C8E000":"#FFF") + ';">' + miVal + '</div><div style="font-size:10px;color:rgba(255,255,255,.35);">Tú</div></div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,.2);text-align:center;">' + label + '</div>' +
+        '<div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:' + (suVal>miVal?"#C8E000":"#FFF") + ';">' + suVal + '</div><div style="font-size:10px;color:rgba(255,255,255,.35);">' + (otro?otro.nombre:"Rival") + '</div></div>' +
+      '</div>';
+    }
+
+    container.innerHTML =
+      '<div style="font-size:14px;font-weight:700;color:#FFF;margin-bottom:14px;">⚔️ Reto activo</div>' +
+      vsRow(miRacha, suRacha, "Racha días") +
+      vsRow(miPct+"%", suPct+"%", "Cumplimiento mes") +
+      '<div style="font-size:11px;color:rgba(255,255,255,.25);text-align:center;margin-top:4px;">Constancia — no peso ni cuerpo 💪</div>';
+  }
 
   function stat(val, label){
     return '<div style="background:var(--surface);border-radius:14px;padding:16px;text-align:center;">' +
