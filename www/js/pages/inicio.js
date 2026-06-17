@@ -262,11 +262,21 @@
             "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round'><path d='M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 01-3.46 0'/></svg>" +
             "<span class='badge-dot'></span>" +
           "</button>" +
-          "<div class='ah-avatar' id='ah-avatar-btn'>" + alumno.nombre[0] + (alumno.apellido?alumno.apellido[0]:"") + "</div>" +
+          "<div class='ah-avatar' id='ah-avatar-btn' style='overflow:hidden;position:relative;'>" +
+            "<span id='ah-avatar-initials'>" + alumno.nombre[0] + (alumno.apellido?alumno.apellido[0]:"") + "</span>" +
+            "<img id='ah-avatar-img' src='' style='display:none;position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:50%;'>" +
+          "</div>" +
         "</div>" +
       "</div>";
 
     document.getElementById("ah-avatar-btn").addEventListener("click", function(){ window.irAPagina("perfil"); });
+    var savedPhoto = localStorage.getItem("fitapp_avatar_" + alumnoId);
+    if(savedPhoto){
+      document.getElementById("ah-avatar-initials").style.display = "none";
+      var ahImg = document.getElementById("ah-avatar-img");
+      ahImg.src = savedPhoto;
+      ahImg.style.display = "block";
+    }
 
     var rutina   = window.db.getRutinaPorId(alumno.rutina_id);
     var registros= window.db.getRegistros(alumno.id);

@@ -320,42 +320,120 @@
     window.init_nutricion();
   };
 
+  var PROMPT_ESCANER_ESTRICTO =
+    "Eres un nutricionista experto en análisis visual de alimentos. Analiza ESTA imagen y detecta ABSOLUTAMENTE TODOS los componentes de comida que puedas ver, incluyendo guarniciones, salsas, bebidas, postres y cualquier alimento adicional separado. " +
+    "Para CADA componente individual devuelve: nombre en español, porción estimada, calorías, proteína en gramos, carbohidratos en gramos y grasas en gramos. " +
+    "NO omitas ningún componente visible. NO combines alimentos distintos en uno solo. " +
+    "Responde ÚNICAMENTE con un array JSON válido sin texto extra, sin markdown, sin comentarios. " +
+    "Formato exacto: [{\"nombre\":\"Arroz cocido\",\"porcion\":\"150g\",\"calorias\":195,\"proteina\":4,\"carbos\":43,\"grasas\":0}]";
+
   function abrirSelectorRapido(fotoDataUrl){
-    var comunes = window.db.ALIMENTOS_COMUNES || [];
+    var apiKey = localStorage.getItem("fitapp_claude_api_key") || "";
+    if(!apiKey){
+      apiKey = prompt("Ingresa tu API key de Anthropic para el escáner de IA:\n(Se guarda solo en tu dispositivo)") || "";
+      if(apiKey) localStorage.setItem("fitapp_claude_api_key", apiKey.trim());
+    }
+
     var modal = document.createElement("div");
     modal.className = "modal-celebracion";
     modal.innerHTML =
-      '<div class="mc-card" style="text-align:left;max-height:80vh;overflow-y:auto;">' +
-        '<h2 style="text-align:center;margin-bottom:12px;">¿Qué es esto?</h2>' +
-        '<img src="' + fotoDataUrl + '" style="width:100%;border-radius:12px;margin-bottom:12px;">' +
-        '<input id="buscar-alimento" placeholder="Buscar alimento..." style="width:100%;height:44px;background:#1C1C1C;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:0 12px;color:#FFF;font-size:15px;font-family:inherit;margin-bottom:10px;">' +
-        '<div id="lista-comunes"></div>' +
+      '<div class="mc-card" style="text-align:left;max-height:85vh;overflow-y:auto;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
+          '<h2 style="margin:0;">Escáner IA</h2>' +
+          '<button id="btn-cerrar-escaner" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:22px;cursor:pointer;line-height:1;">×</button>' +
+        '</div>' +
+        '<img src="' + fotoDataUrl + '" style="width:100%;border-radius:12px;margin-bottom:14px;max-height:220px;object-fit:cover;">' +
+        '<div id="escaner-resultado">' +
+          '<div style="text-align:center;padding:24px 0;">' +
+            '<div style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:8px;">Analizando tu comida con IA...</div>' +
+            '<div style="width:36px;height:36px;border:3px solid rgba(200,224,0,.2);border-top-color:#C8E000;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto;"></div>' +
+          '</div>' +
+        '</div>' +
       '</div>';
-    document.body.appendChild(modal);
-    modal.addEventListener("click", function(e){ if(e.target===modal) modal.remove(); });
 
-    function renderLista(filtro){
-      var f = (filtro||"").toLowerCase();
-      var filtrados = comunes.filter(function(c){ return c.nombre.toLowerCase().indexOf(f) !== -1; });
-      modal.querySelector("#lista-comunes").innerHTML = filtrados.map(function(c, i){
-        return '<div class="ali-row" style="cursor:pointer;" data-i="' + comunes.indexOf(c) + '">' +
-          '<div style="font-size:22px;">' + (c.icono||"🍽️") + '</div>' +
-          '<div class="ali-body"><div class="ali-nombre">' + c.nombre + '</div><div style="font-size:11px;color:rgba(255,255,255,.3);">' + c.cantidad + '</div></div>' +
-          '<div class="ali-kcal">' + c.calorias + ' kcal</div>' +
-        '</div>';
-      }).join("") || '<p style="color:rgba(255,255,255,.3);font-size:13px;text-align:center;padding:20px 0;">Sin resultados.</p>';
-      modal.querySelectorAll(".ali-row[data-i]").forEach(function(row){
-        row.addEventListener("click", function(){
-          var item = comunes[parseInt(this.getAttribute("data-i"),10)];
-          _estado.extras.push({ nombre:item.nombre, cantidad:item.cantidad, calorias:item.calorias, proteina:item.proteina||0, carbos:item.carbos||0, grasas:item.grasas||0, icono:item.icono||"🍽️", foto:fotoDataUrl });
+    if(!document.getElementById("spin-style")){
+      var s = document.createElement("style");
+      s.id = "spin-style";
+      s.textContent = "@keyframes spin{to{transform:rotate(360deg)}}";
+      document.head.appendChild(s);
+    }
+
+    document.body.appendChild(modal);
+    document.getElementById("btn-cerrar-escaner").addEventListener("click", function(){ modal.remove(); });
+
+    if(!apiKey){
+      document.getElementById("escaner-resultado").innerHTML =
+        '<p style="color:#FF453A;font-size:13px;text-align:center;">Sin API key. Toca el botón de foto otra vez para ingresarla.</p>';
+      return;
+    }
+
+    fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 1024,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: fotoDataUrl.replace(/^data:image\/jpeg;base64,/, "") } },
+            { type: "text", text: PROMPT_ESCANER_ESTRICTO }
+          ]
+        }]
+      })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var texto = (data.content && data.content[0] && data.content[0].text) || "";
+      var match = texto.match(/\[[\s\S]*\]/);
+      if(!match) throw new Error("Sin JSON en respuesta");
+      var alimentos = JSON.parse(match[0]);
+      if(!alimentos.length) throw new Error("Array vacío");
+
+      var checks = alimentos.map(function(_, i){ return true; });
+
+      function renderResultado(){
+        var html = '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Detectados · ' + alimentos.length + ' componentes</div>';
+        alimentos.forEach(function(al, i){
+          html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:.5px solid rgba(255,255,255,.05);">' +
+            '<input type="checkbox" id="al-chk-' + i + '" ' + (checks[i]?"checked":"") + ' style="margin-top:3px;accent-color:#C8E000;width:18px;height:18px;flex-shrink:0;">' +
+            '<div style="flex:1;">' +
+              '<div style="font-size:14px;font-weight:600;color:#FFF;">' + al.nombre + '</div>' +
+              '<div style="font-size:12px;color:rgba(255,255,255,.35);margin-top:2px;">' + (al.porcion||"") + ' · P:' + al.proteina + 'g C:' + al.carbos + 'g G:' + al.grasas + 'g</div>' +
+            '</div>' +
+            '<div style="font-size:15px;font-weight:700;color:#C8E000;">' + al.calorias + '<span style="font-size:10px;font-weight:400;color:rgba(255,255,255,.3);"> kcal</span></div>' +
+          '</div>';
+        });
+        html += '<button id="btn-registrar-escaner" style="width:100%;height:48px;background:#C8E000;border:none;border-radius:14px;color:#1C1C1E;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:14px;">Registrar seleccionados</button>';
+        document.getElementById("escaner-resultado").innerHTML = html;
+
+        alimentos.forEach(function(_, i){
+          document.getElementById("al-chk-" + i).addEventListener("change", function(){ checks[i] = this.checked; });
+        });
+        document.getElementById("btn-registrar-escaner").addEventListener("click", function(){
+          var registrados = 0;
+          alimentos.forEach(function(al, i){
+            if(!checks[i]) return;
+            _estado.extras.push({ nombre:al.nombre, cantidad:al.porcion||"", calorias:al.calorias||0, proteina:al.proteina||0, carbos:al.carbos||0, grasas:al.grasas||0, icono:"📷", foto:fotoDataUrl });
+            registrados++;
+          });
           window.db.saveNutricion(_alumno.id, _diasFecha[_diaSelIdx], _estado);
           modal.remove();
-          window.mostrarToast("✅ " + item.nombre + " registrado");
+          window.mostrarToast("✅ " + registrados + " alimento" + (registrados!==1?"s":"") + " registrado" + (registrados!==1?"s":""));
           window.init_nutricion();
         });
-      });
-    }
-    renderLista("");
-    modal.querySelector("#buscar-alimento").addEventListener("input", function(){ renderLista(this.value); });
+      }
+      renderResultado();
+    })
+    .catch(function(err){
+      document.getElementById("escaner-resultado").innerHTML =
+        '<p style="color:#FF453A;font-size:13px;text-align:center;padding:16px 0;">Error al analizar: ' + (err.message||"intenta de nuevo") + '</p>' +
+        '<button onclick="this.parentNode.parentNode.parentNode.remove()" style="width:100%;height:44px;background:#1C1C1C;border:1px solid rgba(255,255,255,.08);border-radius:12px;color:rgba(255,255,255,.6);font-size:14px;font-family:inherit;cursor:pointer;">Cerrar</button>';
+    });
   }
 })();
