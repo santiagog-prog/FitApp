@@ -197,9 +197,56 @@
       html += "</table></div>";
     }
 
-    // Medallas
-    html += "<div style='padding:0 20px 10px;'><div style='font-size:18px;font-weight:700;color:#FFF;margin-bottom:14px;'>Mis medallas</div></div>";
-    html += "<div class='medallas-grid'>" + renderMedallas(alumno.id) + "</div>";
+    // ── FitScore historial (7 días) ──
+    if(window.calcularFitScore){
+      var fsHist = window.db.getFitScoreHistorial(alumno.id, 7);
+      var maxFs = Math.max.apply(null, fsHist.map(function(x){ return x.score||0; }).concat([100]));
+      html += "<div style='padding:0 20px 16px;'>" +
+        "<div style='font-size:18px;font-weight:700;margin-bottom:14px;'>FitScore — últimos 7 días</div>" +
+        "<div style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;'>" +
+          "<div style='display:flex;align-items:flex-end;justify-content:space-between;gap:6px;height:80px;'>";
+      var diasLabels = ["L","M","X","J","V","S","D"];
+      fsHist.forEach(function(d, i){
+        var sc = d.score || 0;
+        var h  = maxFs > 0 ? Math.round(sc/maxFs*70) : 0;
+        var dObj = new Date(d.fecha + "T12:00:00");
+        var label = diasLabels[(dObj.getDay()+6)%7];
+        var isToday = d.fecha === window.db.fechaHoy();
+        html += "<div style='flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;'>" +
+          "<div style='font-size:10px;font-weight:700;color:var(--text-muted);'>" + (sc||"-") + "</div>" +
+          "<div style='width:100%;height:" + h + "px;background:" + (isToday?"var(--accent)":"rgba(200,224,0,0.3)") + ";border-radius:4px 4px 0 0;min-height:4px;'></div>" +
+          "<div style='font-size:10px;color:var(--text-muted);font-weight:600;'>" + label + "</div>" +
+        "</div>";
+      });
+      html += "</div></div></div>";
+    }
+
+    // ── Logros (expandidos con LOGROS_DEF) ──
+    var logrosDef = window.LOGROS_DEF || [];
+    var desbloqueadas = window.db.getMedallas(alumno.id);
+    html += "<div style='padding:0 20px 10px;'>" +
+      "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;'>" +
+        "<div style='font-size:18px;font-weight:700;'>Logros</div>" +
+        "<div style='font-size:12px;color:var(--accent);font-weight:700;'>" + desbloqueadas.length + " desbloqueados</div>" +
+      "</div>" +
+    "</div>";
+
+    // Logros nuevos (fitscore.js)
+    if(logrosDef.length){
+      html += "<div class='logros-grid' style='margin-bottom:8px;'>";
+      logrosDef.forEach(function(l){
+        var ok = desbloqueadas.indexOf(l.id) !== -1;
+        html += "<div class='logro-badge " + (ok?"unlocked":"locked") + "' title='" + l.desc + "'>" +
+          "<div class='lb-icon'>" + l.icono + "</div>" +
+          "<div class='lb-name'>" + l.nombre + "</div>" +
+        "</div>";
+      });
+      html += "</div>";
+    } else {
+      // Medallas originales
+      html += "<div class='medallas-grid'>" + renderMedallas(alumno.id) + "</div>";
+    }
+
     html += "<div style='height:20px;'></div></div>";
 
     document.getElementById("page-evolucion").innerHTML = html;

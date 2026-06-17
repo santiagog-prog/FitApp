@@ -86,6 +86,18 @@
     html += "<div style='margin:16px 20px 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase;'>Reto entre amigos</div>";
     html += "<div id='comparativa-card' style='background:var(--surface);border-radius:16px;padding:18px;margin:8px 20px 0;'></div>";
 
+    // ── Ajustes IA ──
+    var currentApiKey = window.db.getOpenAIKey();
+    html += "<div style='padding:8px 20px;'>" +
+      "<div style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;'>" +
+        "<div style='font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:12px;'>Ajustes IA · Food Vision</div>" +
+        "<div style='font-size:13px;font-weight:600;margin-bottom:6px;'>OpenAI API Key</div>" +
+        "<input id='openai-key-input' class='api-key-field' type='password' placeholder='sk-...' autocomplete='off'>" +
+        "<div style='font-size:11px;color:var(--text-muted);margin-top:6px;'>Para Escanear Comida con IA (Nutrición). Se guarda solo en este dispositivo.</div>" +
+        "<button id='btn-save-api-key' style='margin-top:10px;width:100%;height:42px;background:var(--accent);border:none;border-radius:99px;color:#1C1C1E;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;'>Guardar API Key</button>" +
+      "</div>" +
+    "</div>";
+
     // Logout
     html += "<div style='padding:20px 20px 32px;'>" +
       "<button id='btn-logout' style='width:100%;height:48px;background:rgba(255,69,58,0.1);border:1px solid rgba(255,69,58,0.3);border-radius:50px;color:#FF453A;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;'>Cerrar sesión</button>" +
@@ -93,6 +105,17 @@
 
     document.getElementById("page-perfil").innerHTML = html;
     window.db.marcarNotasLeidas(alumno.id);
+
+    // API Key input: poner valor actual después de renderizar
+    var akInput = document.getElementById("openai-key-input");
+    if(akInput && currentApiKey) akInput.value = currentApiKey;
+
+    document.getElementById("btn-save-api-key").addEventListener("click", function(){
+      var v = (document.getElementById("openai-key-input").value || "").trim();
+      if(!v){ window.mostrarToast("⚠️ Introduce tu API Key"); return; }
+      window.db.saveOpenAIKey(v);
+      window.mostrarToast("✅ API Key guardada");
+    });
 
     // Bind toggles
     function bindToggle(id, key){

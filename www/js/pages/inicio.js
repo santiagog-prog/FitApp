@@ -301,6 +301,75 @@
       "<div class='home-greeting-h'>" + alumno.nombre + ", hoy es<br>un gran día para mejorar.</div>" +
     "</div>";
 
+    // ── FitScore widget ──────────────────────────────────
+    var fsObj = window.calcularFitScore ? window.calcularFitScore(alumno.id, window.db.fechaHoy()) : null;
+    if(fsObj){
+      var fsColors = { nutricion:"#0A84FF", actividad:"#C8E000", hidratacion:"#5AC8FA", habitos:"#BF5AF2", entreno:"#30D158" };
+      var fsLabels = { nutricion:"Nutrición", actividad:"Actividad", hidratacion:"Agua", habitos:"Hábitos", entreno:"Entreno" };
+      html += "<div class='fitscore-home-card'>";
+      html += "<div class='fsc-row'>";
+      html += "<div class='fsc-left'><div class='fsc-eyebrow'>FitScore</div><div class='fsc-score-big' id='fsc-num'>0</div><div class='fsc-score-label'>Puntuación de hoy</div></div>";
+      html += "<div class='fsc-bars'>";
+      Object.keys(fsObj.factores).forEach(function(k){
+        var pct = Math.round(fsObj.factores[k]);
+        html += "<div class='fsc-bar-row'>" +
+          "<div class='fsc-bar-name'>" + (fsLabels[k]||k) + "</div>" +
+          "<div class='fsc-bar-track'><div class='fsc-bar-fill' style='width:" + pct + "%;background:" + (fsColors[k]||"#C8E000") + ";'></div></div>" +
+          "<div class='fsc-bar-val'>" + pct + "</div>" +
+        "</div>";
+      });
+      html += "</div></div></div>";
+    }
+
+    // ── Objetivos del día ────────────────────────────────
+    var objetivos = window.db.getObjetivos(alumno.id);
+    var fechaHoyStr0 = window.db.fechaHoy();
+    if(objetivos.length){
+      var objColors = { pasos:"#C8E000", agua:"#5AC8FA", proteina:"#0A84FF", calorias:"#FF9F0A", sueno:"#BF5AF2", entreno:"#30D158" };
+      var objIcons  = { pasos:"👟", agua:"💧", proteina:"💪", calorias:"🔥", sueno:"😴", entreno:"🏋️" };
+      var progDia   = window.db.getProgresoDiario(alumno.id, fechaHoyStr0);
+      var nutriObjHoy = window.db.getNutricion(alumno.id, fechaHoyStr0);
+      var kcalObjHoy = 0; var protObjHoy = 0;
+      if(nutriObjHoy.extras) nutriObjHoy.extras.forEach(function(a){ kcalObjHoy+=(a.calorias||0); protObjHoy+=(a.proteina||0); });
+      window.db.getFoodScans(alumno.id, fechaHoyStr0).forEach(function(s){ kcalObjHoy+=(s.calorias||0); protObjHoy+=(s.proteinas||0); });
+      var entHoy = window.db.getRegistros(alumno.id).filter(function(r){ return r.fecha===fechaHoyStr0; }).length;
+
+      var actualMap = { pasos: progDia.pasos||0, agua: (nutriObjHoy.agua||0)*375, proteina: protObjHoy, calorias: kcalObjHoy, sueno: progDia.sueno_h||0, entreno: entHoy };
+
+      html += "<div style='padding:0 20px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;'><div style='font-size:16px;font-weight:800;letter-spacing:-0.3px;'>Objetivos de hoy</div></div>";
+
+      objetivos.slice(0,3).forEach(function(obj){
+        var actual = actualMap[obj.tipo] || 0;
+        var meta   = obj.meta || 1;
+        var pct    = Math.min(100, Math.round(actual / meta * 100));
+        var color  = objColors[obj.tipo] || "#C8E000";
+        var icon   = objIcons[obj.tipo] || "🎯";
+        var restante = Math.max(0, meta - actual);
+        var prediccion = "";
+        if(obj.tipo === "pasos" && actual > 0){
+          var hora = new Date().getHours() + new Date().getMinutes()/60;
+          var ritmo = actual / Math.max(1, hora);
+          var proyectado = Math.round(ritmo * 24);
+          prediccion = proyectado >= meta
+            ? "Terminarás el día con ~" + proyectado.toLocaleString() + " pasos"
+            : "Necesitas " + Math.round((meta - actual) / Math.max(1,(24-hora))).toLocaleString() + " pasos/h";
+        }
+        html += "<div class='obj-card'>" +
+          "<div class='obj-card-header'>" +
+            "<div class='obj-card-icon' style='background:rgba(255,255,255,0.05);'>" + icon + "</div>" +
+            "<div><div class='obj-card-title'>" + obj.nombre + "</div>" +
+            "<div class='obj-card-sub'>" + actual.toLocaleString() + " / " + meta.toLocaleString() + " " + (obj.unidad||"") + "</div></div>" +
+            "<div style='margin-left:auto;font-size:28px;font-weight:900;color:" + color + ";'>" + pct + "%</div>" +
+          "</div>" +
+          "<div class='obj-prog-track'><div class='obj-prog-fill' style='width:" + pct + "%;background:" + color + ";'></div></div>" +
+          "<div class='obj-foot'>" +
+            "<div class='obj-remaining'>" + (pct>=100 ? "✅ Completado" : "Faltan " + restante.toLocaleString() + " " + (obj.unidad||"")) + "</div>" +
+            (prediccion ? "<div class='obj-prediction'>" + prediccion + "</div>" : "") +
+          "</div>" +
+        "</div>";
+      });
+    }
+
     // ── Progreso semanal (mini-chart + % + métricas) ─────
     var regsSemana = registros.filter(function(r){
       var d = new Date(r.fecha);
@@ -420,6 +489,10 @@
     // Events
     renderStatRings(alumno.id);
     renderCalendarioMes(alumno.id);
+
+    // Animar FitScore
+    var fscEl = document.getElementById("fsc-num");
+    if(fscEl && fsObj) animarNumero(fscEl, fsObj.total, 1000, "");
 
     // Animar % de progreso semanal
     var pctEl = document.getElementById("pct-semanal-num");

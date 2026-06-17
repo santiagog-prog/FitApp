@@ -268,10 +268,59 @@
     html += '</div>';
     html += '<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:6px;">' + _estado.agua + '/8 vasos completados</div></div>';
 
+    // ── Food Vision AI ──
+    var apiKey = window.db.getOpenAIKey();
+    html += '<div style="padding:12px 16px 4px;">';
+    html += '<button class="food-scan-btn" id="btn-scan-ia">' +
+      '<span style="font-size:22px;">🤖</span>' +
+      '<span>Escanear comida con IA</span>' +
+      '<span style="font-size:11px;background:rgba(200,224,0,0.15);color:var(--accent);border-radius:99px;padding:3px 8px;font-weight:700;">BETA</span>' +
+    '</button>';
+    if(!apiKey){
+      html += '<div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:6px;">Añade tu OpenAI API Key en Más → Perfil → Ajustes IA</div>';
+    }
+
+    // Scans del día
+    var scansHoy = window.db.getFoodScans(_alumno.id, fechaSel);
+    if(scansHoy.length){
+      html += '<div style="margin-top:12px;">';
+      scansHoy.forEach(function(sc, si){
+        html += '<div class="scan-result-card" style="margin-bottom:10px;">' +
+          '<div class="scan-result-hero">' +
+            (sc.foto_preview ? '<img src="' + sc.foto_preview + '" class="scan-img-preview">' : '') +
+            '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+              '<div class="scan-ns-badge">' +
+                '<div class="scan-ns-num">' + (sc.nutrition_score||0) + '</div>' +
+                '<div class="scan-ns-txt">Nutrition<br>Score</div>' +
+              '</div>' +
+              '<div style="text-align:right;">' +
+                '<div style="font-size:22px;font-weight:900;color:var(--text);">' + (sc.calorias||0) + '</div>' +
+                '<div style="font-size:11px;color:var(--text-muted);">kcal</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="scan-macro-grid">' +
+            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--blue);">' + (sc.proteinas||0) + 'g</div><div class="scan-macro-name">Prot.</div></div>' +
+            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--orange);">' + (sc.carbos||0) + 'g</div><div class="scan-macro-name">Carbos</div></div>' +
+            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--purple);">' + (sc.grasas||0) + 'g</div><div class="scan-macro-name">Grasas</div></div>' +
+            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--green);">' + (sc.fibra||0) + 'g</div><div class="scan-macro-name">Fibra</div></div>' +
+          '</div>' +
+          '<div class="scan-analysis-text">' + (sc.analisis||"") + '</div>' +
+          '<div class="scan-alimentos-list">' +
+            (sc.alimentos||[]).map(function(a){ return '<span class="scan-alimento-chip">' + a + '</span>'; }).join('') +
+            '<button onclick="window._eliminarScan(\'' + fechaSel + '\',' + si + ')" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;margin-left:8px;">✕ quitar</button>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+
     // ── Registrar con foto ──
-    html += '<div style="padding:16px 16px 4px;">' +
-      '<button id="btn-foto-comida" style="width:100%;height:46px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:50px;color:rgba(255,255,255,.6);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">📷 Registrar comida con foto</button>' +
+    html += '<div style="padding:8px 16px 4px;">' +
+      '<button id="btn-foto-comida" style="width:100%;height:46px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:50px;color:rgba(255,255,255,.6);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">📷 Registrar comida manual con foto</button>' +
       '<input type="file" accept="image/*" capture="environment" id="comida-foto-input" style="display:none;">' +
+      '<input type="file" accept="image/*" capture="environment" id="ia-foto-input" style="display:none;">' +
     '</div>';
 
     html += '<div style="height:20px;"></div></div>';
@@ -301,6 +350,84 @@
       };
       reader.readAsDataURL(file);
     });
+
+    // AI scan button
+    var btnScanIA = document.getElementById("btn-scan-ia");
+    if(btnScanIA){
+      btnScanIA.addEventListener("click", function(){
+        var k = window.db.getOpenAIKey();
+        if(!k){
+          window.mostrarToast("⚠️ Primero añade tu OpenAI API Key en Perfil → Ajustes IA");
+          return;
+        }
+        document.getElementById("ia-foto-input").click();
+      });
+    }
+    var iaFotoInput = document.getElementById("ia-foto-input");
+    if(iaFotoInput){
+      iaFotoInput.addEventListener("change", function(e){
+        var file = e.target.files[0];
+        if(!file) return;
+        _procesarFoodScanIA(file);
+      });
+    }
+  };
+
+  // ── FOOD VISION AI ──────────────────────────────────────
+  function _procesarFoodScanIA(file){
+    var btnIA = document.getElementById("btn-scan-ia");
+    if(btnIA){ btnIA.innerHTML = '<span class="ai-scanning">🤖</span> Analizando con IA...'; btnIA.disabled = true; }
+
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var base64 = ev.target.result.split(",")[1];
+      var previewUrl = ev.target.result;
+      var apiKey = window.db.getOpenAIKey();
+
+      var payload = {
+        model: "gpt-4o-mini",
+        max_tokens: 600,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "text", text: "Analiza esta comida. Responde SOLO con JSON válido, sin markdown, con este formato exacto: {\"alimentos\":[\"nombre1\",\"nombre2\"],\"calorias\":numero,\"proteinas\":numero,\"carbos\":numero,\"grasas\":numero,\"fibra\":numero,\"nutrition_score\":numero_entre_0_y_100,\"analisis\":\"texto motivacional breve en español sobre el valor nutricional de esta comida (max 80 palabras)\"}" },
+            { type: "image_url", image_url: { url: "data:image/jpeg;base64," + base64, detail: "low" } }
+          ]
+        }]
+      };
+
+      fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
+        body: JSON.stringify(payload)
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        if(!content) throw new Error("Sin respuesta");
+        var result = JSON.parse(content.trim());
+        result.fecha = _diasFecha[_diaSelIdx];
+        result.foto_preview = previewUrl;
+        result.id = "scan_" + Date.now();
+        window.db.saveFoodScan(_alumno.id, result);
+        window.checkLogros && window.checkLogros(_alumno.id);
+        window.mostrarToast("✅ Comida analizada · " + (result.calorias||0) + " kcal");
+        window.init_nutricion();
+      })
+      .catch(function(err){
+        console.error("Food Vision AI error:", err);
+        window.mostrarToast("❌ Error al analizar. Verifica tu API Key.");
+        if(btnIA){ btnIA.innerHTML = '<span>🤖</span> Escanear comida con IA'; btnIA.disabled = false; }
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  window._eliminarScan = function(fecha, idx){
+    var scans = window.db.getFoodScans(_alumno.id, fecha);
+    scans.splice(idx, 1);
+    try{ localStorage.setItem("fitapp_food_scans_" + _alumno.id + "_" + fecha, JSON.stringify(scans)); }catch(e){}
+    window.init_nutricion();
   };
 
   window._selDia = function(idx){
