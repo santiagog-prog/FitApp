@@ -270,7 +270,7 @@
       "</div>";
 
     document.getElementById("ah-avatar-btn").addEventListener("click", function(){ window.irAPagina("perfil"); });
-    var savedPhoto = localStorage.getItem("fitapp_avatar_" + alumnoId);
+    var savedPhoto = localStorage.getItem("fitapp_avatar_" + alumno.id);
     if(savedPhoto){
       document.getElementById("ah-avatar-initials").style.display = "none";
       var ahImg = document.getElementById("ah-avatar-img");
