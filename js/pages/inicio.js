@@ -296,10 +296,41 @@
     var html = "<div style='padding:16px 0 0;'>";
 
     // Saludo
-    html += "<div style='padding:0 20px 20px;'>" +
+    html += "<div style='padding:0 20px 14px;'>" +
       "<div class='home-greeting-label'>" + saludoHora() + "</div>" +
       "<div class='home-greeting-h'>" + alumno.nombre + ", hoy es<br>un gran día para mejorar.</div>" +
     "</div>";
+
+    // ── Strip 7 días de la semana con fechas reales ──────
+    (function(){
+      var hoyD    = new Date();
+      var hoyStr  = window.db.fechaHoy();
+      // Encontrar el lunes de esta semana
+      var diaSem  = hoyD.getDay(); // 0=Dom…6=Sab
+      var diffLun = (diaSem + 6) % 7; // días desde lunes
+      var labels  = ["L","M","X","J","V","S","D"];
+      html += "<div style='display:flex;gap:0;padding:0 20px 16px;'>";
+      for(var wi = 0; wi < 7; wi++){
+        var d = new Date(hoyD);
+        d.setDate(hoyD.getDate() - diffLun + wi);
+        var f = d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate());
+        var dayNum   = d.getDate();
+        var isHoy    = f === hoyStr;
+        var tieneEnt = registros.some(function(r){ return r.fecha === f; });
+        html += "<div style='flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;'>" +
+          "<div style='font-size:10px;font-weight:600;color:" + (isHoy ? "#C8E000" : "rgba(255,255,255,0.35)") + ";text-transform:uppercase;letter-spacing:0.5px;'>" + labels[wi] + "</div>" +
+          "<div style='width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;" +
+            (isHoy
+              ? "background:#C8E000;color:#1C1C1E;font-weight:900;"
+              : tieneEnt
+                ? "background:rgba(200,224,0,0.15);color:#C8E000;font-weight:700;border:1.5px solid rgba(200,224,0,0.4);"
+                : "background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4);font-weight:600;") +
+            "font-size:13px;'>" + dayNum + "</div>" +
+          (tieneEnt && !isHoy ? "<div style='width:5px;height:5px;border-radius:50%;background:#C8E000;opacity:0.6;'></div>" : "<div style='width:5px;height:5px;'></div>") +
+        "</div>";
+      }
+      html += "</div>";
+    })();
 
     // ── FitScore widget ──────────────────────────────────
     var fsObj = window.calcularFitScore ? window.calcularFitScore(alumno.id, window.db.fechaHoy()) : null;
