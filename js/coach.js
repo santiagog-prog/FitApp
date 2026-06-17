@@ -277,6 +277,7 @@
           biblioteca.map(function(e){ return "<option value='"+e.id+"'>"+e.nombre+" ("+e.grupo+")</option>"; }).join("") + "</select>" +
           "<div class='row2'><input id='ej-series' type='number' placeholder='Series' value='3'><input id='ej-reps' placeholder='Reps/RIR' value='12/RIR 2'></div>" +
           "<div class='row2'><input id='ej-descanso' type='number' placeholder='Descanso seg' value='90'><input id='ej-video' placeholder='URL de vídeo (opcional)'></div>" +
+          "<input id='ej-foto' placeholder='URL de imagen del ejercicio (opcional)' style='width:100%;margin-top:8px;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;'>" +
           "<textarea id='ej-nota' placeholder='Nota técnica' style='width:100%;margin-top:8px;padding:8px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;'></textarea>" +
           "<button class='btn-coach' id='ej-confirmar' style='margin-top:12px;'>Agregar</button></div></div>");
         document.body.appendChild(sub);
@@ -287,7 +288,7 @@
             id: window.db.generarId("ej"), nombre: ejBib.nombre, grupo: ejBib.grupo,
             series: parseInt(sub.querySelector("#ej-series").value,10)||3, repeticiones: sub.querySelector("#ej-reps").value,
             descanso_seg: parseInt(sub.querySelector("#ej-descanso").value,10)||90, nota_tecnica: sub.querySelector("#ej-nota").value,
-            video_url: sub.querySelector("#ej-video").value, foto:"",
+            video_url: sub.querySelector("#ej-video").value, foto: sub.querySelector("#ej-foto").value,
             sets: Array.from({length: parseInt(sub.querySelector("#ej-series").value,10)||3}, function(){ return {reps:10, peso:0}; })
           });
           sub.remove();
@@ -409,13 +410,14 @@
         "<label>Nombre</label><input id='ne-nombre'>" +
         "<div class='row2'><div><label>Grupo muscular</label><input id='ne-grupo'></div><div><label>Equipamiento</label><input id='ne-equipo'></div></div>" +
         "<label>URL de vídeo (opcional)</label><input id='ne-video'>" +
+        "<label>URL de imagen (opcional)</label><input id='ne-foto'>" +
         "<label>Descripción técnica</label><textarea id='ne-desc'></textarea>" +
         "<button class='btn-coach' id='ne-guardar' style='margin-top:14px;'>Guardar ejercicio</button></div>", function(){
         $("#ne-guardar").addEventListener("click", function(){
           var nombre = $("#ne-nombre").value.trim();
           if(!nombre) return;
           window.db.saveEjercicio({ id: window.db.generarId("ej"), nombre: nombre, grupo: $("#ne-grupo").value||"General",
-            equipamiento: $("#ne-equipo").value, video_url: $("#ne-video").value, descripcion: $("#ne-desc").value });
+            equipamiento: $("#ne-equipo").value, video_url: $("#ne-video").value, foto: $("#ne-foto").value, descripcion: $("#ne-desc").value });
           window.cerrarCoachModal();
           render_ejercicios();
         });

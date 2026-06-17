@@ -158,9 +158,7 @@
       html +=
         "<div style='display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:.5px solid rgba(255,255,255,0.05);'>" +
           "<span style='width:22px;font-size:14px;font-weight:600;color:rgba(255,255,255,0.25);'>" + (i+1) + "</span>" +
-          "<div style='width:52px;height:52px;border-radius:10px;background:#1C1C1C;flex-shrink:0;display:flex;align-items:center;justify-content:center;'>" +
-            "<svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.15)' stroke-width='1.5'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>" +
-          "</div>" +
+          renderFotoEjercicio(ej) +
           "<div style='flex:1;'>" +
             "<div style='font-size:15px;font-weight:600;color:#FFF;margin-bottom:3px;'>" + ej.nombre + "</div>" +
             "<div style='font-size:12px;color:rgba(255,255,255,0.35);'>" + ej.series + " series · " + ej.repeticiones + " · " + ej.descanso_seg + "\" descanso</div>" +
@@ -227,9 +225,7 @@
       // Header ejercicio
       html +=
         "<div class='me-ej-head' onclick='window._toggleEjCard(" + ejIdx + ")'>" +
-          "<div class='me-ej-thumb'>" +
-            "<svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='1.5'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>" +
-          "</div>" +
+          renderFotoEjercicio(ej, "me-ej-thumb") +
           "<div style='flex:1;'>" +
             "<div style='font-size:15px;font-weight:600;color:#FFF;'>" + ej.nombre + "</div>" +
             "<div style='font-size:12px;color:rgba(255,255,255,0.35);margin-top:2px;'>" + ej.series + " series · " + ej.repeticiones + "</div>" +
@@ -274,7 +270,7 @@
       });
 
       if(ej.video_url){
-        html += "<button onclick=\"window.abrirModalVideo('" + ej.video_url + "','" + ej.nombre.replace(/'/g,"") + "')\" style='width:100%;height:38px;background:rgba(255,255,255,0.04);border:none;border-radius:8px;color:rgba(255,255,255,0.4);font-size:13px;font-family:inherit;cursor:pointer;margin-top:8px;'>📹 Ver técnica</button>";
+        html += renderBotonVideo(ej);
       }
 
       html += "</div></div>"; // cierre body + card
@@ -467,6 +463,32 @@
       window.mostrarMedallasNuevas(nuevas);
     });
   };
+
+  function renderFotoEjercicio(ej, cssClass){
+    var foto = ej.foto || ej.foto_url || "";
+    var cls = cssClass || "";
+    var wrapStyle = cls ? "" : "width:52px;height:52px;border-radius:10px;background:#1C1C1C;flex-shrink:0;display:flex;align-items:center;justify-content:center;";
+    if(foto){
+      return "<div" + (cls ? " class='" + cls + "'" : " style='" + wrapStyle + "overflow:hidden;'") + ">" +
+        "<img src='" + foto + "' style='width:100%;height:100%;object-fit:cover;" + (cls ? "" : "border-radius:10px;") + "'>" +
+      "</div>";
+    }
+    return "<div" + (cls ? " class='" + cls + "'" : " style='" + wrapStyle + "'") + ">" +
+      "<svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.15)' stroke-width='1.5'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>" +
+    "</div>";
+  }
+
+  function renderBotonVideo(ej){
+    var nombre = (ej.nombre||"").replace(/'/g,"");
+    var url = ej.video_url || "";
+    return "<button onclick=\"window.abrirModalVideo('" + url + "','" + nombre + "')\" " +
+      "style='width:100%;height:44px;background:rgba(10,132,255,0.1);border:1px solid rgba(10,132,255,0.25);border-radius:12px;" +
+      "color:#0A84FF;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:10px;" +
+      "display:flex;align-items:center;justify-content:center;gap:8px;'>" +
+      "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='#0A84FF' stroke-width='2' stroke-linecap='round'><polygon points='5 3 19 12 5 21 5 3'/></svg>" +
+      "Ver técnica" +
+    "</button>";
+  }
 
   window.init_agenda = function(){
     state.weekOffset = 0;

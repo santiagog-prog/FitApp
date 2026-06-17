@@ -27,7 +27,12 @@
     // Avatar + info
     html +=
       "<div class='perfil-header-grad'>" +
-        "<div class='perfil-avatar'>" + initials + "</div>" +
+        "<div class='perfil-avatar' id='perfil-avatar-wrap' onclick='document.getElementById(\"perfil-foto-input\").click()' style='cursor:pointer;position:relative;overflow:hidden;'>" +
+        "<span id='perfil-avatar-initials'>" + initials + "</span>" +
+        "<img id='perfil-avatar-img' src='' style='display:none;position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:50%;'>" +
+        "<div style='position:absolute;bottom:0;right:0;width:22px;height:22px;background:#C8E000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;'>✏️</div>" +
+      "</div>" +
+      "<input type='file' id='perfil-foto-input' accept='image/*' style='display:none;'>" +
         "<div class='perfil-nombre'>" + alumno.nombre + " " + (alumno.apellido||"") + "</div>" +
         "<div class='perfil-codigo'>Código: " + alumno.codigo + "</div>" +
         "<div style='display:flex;gap:8px;justify-content:center;margin-top:10px;'>" +
@@ -103,6 +108,40 @@
     document.getElementById("btn-logout").addEventListener("click", function(){
       window.db.clearSesion();
       location.href = "../index.html";
+    });
+
+    // Avatar foto editable
+    var savedPhoto = localStorage.getItem("fitapp_avatar_" + alumno.id);
+    if(savedPhoto){
+      document.getElementById("perfil-avatar-initials").style.display = "none";
+      var imgEl = document.getElementById("perfil-avatar-img");
+      imgEl.src = savedPhoto;
+      imgEl.style.display = "block";
+    }
+    document.getElementById("perfil-foto-input").addEventListener("change", function(e){
+      var file = e.target.files[0];
+      if(!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        var img = new Image();
+        img.onload = function(){
+          var canvas = document.createElement("canvas");
+          var size = 200;
+          canvas.width = size; canvas.height = size;
+          var ctx = canvas.getContext("2d");
+          var scale = Math.max(size/img.width, size/img.height);
+          var w = img.width*scale, h = img.height*scale;
+          ctx.drawImage(img, (size-w)/2, (size-h)/2, w, h);
+          var dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+          localStorage.setItem("fitapp_avatar_" + alumno.id, dataUrl);
+          document.getElementById("perfil-avatar-initials").style.display = "none";
+          var imgEl2 = document.getElementById("perfil-avatar-img");
+          imgEl2.src = dataUrl;
+          imgEl2.style.display = "block";
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
     });
   };
 
