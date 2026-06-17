@@ -272,13 +272,10 @@
     var apiKey = window.db.getOpenAIKey();
     html += '<div style="padding:12px 16px 4px;">';
     html += '<button class="food-scan-btn" id="btn-scan-ia">' +
-      '<span style="font-size:22px;">📷</span>' +
-      '<span>' + (apiKey ? 'Analizar comida con IA' : 'Registrar comida con foto') + '</span>' +
-      (apiKey ? '<span style="font-size:11px;background:rgba(200,224,0,0.15);color:var(--accent);border-radius:99px;padding:3px 8px;font-weight:700;">IA</span>' : '') +
+      '<span style="font-size:22px;">🤖</span>' +
+      '<span>Escanear comida con IA</span>' +
+      '<span style="font-size:11px;background:rgba(200,224,0,0.15);color:var(--accent);border-radius:99px;padding:3px 8px;font-weight:700;">IA</span>' +
     '</button>';
-    if(!apiKey){
-      html += '<div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:5px;">Toca para abrir cámara · Activa análisis IA en Perfil → Ajustes IA</div>';
-    }
 
     // Scans del día
     var scansHoy = window.db.getFoodScans(_alumno.id, fechaSel);
@@ -351,10 +348,17 @@
       reader.readAsDataURL(file);
     });
 
-    // AI scan button — con key: IA real; sin key: abre selector manual con foto
+    // AI scan: siempre IA. Si no hay key → modal para ingresarla primero
     var btnScanIA = document.getElementById("btn-scan-ia");
     if(btnScanIA){
       btnScanIA.addEventListener("click", function(){
+        var k = window.db.getOpenAIKey();
+        if(!k){
+          _mostrarModalApiKey(function(){
+            document.getElementById("ia-foto-input").click();
+          });
+          return;
+        }
         document.getElementById("ia-foto-input").click();
       });
     }
@@ -368,29 +372,37 @@
     }
   };
 
-  // ── FOOD VISION AI / FALLBACK MANUAL ───────────────────
+  // ── MODAL PARA INGRESAR API KEY ─────────────────────────
+  function _mostrarModalApiKey(onGuardado){
+    var overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:flex-end;";
+    overlay.innerHTML =
+      '<div style="background:#111;border-radius:26px 26px 0 0;padding:28px 24px 40px;width:100%;border-top:1px solid rgba(255,255,255,0.1);">' +
+        '<div style="width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:99px;margin:0 auto 24px;"></div>' +
+        '<div style="font-size:20px;font-weight:800;margin-bottom:6px;">Configurar análisis IA</div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;line-height:1.5;">Necesitas una API Key de OpenAI para analizar fotos de comida. Se guarda solo en tu dispositivo.</div>' +
+        '<input id="modal-api-key-input" type="password" placeholder="sk-..." autocomplete="off" style="width:100%;height:52px;background:#1C1C1C;border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:0 16px;color:#FFF;font-size:15px;font-family:inherit;outline:none;box-sizing:border-box;">' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.35);margin:8px 0 20px;">Obtén tu key en platform.openai.com → API Keys</div>' +
+        '<button id="modal-api-key-save" style="width:100%;height:54px;background:#C8E000;color:#1C1C1E;border:none;border-radius:99px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;">Guardar y escanear</button>' +
+        '<button id="modal-api-key-cancel" style="width:100%;height:44px;background:none;border:none;color:rgba(255,255,255,0.4);font-size:14px;font-family:inherit;cursor:pointer;margin-top:8px;">Cancelar</button>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector("#modal-api-key-cancel").addEventListener("click", function(){ overlay.remove(); });
+    overlay.querySelector("#modal-api-key-save").addEventListener("click", function(){
+      var v = (overlay.querySelector("#modal-api-key-input").value || "").trim();
+      if(!v || !v.startsWith("sk-")){ window.mostrarToast("⚠️ Introduce una API Key válida (empieza con sk-)"); return; }
+      window.db.saveOpenAIKey(v);
+      overlay.remove();
+      window.mostrarToast("✅ API Key guardada");
+      if(onGuardado) onGuardado();
+    });
+  }
+
+  // ── FOOD VISION AI ───────────────────────────────────────
   function _procesarFoodScanIA(file){
     var apiKey = window.db.getOpenAIKey();
 
-    // Sin API Key → usar selector manual con la foto como preview
-    if(!apiKey){
-      var reader0 = new FileReader();
-      reader0.onload = function(ev){
-        var img = new Image();
-        img.onload = function(){
-          var ratio = Math.min(1, 320/img.width);
-          var canvas = document.createElement("canvas");
-          canvas.width = img.width*ratio; canvas.height = img.height*ratio;
-          canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
-          abrirSelectorRapido(canvas.toDataURL("image/jpeg",0.7));
-        };
-        img.src = ev.target.result;
-      };
-      reader0.readAsDataURL(file);
-      return;
-    }
-
-    // Con API Key → análisis IA real
+    // Análisis IA real
     var btnIA = document.getElementById("btn-scan-ia");
     if(btnIA){ btnIA.innerHTML = '<span class="ai-scanning">🤖</span> Analizando con IA...'; btnIA.disabled = true; }
 
