@@ -92,6 +92,9 @@
                 (h.descripcion ? '<div class="habito-tl-desc">' + h.descripcion + '</div>' : "") +
                 (racha>1 ? '<div style="font-size:11px;color:#C8E000;margin-top:3px;">🔥 Racha: ' + racha + ' días</div>' : "") +
               '</div>' +
+              '<button onclick="window._menuHabito(\'' + h.id + '\',event)" style="background:none;border:none;padding:6px;cursor:pointer;flex-shrink:0;">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>' +
+              '</button>' +
               '<button class="habito-tl-btn' + (done?" done":"") + '" ' +
                 'onclick="window._toggleHabito(\'' + h.id + '\',\'' + hoyKey + '\')">' +
                 (done
@@ -102,12 +105,108 @@
           '</div>';
       });
       html += "</div>";
+      html += '<button onclick="window._nuevoHabito()" style="width:calc(100% - 40px);margin:16px 20px;height:48px;background:rgba(200,224,0,0.08);color:#C8E000;border:1.5px dashed rgba(200,224,0,0.3);border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">+ Nuevo hábito</button>';
     }
 
     html += renderSemanaHabitos(alumno.id, habitos);
     html += "<div style='height:20px;'></div></div>";
 
     document.getElementById("page-habitos").innerHTML = html;
+  };
+
+  window._menuHabito = function(habitoId, event){
+    event.stopPropagation();
+    var menu = document.createElement('div');
+    menu.className = 'modal-bottom';
+    menu.innerHTML =
+      '<div class="modal-bottom-sheet">' +
+      '<div class="modal-handle"></div>' +
+      '<div onclick="window._editarHabito(\'' + habitoId + '\')" style="padding:16px 0;font-size:16px;color:#FFF;cursor:pointer;display:flex;align-items:center;gap:12px;border-bottom:0.5px solid rgba(255,255,255,0.06);">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+        'Editar hábito' +
+      '</div>' +
+      '<div onclick="window._eliminarHabito(\'' + habitoId + '\')" style="padding:16px 0;font-size:16px;color:#FF453A;cursor:pointer;display:flex;align-items:center;gap:12px;border-bottom:0.5px solid rgba(255,255,255,0.06);">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF453A" stroke-width="1.5"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>' +
+        'Eliminar hábito' +
+      '</div>' +
+      '<div onclick="this.closest(\'.modal-bottom\').remove()" style="padding:16px 0;font-size:16px;color:rgba(255,255,255,0.4);cursor:pointer;text-align:center;margin-top:4px;">Cancelar</div>' +
+      '</div>';
+    menu.addEventListener('click', function(e){ if(e.target===menu) menu.remove(); });
+    document.body.appendChild(menu);
+  };
+
+  window._editarHabito = function(habitoId){
+    document.querySelectorAll('.modal-bottom').forEach(function(m){ m.remove(); });
+    var alumnoId = window.db.getAlumnoActual();
+    var habitos = window.db.getHabitos(alumnoId);
+    var h = habitos.find(function(x){ return x.id===habitoId; });
+    if(!h) return;
+    var modal = document.createElement('div');
+    modal.className = 'modal-bottom';
+    modal.innerHTML =
+      '<div class="modal-bottom-sheet">' +
+      '<div class="modal-handle"></div>' +
+      '<div style="font-size:18px;font-weight:700;color:#FFF;margin-bottom:16px;">Editar hábito</div>' +
+      '<input id="edit-hab-nombre" value="' + h.nombre + '" style="width:100%;height:48px;background:#1C1C1C;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 16px;color:#FFF;font-family:inherit;font-size:15px;margin-bottom:12px;box-sizing:border-box;">' +
+      '<input id="edit-hab-hora" type="time" value="' + (h.hora_sugerida||'08:00') + '" style="width:100%;height:48px;background:#1C1C1C;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 16px;color:#FFF;font-family:inherit;font-size:15px;margin-bottom:20px;box-sizing:border-box;">' +
+      '<button onclick="window._guardarHabito(\'' + habitoId + '\')" style="width:100%;height:52px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;">Guardar cambios</button>' +
+      '</div>';
+    modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+    document.body.appendChild(modal);
+  };
+
+  window._guardarHabito = function(habitoId){
+    var alumnoId = window.db.getAlumnoActual();
+    var habitos = window.db.getHabitos(alumnoId);
+    var idx = habitos.findIndex(function(x){ return x.id===habitoId; });
+    if(idx===-1) return;
+    var nombre = document.getElementById('edit-hab-nombre');
+    var hora   = document.getElementById('edit-hab-hora');
+    if(nombre) habitos[idx].nombre = nombre.value;
+    if(hora)   habitos[idx].hora_sugerida = hora.value;
+    localStorage.setItem('fitapp_habitos_' + alumnoId, JSON.stringify(habitos));
+    document.querySelectorAll('.modal-bottom').forEach(function(m){ m.remove(); });
+    window.mostrarToast && window.mostrarToast('✓ Hábito actualizado');
+    window.init_habitos();
+  };
+
+  window._eliminarHabito = function(habitoId){
+    if(!confirm('¿Eliminar este hábito?')) return;
+    document.querySelectorAll('.modal-bottom').forEach(function(m){ m.remove(); });
+    var alumnoId = window.db.getAlumnoActual();
+    var habitos = window.db.getHabitos(alumnoId).filter(function(x){ return x.id!==habitoId; });
+    localStorage.setItem('fitapp_habitos_' + alumnoId, JSON.stringify(habitos));
+    window.mostrarToast && window.mostrarToast('Hábito eliminado');
+    window.init_habitos();
+  };
+
+  window._nuevoHabito = function(){
+    var modal = document.createElement('div');
+    modal.className = 'modal-bottom';
+    modal.innerHTML =
+      '<div class="modal-bottom-sheet">' +
+      '<div class="modal-handle"></div>' +
+      '<div style="font-size:18px;font-weight:700;color:#FFF;margin-bottom:16px;">Nuevo hábito</div>' +
+      '<input id="new-hab-nombre" placeholder="Ej: Estirar antes de dormir" style="width:100%;height:48px;background:#1C1C1C;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 16px;color:#FFF;font-family:inherit;font-size:15px;margin-bottom:12px;box-sizing:border-box;">' +
+      '<input id="new-hab-hora" type="time" value="08:00" style="width:100%;height:48px;background:#1C1C1C;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 16px;color:#FFF;font-family:inherit;font-size:15px;margin-bottom:20px;box-sizing:border-box;">' +
+      '<button onclick="window._crearHabito()" style="width:100%;height:52px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;">Crear hábito</button>' +
+      '</div>';
+    modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+    document.body.appendChild(modal);
+    setTimeout(function(){ var inp=document.getElementById('new-hab-nombre'); if(inp) inp.focus(); },150);
+  };
+
+  window._crearHabito = function(){
+    var nombre = document.getElementById('new-hab-nombre');
+    var hora   = document.getElementById('new-hab-hora');
+    if(!nombre||!nombre.value.trim()) return;
+    var alumnoId = window.db.getAlumnoActual();
+    var habitos = window.db.getHabitos(alumnoId);
+    habitos.push({ id:'hab_'+Date.now(), nombre:nombre.value.trim(), icono:'check', hora_sugerida:hora?hora.value:'08:00', racha:0 });
+    localStorage.setItem('fitapp_habitos_' + alumnoId, JSON.stringify(habitos));
+    document.querySelectorAll('.modal-bottom').forEach(function(m){ m.remove(); });
+    window.mostrarToast && window.mostrarToast('✓ Hábito creado');
+    window.init_habitos();
   };
 
   window._toggleHabito = function(habitoId, fecha){

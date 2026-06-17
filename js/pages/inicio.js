@@ -27,6 +27,78 @@
     "Hoy es un gran día para mejorar."
   ];
 
+  // ── ANIMAR NÚMERO ───────────────────────────────────────
+  function animarNumero(el, valorFinal, duracionMs, sufijo){
+    duracionMs = duracionMs || 800;
+    sufijo = sufijo || '';
+    var startTime = null;
+    function paso(timestamp){
+      if(!startTime) startTime = timestamp;
+      var progreso = Math.min((timestamp - startTime) / duracionMs, 1);
+      var easeOut = 1 - Math.pow(1 - progreso, 3);
+      el.textContent = Math.round(valorFinal * easeOut) + sufijo;
+      if(progreso < 1) requestAnimationFrame(paso);
+    }
+    requestAnimationFrame(paso);
+  }
+
+  // ── NOTIFICACIONES ───────────────────────────────────────
+  window.abrirNotificaciones = function(){
+    var alumnoId = window.db.getAlumnoActual();
+    var notas = window.db.getNotas(alumnoId);
+    var modal = document.createElement('div');
+    modal.className = 'modal-bottom';
+    var itemsHTML = notas.length > 0 ?
+      notas.slice().reverse().map(function(n){
+        return '<div class="notif-item"><div class="notif-icon">📋</div>' +
+          '<div><div style="font-size:14px;color:#FFF;line-height:1.4;">' + n.texto + '</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">' + n.fecha + '</div></div></div>';
+      }).join('') :
+      '<div style="text-align:center;padding:40px 0;color:rgba(255,255,255,0.3);font-size:14px;">No tienes notificaciones nuevas</div>';
+    modal.innerHTML =
+      '<div class="modal-bottom-sheet">' +
+      '<div class="modal-handle"></div>' +
+      '<div class="modal-title">Notificaciones' +
+        '<button class="modal-close-btn" onclick="this.closest(\'.modal-bottom\').remove()">×</button>' +
+      '</div>' + itemsHTML + '</div>';
+    modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+    document.body.appendChild(modal);
+  };
+
+  // ── BÚSQUEDA ─────────────────────────────────────────────
+  window.abrirBusqueda = function(){
+    var modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;inset:0;background:#0A0A0A;z-index:9999;padding:calc(env(safe-area-inset-top) + 16px) 20px 20px;';
+    modal.innerHTML =
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">' +
+        '<input id="search-input" class="search-input" placeholder="Buscar ejercicio, rutina, hábito..." autofocus>' +
+        '<button onclick="this.closest(\'[style*=fixed]\').remove()" style="background:none;border:none;color:#C8E000;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;">Cancelar</button>' +
+      '</div><div id="search-results"></div>';
+    document.body.appendChild(modal);
+    setTimeout(function(){ var inp=document.getElementById('search-input'); if(inp) inp.focus(); },100);
+    document.getElementById('search-input').addEventListener('input', function(e){ buscarEnApp(e.target.value); });
+  };
+
+  function buscarEnApp(query){
+    if(!query||query.length<2){ document.getElementById('search-results').innerHTML=''; return; }
+    query = query.toLowerCase();
+    var ejercicios = window.db.getEjercicios ? window.db.getEjercicios() : [];
+    ejercicios = ejercicios.filter(function(e){ return e.nombre.toLowerCase().indexOf(query)!==-1; });
+    var resultsEl = document.getElementById('search-results');
+    if(!resultsEl) return;
+    if(ejercicios.length===0){
+      resultsEl.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.3);padding:40px 0;">Sin resultados para "'+query+'"</div>';
+      return;
+    }
+    resultsEl.innerHTML = ejercicios.slice(0,15).map(function(e){
+      return '<div class="search-result-row">' +
+        '<div class="search-icon-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><path d="M6 4v16M18 4v16M6 12h12"/></svg></div>' +
+        '<div><div style="font-size:14px;color:#FFF;font-weight:500;">' + e.nombre + '</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.4);">' + (e.grupo||'Ejercicio') + '</div></div>' +
+      '</div>';
+    }).join('');
+  }
+
   function getFraseDelDia(){
     var inicio = new Date(new Date().getFullYear(), 0, 0);
     var diaAnio = Math.floor((new Date() - inicio) / 86400000);
@@ -183,7 +255,10 @@
           "<button class='ah-icon-btn' onclick=\"window.irAPagina('videos')\" style='position:relative;'>" +
             "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round'><polygon points='23 7 16 12 23 17 23 7'/><rect x='1' y='5' width='15' height='14' rx='2'/></svg>" +
           "</button>" +
-          "<button class='ah-icon-btn' style='position:relative;'>" +
+          "<button class='ah-icon-btn' onclick='window.abrirBusqueda()' style='position:relative;'>" +
+            "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='8'/><path d='M21 21l-4.35-4.35'/></svg>" +
+          "</button>" +
+          "<button class='ah-icon-btn' onclick='window.abrirNotificaciones()' style='position:relative;'>" +
             "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round'><path d='M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 01-3.46 0'/></svg>" +
             "<span class='badge-dot'></span>" +
           "</button>" +
@@ -245,7 +320,7 @@
       "<div style='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;'>" +
         "<div>" +
           "<div style='font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1px;text-transform:uppercase;'>Tu progreso semanal</div>" +
-          "<div style='font-size:44px;font-weight:800;color:#C8E000;letter-spacing:-2px;line-height:1;margin-top:4px;'>" + pctSemana + "%</div>" +
+          "<div id='pct-semanal-num' style='font-size:44px;font-weight:800;color:#C8E000;letter-spacing:-2px;line-height:1;margin-top:4px;'>0%</div>" +
           "<div style='font-size:12px;color:rgba(255,255,255,.35);margin-top:4px;'>Objetivo semanal<br>" + diasHechos + "/" + diasSemana + " días completados</div>" +
         "</div>" +
         "<svg width='100' height='36' viewBox='0 0 100 36'>" +
@@ -291,14 +366,24 @@
       "</div>";
     }
 
-    // Quick links
-    html += "<div class='quick-links-row'>";
-    html += "<div class='quick-link-card' id='btn-ir-fotos'><div class='qlc-icon'>📸</div><div class='qlc-name'>Foto semanal</div><div class='qlc-sub'>Compara tu evolución</div></div>";
-    html += "<div class='quick-link-card' id='btn-ir-habitos'><div class='qlc-icon'>🎯</div><div class='qlc-name'>Mis hábitos</div><div class='qlc-sub'>Constancia diaria</div></div>";
+    // Quick action cards rediseñadas
+    html += "<div class='quick-action-card' id='btn-ir-fotos'>" +
+      "<div class='quick-action-icon-bg foto'>📸</div>" +
+      "<div><div class='quick-action-title'>Foto semanal</div><div class='quick-action-sub'>Compara tu evolución</div></div>" +
+      "<div class='quick-action-arrow'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'><polyline points='9 18 15 12 9 6'/></svg></div>" +
+    "</div>";
+    html += "<div class='quick-action-card' id='btn-ir-habitos'>" +
+      "<div class='quick-action-icon-bg habit'>🎯</div>" +
+      "<div><div class='quick-action-title'>Mis hábitos</div><div class='quick-action-sub'>Constancia diaria</div></div>" +
+      "<div class='quick-action-arrow'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'><polyline points='9 18 15 12 9 6'/></svg></div>" +
+    "</div>";
     if(gym.activo){
-      html += "<div class='quick-link-card' id='btn-ir-gym'><div class='qlc-icon'>🏢</div><div class='qlc-name'>" + gym.nombre + "</div><div class='qlc-sub'>Horarios y clases</div></div>";
+      html += "<div class='quick-action-card' id='btn-ir-gym'>" +
+        "<div class='quick-action-icon-bg gym'>🏢</div>" +
+        "<div><div class='quick-action-title'>" + gym.nombre + "</div><div class='quick-action-sub'>Horarios y clases</div></div>" +
+        "<div class='quick-action-arrow'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'><polyline points='9 18 15 12 9 6'/></svg></div>" +
+      "</div>";
     }
-    html += "</div>";
 
     // Nota del coach
     if(notas.length){
@@ -319,6 +404,14 @@
     // Events
     renderStatRings(alumno.id);
     renderCalendarioMes(alumno.id);
+
+    // Animar % de progreso semanal
+    var pctEl = document.getElementById("pct-semanal-num");
+    if(pctEl) animarNumero(pctEl, pctSemana, 900, "%");
+
+    // Tarjeta progreso → Evolución
+    var cardProg = document.querySelector(".progreso-semanal-card");
+    if(cardProg) cardProg.addEventListener("click", function(){ window.irAPagina("evolucion"); });
 
     var btnRutina = document.getElementById("btn-ir-rutina");
     if(btnRutina) btnRutina.addEventListener("click", function(){ window.irAPagina("agenda"); });

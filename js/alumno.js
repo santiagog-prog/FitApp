@@ -27,7 +27,11 @@
       var btn = document.querySelector('[data-tab="' + p + '"]');
       if(btn) btn.classList.remove("active");
     });
-    document.getElementById("page-" + pageId).style.display = "block";
+    var el = document.getElementById("page-" + pageId);
+    el.style.display = "block";
+    el.classList.remove("page-transition-enter");
+    void el.offsetWidth; // reflow
+    el.classList.add("page-transition-enter");
     var activeBtn = document.querySelector('[data-tab="' + pageId + '"]');
     if(activeBtn) activeBtn.classList.add("active");
 
