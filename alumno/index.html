@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FitApp</title>
+<link rel="manifest" href="../manifest.json?v=20260616d">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="../styles/global.css?v=20260616d">
+<link rel="stylesheet" href="../styles/alumno.css?v=20260616d">
+</head>
+<body>
+<div id="app-alumno">
+
+  <header id="app-header"></header>
+
+  <main id="app-content">
+    <div id="page-inicio"    style="display:block"></div>
+    <div id="page-agenda"    style="display:none"></div>
+    <div id="page-nutricion" style="display:none"></div>
+    <div id="page-evolucion" style="display:none"></div>
+    <div id="page-perfil"    style="display:none"></div>
+    <div id="page-videos"    style="display:none"></div>
+    <div id="page-gym"       style="display:none"></div>
+    <div id="page-fotos"     style="display:none"></div>
+    <div id="page-habitos"   style="display:none"></div>
+  </main>
+
+  <nav id="bottom-nav">
+    <!-- Inicio -->
+    <button data-tab="inicio" class="nav-tab active">
+      <span class="nt-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+          <path d="M9 21V12h6v9"/>
+        </svg>
+      </span>
+      <span>Inicio</span>
+    </button>
+
+    <!-- Entrena -->
+    <button data-tab="agenda" class="nav-tab">
+      <span class="nt-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4"/>
+        </svg>
+      </span>
+      <span>Entrena</span>
+    </button>
+
+    <!-- Nutrición -->
+    <button data-tab="nutricion" class="nav-tab">
+      <span class="nt-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 2l2 7h14l2-7M5 9v13M19 9v13M9 9v13M15 9v13"/>
+        </svg>
+      </span>
+      <span>Nutrición</span>
+    </button>
+
+    <!-- Progreso -->
+    <button data-tab="evolucion" class="nav-tab">
+      <span class="nt-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </span>
+      <span>Progreso</span>
+    </button>
+
+    <!-- Perfil -->
+    <button data-tab="perfil" class="nav-tab">
+      <span class="nt-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+      </span>
+      <span>Perfil</span>
+    </button>
+  </nav>
+
+</div>
+
+<script src="../js/db.js?v=20260616d"></script>
+<script src="../js/shared.js?v=20260616d"></script>
+<script src="../js/ejercicios-default.js?v=20260616d"></script>
+<script src="../js/pages/inicio.js?v=20260616d"></script>
+<script src="../js/pages/agenda.js?v=20260616d"></script>
+<script src="../js/pages/videos.js?v=20260616d"></script>
+<script src="../js/pages/evolucion.js?v=20260616d"></script>
+<script src="../js/pages/nutricion.js?v=20260616d"></script>
+<script src="../js/pages/perfil.js?v=20260616d"></script>
+<script src="../js/pages/gym.js?v=20260616d"></script>
+<script src="../js/pages/fotos.js?v=20260616d"></script>
+<script src="../js/pages/habitos.js?v=20260616d"></script>
+<script src="../js/alumno.js?v=20260616d"></script>
+</body>
+</html>

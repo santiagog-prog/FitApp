@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel del Entrenador — FitApp</title>
+<link rel="stylesheet" href="../styles/global.css?v=20260616c">
+<link rel="stylesheet" href="../styles/coach.css?v=20260616c">
+</head>
+<body class="coach-body">
+<div id="coach-app">
+  <aside id="coach-sidebar">
+    <div class="cs-logo">FitCoach</div>
+    <nav>
+      <button data-sec="dashboard" class="active">📊 <span class="label">Dashboard</span></button>
+      <button data-sec="alumnos">🏃 <span class="label">Mis alumnos</span></button>
+      <button data-sec="rutinas">🏋️ <span class="label">Rutinas</span></button>
+      <button data-sec="alimentacion">🍽️ <span class="label">Alimentación</span></button>
+      <button data-sec="ejercicios">📚 <span class="label">Ejercicios</span></button>
+      <button data-sec="mensajes">💬 <span class="label">Mensajes</span></button>
+      <button data-sec="gym">🏢 <span class="label">Mi Gimnasio</span></button>
+      <button data-sec="videos">🎬 <span class="label">Videos</span></button>
+      <button data-sec="intakes">📋 <span class="label">Intakes</span></button>
+    </nav>
+    <div class="cs-foot"><a href="../index.html" style="color:#999;">← Salir del panel</a></div>
+  </aside>
+
+  <main id="coach-main">
+    <div id="sec-dashboard"></div>
+    <div id="sec-alumnos" style="display:none"></div>
+    <div id="sec-rutinas" style="display:none"></div>
+    <div id="sec-alimentacion" style="display:none"></div>
+    <div id="sec-ejercicios" style="display:none"></div>
+    <div id="sec-mensajes" style="display:none"></div>
+    <div id="sec-gym" style="display:none"></div>
+    <div id="sec-videos" style="display:none"></div>
+    <div id="sec-intakes" style="display:none"></div>
+  </main>
+</div>
+
+<script src="../js/ejercicios-default.js?v=20260616c"></script>
+<script src="../js/db.js?v=20260616c"></script>
+<script src="../js/shared.js?v=20260616c"></script>
+<script src="../js/coach.js?v=20260616c"></script>
+</body>
+</html>
