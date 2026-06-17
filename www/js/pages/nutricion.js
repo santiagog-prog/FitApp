@@ -272,12 +272,12 @@
     var apiKey = window.db.getOpenAIKey();
     html += '<div style="padding:12px 16px 4px;">';
     html += '<button class="food-scan-btn" id="btn-scan-ia">' +
-      '<span style="font-size:22px;">🤖</span>' +
-      '<span>Escanear comida con IA</span>' +
-      '<span style="font-size:11px;background:rgba(200,224,0,0.15);color:var(--accent);border-radius:99px;padding:3px 8px;font-weight:700;">BETA</span>' +
+      '<span style="font-size:22px;">📷</span>' +
+      '<span>' + (apiKey ? 'Analizar comida con IA' : 'Registrar comida con foto') + '</span>' +
+      (apiKey ? '<span style="font-size:11px;background:rgba(200,224,0,0.15);color:var(--accent);border-radius:99px;padding:3px 8px;font-weight:700;">IA</span>' : '') +
     '</button>';
     if(!apiKey){
-      html += '<div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:6px;">Añade tu OpenAI API Key en Más → Perfil → Ajustes IA</div>';
+      html += '<div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:5px;">Toca para abrir cámara · Activa análisis IA en Perfil → Ajustes IA</div>';
     }
 
     // Scans del día
@@ -351,15 +351,10 @@
       reader.readAsDataURL(file);
     });
 
-    // AI scan button
+    // AI scan button — con key: IA real; sin key: abre selector manual con foto
     var btnScanIA = document.getElementById("btn-scan-ia");
     if(btnScanIA){
       btnScanIA.addEventListener("click", function(){
-        var k = window.db.getOpenAIKey();
-        if(!k){
-          window.mostrarToast("⚠️ Primero añade tu OpenAI API Key en Perfil → Ajustes IA");
-          return;
-        }
         document.getElementById("ia-foto-input").click();
       });
     }
@@ -373,8 +368,29 @@
     }
   };
 
-  // ── FOOD VISION AI ──────────────────────────────────────
+  // ── FOOD VISION AI / FALLBACK MANUAL ───────────────────
   function _procesarFoodScanIA(file){
+    var apiKey = window.db.getOpenAIKey();
+
+    // Sin API Key → usar selector manual con la foto como preview
+    if(!apiKey){
+      var reader0 = new FileReader();
+      reader0.onload = function(ev){
+        var img = new Image();
+        img.onload = function(){
+          var ratio = Math.min(1, 320/img.width);
+          var canvas = document.createElement("canvas");
+          canvas.width = img.width*ratio; canvas.height = img.height*ratio;
+          canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
+          abrirSelectorRapido(canvas.toDataURL("image/jpeg",0.7));
+        };
+        img.src = ev.target.result;
+      };
+      reader0.readAsDataURL(file);
+      return;
+    }
+
+    // Con API Key → análisis IA real
     var btnIA = document.getElementById("btn-scan-ia");
     if(btnIA){ btnIA.innerHTML = '<span class="ai-scanning">🤖</span> Analizando con IA...'; btnIA.disabled = true; }
 
@@ -382,7 +398,6 @@
     reader.onload = function(ev){
       var base64 = ev.target.result.split(",")[1];
       var previewUrl = ev.target.result;
-      var apiKey = window.db.getOpenAIKey();
 
       var payload = {
         model: "gpt-4o-mini",
@@ -416,7 +431,7 @@
       })
       .catch(function(err){
         console.error("Food Vision AI error:", err);
-        window.mostrarToast("❌ Error al analizar. Verifica tu API Key.");
+        window.mostrarToast("❌ Error al analizar. Verifica tu API Key en Perfil.");
         if(btnIA){ btnIA.innerHTML = '<span>🤖</span> Escanear comida con IA'; btnIA.disabled = false; }
       });
     };

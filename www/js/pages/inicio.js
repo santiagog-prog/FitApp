@@ -370,107 +370,62 @@
       });
     }
 
-    // ── Progreso semanal (mini-chart + % + métricas) ─────
-    var regsSemana = registros.filter(function(r){
-      var d = new Date(r.fecha);
-      var diffMs = Date.now() - d.getTime();
-      return diffMs >= 0 && diffMs < 7*86400000;
-    });
-    var diasSemana = rutina ? rutina.dias.filter(function(d){ return d.tipo !== "descanso"; }).length : 5;
-    var diasHechos = regsSemana.length;
-    var pctSemana  = diasSemana > 0 ? Math.min(100, Math.round(diasHechos / diasSemana * 100)) : 0;
-
+    // ── Datos para el resto del home ────────────────────
     var fechaHoyStr = window.db.fechaHoy();
+    var racha2 = window.db.calcularRacha(alumno.id);
     var nutriHoy = window.db.getNutricion(alumno.id, fechaHoyStr);
     var planObj  = window.db.getPlanPorId(alumno.plan_alimentacion_id);
     var kcalObj  = planObj ? (planObj.calorias_objetivo || 2000) : 2000;
     var kcalHoy2 = 0;
     if(nutriHoy && nutriHoy.extras) nutriHoy.extras.forEach(function(a){ kcalHoy2 += (a.calorias||0); });
-    var pctNutri = Math.min(100, Math.round(kcalHoy2/kcalObj*100));
-    var aguaHoy2 = (nutriHoy && nutriHoy.agua) ? nutriHoy.agua : 0;
-    var pctAgua  = Math.round(aguaHoy2/8*100);
-    var racha2   = window.db.calcularRacha(alumno.id);
+    var pasosHoy = (function(){
+      var alumnoId2 = alumno.id;
+      var d2 = new Date(); var k2 = d2.getFullYear()+""+pad2(d2.getMonth()+1)+""+pad2(d2.getDate());
+      try{ var dp = JSON.parse(localStorage.getItem("fitapp_pasos_"+alumnoId2+"_"+k2)||"null"); return dp?(dp.pasos||0):0; }catch(e){ return 0; }
+    })();
 
-    // Mini sparkline (7 días)
-    var spark = "";
-    for(var si=6; si>=0; si--){
-      var dsp = new Date(); dsp.setDate(dsp.getDate()-si);
-      var fsp = dsp.getFullYear()+"-"+pad2(dsp.getMonth()+1)+"-"+pad2(dsp.getDate());
-      var hasSp = registros.some(function(r){ return r.fecha===fsp; });
-      var xsp = ((6-si)/6*80 + 10).toFixed(1);
-      spark += '<circle cx="'+xsp+'" cy="'+(hasSp?"8":"16")+'" r="3" fill="'+(hasSp?"#C8E000":"rgba(255,255,255,0.1)")+'"/>';
-    }
-
-    html += "<div class='progreso-semanal-card'>" +
-      "<div style='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;'>" +
-        "<div>" +
-          "<div style='font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1px;text-transform:uppercase;'>Tu progreso semanal</div>" +
-          "<div id='pct-semanal-num' style='font-size:44px;font-weight:800;color:#C8E000;letter-spacing:-2px;line-height:1;margin-top:4px;'>0%</div>" +
-          "<div style='font-size:12px;color:rgba(255,255,255,.35);margin-top:4px;'>Objetivo semanal<br>" + diasHechos + "/" + diasSemana + " días completados</div>" +
-        "</div>" +
-        "<svg width='100' height='36' viewBox='0 0 100 36'>" +
-          '<polyline points="10,28 26,20 42,24 58,14 74,10 90,8" fill="none" stroke="#C8E000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' +
-          '<path d="M10,28 26,20 42,24 58,14 74,10 90,8 90,36 10,36 Z" fill="rgba(200,224,0,0.12)"/>' +
-        "</svg>" +
-      "</div>" +
-      "<div class='resumen-4grid'>" +
-        "<div class='r4-item'><div class='r4-pct' style='color:#C8E000;'>" + pctNutri + "%</div><div class='r4-icon'>🍽️</div><div class='r4-label'>Nutrición</div></div>" +
-        "<div class='r4-item'><div class='r4-pct' style='color:#34C759;'>" + pctSemana + "%</div><div class='r4-icon'>💪</div><div class='r4-label'>Entreno</div></div>" +
-        "<div class='r4-item'><div class='r4-pct' style='color:#0A84FF;'>" + pctAgua + "%</div><div class='r4-icon'>💧</div><div class='r4-label'>Hidratación</div></div>" +
-        "<div class='r4-item'><div class='r4-pct' style='color:#FF9500;'>" + Math.min(100, racha2*3) + "%</div><div class='r4-icon'>😴</div><div class='r4-label'>Recuperación</div></div>" +
-      "</div>" +
-    "</div>";
-
-    // Stat rings
-    html += "<div class='stat-rings-card'>" +
-      "<div id='stat-rings' class='stat-rings-inner'></div>" +
-    "</div>";
-
-    // Calendario mes
-    html += "<div class='month-calendar-wrap'>" +
-      "<div id='month-calendar'></div>" +
-    "</div>";
-
-    // Sesión de hoy
+    // ── Sesión de hoy ───────────────────────────────────
     if(diaRutina && diaRutina.tipo !== "descanso"){
-      var hechoHoy = registros.some(function(r){ return r.fecha === window.db.fechaHoy(); });
-      html += "<div class='hoy-card-dark' id='btn-ir-rutina'>" +
-        "<div class='hcd-icon'>" +
-          "<svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='#C8E000' stroke-width='2' stroke-linecap='round'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>" +
+      var hechoHoy = registros.some(function(r){ return r.fecha === fechaHoyStr; });
+      html += "<div class='hoy-card-dark' id='btn-ir-rutina' style='margin-bottom:12px;'>" +
+        "<div class='hcd-icon" + (hechoHoy ? "' style='background:rgba(48,209,88,0.15);'" : "'") + ">" +
+          (hechoHoy
+            ? "<svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='#30D158' stroke-width='2.5' stroke-linecap='round'><polyline points='20 6 9 17 4 12'/></svg>"
+            : "<svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='#C8E000' stroke-width='2' stroke-linecap='round'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>") +
         "</div>" +
         "<div class='hcd-info'>" +
-          "<div class='hcd-label'>Tu siguiente acción</div>" +
+          "<div class='hcd-label'>" + (hechoHoy ? "Completado hoy" : "Tu entreno de hoy") + "</div>" +
           "<div class='hcd-nombre'>" + diaRutina.nombre + "</div>" +
-          "<div class='hcd-meta'>Hoy · " + diaRutina.ejercicios.length + " ejercicios" + (hechoHoy ? " · ✓ Completado" : "") + "</div>" +
+          "<div class='hcd-meta'>" + diaRutina.ejercicios.length + " ejercicios" + (hechoHoy ? " · ✅ ¡Hecho!" : " · Toca para empezar") + "</div>" +
         "</div>" +
-        "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2' stroke-linecap='round'><polyline points='9 18 15 12 9 6'/></svg>" +
+        "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.25)' stroke-width='2' stroke-linecap='round'><polyline points='9 18 15 12 9 6'/></svg>" +
       "</div>";
     } else {
-      html += "<div style='background:#1C1C1C;border-radius:14px;padding:16px 20px;margin:0 20px 12px;border:1px solid rgba(255,255,255,0.06);'>" +
-        "<div style='font-size:14px;color:rgba(255,255,255,0.5);'>🌙 Hoy descansas. La recuperación es parte del entreno.</div>" +
+      html += "<div style='background:var(--surface);border-radius:var(--radius);padding:16px 20px;margin:0 20px 12px;border:1px solid var(--border);'>" +
+        "<div style='font-size:14px;color:var(--text-secondary);'>🌙 Día de descanso. La recuperación es parte del progreso.</div>" +
       "</div>";
     }
 
-    // Quick action cards rediseñadas
-    html += "<div class='quick-action-card' id='btn-ir-fotos'>" +
-      "<div class='quick-action-icon-bg foto'>📸</div>" +
-      "<div><div class='quick-action-title'>Foto semanal</div><div class='quick-action-sub'>Compara tu evolución</div></div>" +
-      "<div class='quick-action-arrow'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'><polyline points='9 18 15 12 9 6'/></svg></div>" +
+    // ── Stats row compacto ──────────────────────────────
+    html += "<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 20px 14px;'>";
+    // Racha
+    html += "<div style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;text-align:center;'>" +
+      "<div style='font-size:24px;font-weight:900;color:#FF9F0A;letter-spacing:-1px;'>" + racha2 + "</div>" +
+      "<div style='font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;'>🔥 Racha</div>" +
     "</div>";
-    html += "<div class='quick-action-card' id='btn-ir-habitos'>" +
-      "<div class='quick-action-icon-bg habit'>🎯</div>" +
-      "<div><div class='quick-action-title'>Mis hábitos</div><div class='quick-action-sub'>Constancia diaria</div></div>" +
-      "<div class='quick-action-arrow'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'><polyline points='9 18 15 12 9 6'/></svg></div>" +
+    // Kcal hoy
+    html += "<div style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;text-align:center;'>" +
+      "<div style='font-size:24px;font-weight:900;color:#C8E000;letter-spacing:-1px;'>" + kcalHoy2 + "</div>" +
+      "<div style='font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;'>🍽️ Kcal</div>" +
     "</div>";
-    if(gym.activo){
-      html += "<div class='quick-action-card' id='btn-ir-gym'>" +
-        "<div class='quick-action-icon-bg gym'>🏢</div>" +
-        "<div><div class='quick-action-title'>" + gym.nombre + "</div><div class='quick-action-sub'>Horarios y clases</div></div>" +
-        "<div class='quick-action-arrow'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'><polyline points='9 18 15 12 9 6'/></svg></div>" +
-      "</div>";
-    }
+    // Pasos hoy
+    html += "<div style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;text-align:center;cursor:pointer;' id='stat-pasos-card'>" +
+      "<div style='font-size:24px;font-weight:900;color:#5AC8FA;letter-spacing:-1px;'>" + (pasosHoy > 999 ? (Math.round(pasosHoy/100)/10)+"k" : pasosHoy) + "</div>" +
+      "<div style='font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;'>👟 Pasos</div>" +
+    "</div>";
+    html += "</div>";
 
-    // Nota del coach
+    // ── Nota del coach ──────────────────────────────────
     if(notas.length){
       var ultima = notas[notas.length-1];
       html += "<div class='nota-coach-dark'>" +
@@ -480,33 +435,19 @@
       "</div>";
     }
 
-    // Frase motivacional
+    // ── Frase motivacional ──────────────────────────────
     html += "<div class='frase-motivacional'>\"" + getFraseDelDia() + "\"</div>";
     html += "</div>";
 
     page.innerHTML = html;
 
-    // Events
-    renderStatRings(alumno.id);
-    renderCalendarioMes(alumno.id);
-
     // Animar FitScore
     var fscEl = document.getElementById("fsc-num");
     if(fscEl && fsObj) animarNumero(fscEl, fsObj.total, 1000, "");
 
-    // Animar % de progreso semanal
-    var pctEl = document.getElementById("pct-semanal-num");
-    if(pctEl) animarNumero(pctEl, pctSemana, 900, "%");
-
-    // Tarjeta progreso → Evolución
-    var cardProg = document.querySelector(".progreso-semanal-card");
-    if(cardProg) cardProg.addEventListener("click", function(){ window.irAPagina("evolucion"); });
-
     var btnRutina = document.getElementById("btn-ir-rutina");
     if(btnRutina) btnRutina.addEventListener("click", function(){ window.irAPagina("agenda"); });
-    document.getElementById("btn-ir-fotos").addEventListener("click", function(){ window.irAPagina("fotos"); });
-    document.getElementById("btn-ir-habitos").addEventListener("click", function(){ window.irAPagina("habitos"); });
-    var btnGym = document.getElementById("btn-ir-gym");
-    if(btnGym) btnGym.addEventListener("click", function(){ window.irAPagina("gym"); });
+    var statPasos = document.getElementById("stat-pasos-card");
+    if(statPasos) statPasos.addEventListener("click", function(){ window.irAPagina("cardio"); });
   };
 })();

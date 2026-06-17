@@ -103,16 +103,36 @@
     '</div>';
 
     // Contador en vivo
-    html += '<div style="background:#141414;border-radius:16px;padding:20px;margin:0 20px 12px;">' +
-      '<div style="font-size:15px;font-weight:700;color:#FFF;margin-bottom:4px;">Medir en vivo</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:16px;">Lleva el teléfono en la mano o bolsillo mientras caminas</div>' +
-      '<div style="text-align:center;padding:16px 0;">' +
-        '<div id="pasos-vivo-numero" style="font-size:52px;font-weight:900;color:#C8E000;letter-spacing:-2px;line-height:1;">0</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:6px;">pasos detectados</div>' +
+    var sensorDisponible = !!window.DeviceMotionEvent;
+    var necesitaPermiso = typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function";
+
+    html += '<div style="background:#141414;border-radius:16px;padding:20px;margin:0 20px 12px;">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">' +
+      '<div style="font-size:15px;font-weight:700;color:#FFF;">Medir en vivo</div>' +
+      '<div id="sensor-status-chip" style="font-size:11px;font-weight:700;border-radius:99px;padding:4px 10px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);">' +
+        (sensorDisponible ? '● Sensor listo' : '✕ Sin sensor') +
       '</div>' +
-      '<button id="btn-toggle-cardio" style="width:100%;height:52px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;">▶ Iniciar conteo</button>' +
-      '<div style="font-size:10px;color:rgba(255,255,255,0.2);text-align:center;margin-top:10px;">El conteo solo funciona con la app abierta en pantalla.</div>' +
     '</div>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:16px;">Lleva el móvil en la mano o bolsillo mientras caminas</div>';
+
+    if(necesitaPermiso){
+      html += '<div id="permiso-banner" style="background:rgba(200,224,0,0.08);border:1px solid rgba(200,224,0,0.2);border-radius:12px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">' +
+        '<span style="font-size:24px;">📱</span>' +
+        '<div style="flex:1;">' +
+          '<div style="font-size:13px;font-weight:700;color:#FFF;margin-bottom:2px;">Permiso de movimiento requerido</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.5);">iOS necesita tu autorización para detectar pasos</div>' +
+        '</div>' +
+        '<button id="btn-pedir-permiso" style="background:#C8E000;color:#1C1C1E;border:none;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;flex-shrink:0;">Activar</button>' +
+      '</div>';
+    }
+
+    html += '<div style="text-align:center;padding:16px 0;">' +
+      '<div id="pasos-vivo-numero" style="font-size:52px;font-weight:900;color:#C8E000;letter-spacing:-2px;line-height:1;">0</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:6px;">pasos detectados en esta sesión</div>' +
+    '</div>';
+    html += '<button id="btn-toggle-cardio" style="width:100%;height:52px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;">▶ Iniciar conteo</button>';
+    html += '<div style="font-size:10px;color:rgba(255,255,255,0.2);text-align:center;margin-top:10px;">Mantén la pantalla encendida durante el conteo</div>';
+    html += '</div>';
 
     html += '</div>';
     document.getElementById("page-cardio").innerHTML = html;
@@ -123,6 +143,29 @@
       document.getElementById("pasos-hoy-display").textContent = v;
       window.mostrarToast && window.mostrarToast("✓ " + v + " pasos registrados");
     });
+
+    // Botón "Activar" permiso iOS
+    var btnPermiso = document.getElementById("btn-pedir-permiso");
+    if(btnPermiso){
+      btnPermiso.addEventListener("click", function(){
+        if(typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function"){
+          DeviceMotionEvent.requestPermission().then(function(r){
+            var chip = document.getElementById("sensor-status-chip");
+            var banner = document.getElementById("permiso-banner");
+            if(r === "granted"){
+              if(chip){ chip.textContent = "✓ Permiso concedido"; chip.style.color = "#30D158"; chip.style.background = "rgba(48,209,88,0.12)"; }
+              if(banner){ banner.style.display = "none"; }
+              window.mostrarToast && window.mostrarToast("✅ Sensor de movimiento activado");
+            } else {
+              if(chip){ chip.textContent = "✕ Permiso denegado"; chip.style.color = "#FF453A"; }
+              window.mostrarToast && window.mostrarToast("⚠️ Permiso denegado. Actívalo en Ajustes > Safari > Movimiento.");
+            }
+          }).catch(function(e){
+            console.error("Permiso motion:", e);
+          });
+        }
+      });
+    }
 
     document.getElementById("btn-toggle-cardio").addEventListener("click", function(){
       if(_cardio.activo) _detenerContador(); else _iniciarContador();
