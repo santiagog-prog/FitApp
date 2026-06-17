@@ -68,9 +68,17 @@
     ].join("");
     splash.innerHTML =
       '<div style="opacity:0;animation:splashUp .5s .15s ease both;">' +
-        '<div style="width:72px;height:72px;border-radius:20px;background:rgba(200,224,0,0.12);border:1px solid rgba(200,224,0,0.25);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;">' +
-          '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C8E000" stroke-width="2" stroke-linecap="round"><path d="M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4"/></svg>' +
-        '</div>' +
+          '<svg width="88" height="88" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" style="margin:0 auto 28px;display:block;">' +
+          '<defs><linearGradient id="slg" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#1a2d00"/><stop offset="100%" stop-color="#0a0a0a"/></linearGradient></defs>' +
+          '<rect width="96" height="96" rx="22" fill="url(#slg)"/>' +
+          '<rect x="28" y="44" width="40" height="8" rx="4" fill="#C8E000"/>' +
+          '<rect x="20" y="39" width="10" height="18" rx="3" fill="#C8E000"/>' +
+          '<rect x="66" y="39" width="10" height="18" rx="3" fill="#C8E000"/>' +
+          '<rect x="14" y="43" width="7" height="10" rx="2.5" fill="rgba(200,224,0,0.55)"/>' +
+          '<rect x="75" y="43" width="7" height="10" rx="2.5" fill="rgba(200,224,0,0.55)"/>' +
+          '<circle cx="76" cy="20" r="5" fill="#C8E000" opacity=".3"/>' +
+          '<circle cx="76" cy="20" r="2.5" fill="#C8E000"/>' +
+        '</svg>' +
         '<div style="font-size:13px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;">Bienvenido de vuelta</div>' +
         '<div style="font-size:36px;font-weight:900;color:#FFF;letter-spacing:-1.5px;line-height:1.1;margin-bottom:20px;">' + alumno.nombre + '</div>' +
         '<div style="font-size:16px;color:rgba(255,255,255,0.45);line-height:1.6;max-width:260px;font-style:italic;">"' + frase + '"</div>' +

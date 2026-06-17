@@ -142,30 +142,62 @@
 <body>
 
 <!-- ── SPLASH LOGIN ── -->
-<div id="login-splash" style="position:fixed;inset:0;z-index:99999;background:#080808;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;">
-  <style>
-    @keyframes lsUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes lsOut{from{opacity:1}to{opacity:0}}
-    #login-splash .ls-logo { animation:lsUp .5s .05s ease both; }
-    #login-splash .ls-title { animation:lsUp .5s .2s ease both; }
-    #login-splash .ls-sub   { animation:lsUp .5s .35s ease both; }
-    #login-splash .ls-foot  { animation:lsUp .5s .5s ease both; }
-  </style>
-  <div class="ls-logo" style="width:80px;height:80px;border-radius:24px;background:rgba(200,224,0,0.1);border:1px solid rgba(200,224,0,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;">
-    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#C8E000" stroke-width="1.8" stroke-linecap="round"><path d="M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4"/></svg>
+<style>
+  @keyframes lsUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes lsOut{from{opacity:1}to{opacity:0;transform:scale(.96)}}
+  @keyframes lsIn{from{opacity:0}to{opacity:1}}
+  #login-splash{ animation:lsIn .25s ease both; }
+  #login-splash .ls-logo  { animation:lsUp .55s .1s cubic-bezier(.34,1.56,.64,1) both; }
+  #login-splash .ls-title { animation:lsUp .55s .25s cubic-bezier(.34,1.56,.64,1) both; }
+  #login-splash .ls-sub   { animation:lsUp .5s .4s ease both; }
+  #login-splash .ls-foot  { animation:lsUp .5s .55s ease both; }
+</style>
+<div id="login-splash" style="position:fixed;inset:0;z-index:99999;background:#080808;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px 0;text-align:center;">
+  <!-- Logo -->
+  <div class="ls-logo" style="margin:0 auto 32px;">
+    <svg width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+      <!-- App icon background -->
+      <rect width="96" height="96" rx="22" fill="#0D1800"/>
+      <rect width="96" height="96" rx="22" fill="url(#lg1)"/>
+      <defs>
+        <linearGradient id="lg1" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#1a2d00"/>
+          <stop offset="100%" stop-color="#0a0a0a"/>
+        </linearGradient>
+      </defs>
+      <!-- Barbell horizontal -->
+      <rect x="28" y="44" width="40" height="8" rx="4" fill="#C8E000"/>
+      <!-- Left collar -->
+      <rect x="20" y="39" width="10" height="18" rx="3" fill="#C8E000"/>
+      <!-- Right collar -->
+      <rect x="66" y="39" width="10" height="18" rx="3" fill="#C8E000"/>
+      <!-- Left end cap -->
+      <rect x="14" y="43" width="7" height="10" rx="2.5" fill="rgba(200,224,0,0.55)"/>
+      <!-- Right end cap -->
+      <rect x="75" y="43" width="7" height="10" rx="2.5" fill="rgba(200,224,0,0.55)"/>
+      <!-- Center grip texture lines -->
+      <rect x="44" y="44" width="2" height="8" rx="1" fill="rgba(0,0,0,0.3)"/>
+      <rect x="50" y="44" width="2" height="8" rx="1" fill="rgba(0,0,0,0.3)"/>
+      <!-- Accent dot top right -->
+      <circle cx="76" cy="20" r="5" fill="#C8E000" opacity=".35"/>
+      <circle cx="76" cy="20" r="2.5" fill="#C8E000"/>
+    </svg>
   </div>
-  <div class="ls-title" style="font-size:52px;font-weight:900;color:#FFF;letter-spacing:-3px;line-height:1;">Fit<span style="color:#C8E000;">App</span></div>
-  <div class="ls-sub" style="font-size:16px;font-weight:600;color:rgba(255,255,255,0.45);margin-top:12px;letter-spacing:.2px;">Esto cambiará tu vida</div>
-  <div class="ls-foot" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+28px);left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:.5px;">App desarrollada por Santiago Guamán</div>
+  <!-- Title -->
+  <div class="ls-title" style="font-size:58px;font-weight:900;color:#FFF;letter-spacing:-3.5px;line-height:1;">Fit<span style="color:#C8E000;">App</span></div>
+  <!-- Subtitle -->
+  <div class="ls-sub" style="font-size:15px;font-weight:600;color:rgba(255,255,255,0.4);margin-top:14px;letter-spacing:.3px;">Esto cambiará tu vida</div>
+  <!-- Credit — pushed to bottom via margin-top:auto + padding-bottom -->
+  <div class="ls-foot" style="margin-top:auto;padding-bottom:calc(env(safe-area-inset-bottom,0px)+32px);font-size:11px;color:rgba(255,255,255,0.18);letter-spacing:.6px;">App desarrollada por Santiago Guamán</div>
 </div>
 <script>
   (function(){
     setTimeout(function(){
       var s = document.getElementById("login-splash");
       if(!s) return;
-      s.style.animation = "lsOut .5s ease both";
-      setTimeout(function(){ s.remove(); }, 500);
-    }, 2800);
+      s.style.animation = "lsOut .45s ease both";
+      setTimeout(function(){ s.remove(); }, 450);
+    }, 3000);
   })();
 </script>
 
