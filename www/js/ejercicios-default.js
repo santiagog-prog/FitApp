@@ -1,0 +1,37 @@
+// ════════════════════════════════════════════════════════════
+// ejercicios-default.js — biblioteca base de ejercicios (fallback)
+// ════════════════════════════════════════════════════════════
+window.EJERCICIOS_DEFAULT = [
+  { id:"d_1", nombre:"Press militar en máquina", grupo:"Hombros", equipamiento:"Máquina", video_url:"" },
+  { id:"d_2", nombre:"Press inclinado con mancuerna", grupo:"Pecho", equipamiento:"Mancuernas", video_url:"" },
+  { id:"d_3", nombre:"Press plano con barra", grupo:"Pecho", equipamiento:"Barra", video_url:"" },
+  { id:"d_4", nombre:"Peck Deck", grupo:"Pecho", equipamiento:"Máquina", video_url:"" },
+  { id:"d_5", nombre:"Aperturas con mancuerna", grupo:"Pecho", equipamiento:"Mancuernas", video_url:"" },
+  { id:"d_6", nombre:"Elevaciones laterales", grupo:"Hombros", equipamiento:"Mancuernas", video_url:"" },
+  { id:"d_7", nombre:"Elevaciones frontales", grupo:"Hombros", equipamiento:"Mancuernas", video_url:"" },
+  { id:"d_8", nombre:"Pájaros (deltoide posterior)", grupo:"Hombros", equipamiento:"Mancuernas", video_url:"" },
+  { id:"d_9", nombre:"Extensión de tríceps en polea", grupo:"Tríceps", equipamiento:"Polea", video_url:"" },
+  { id:"d_10", nombre:"Press francés", grupo:"Tríceps", equipamiento:"Barra Z", video_url:"" },
+  { id:"d_11", nombre:"Fondos en banco", grupo:"Tríceps", equipamiento:"Peso corporal", video_url:"" },
+  { id:"d_12", nombre:"Jalón al pecho agarre prono", grupo:"Espalda", equipamiento:"Polea", video_url:"" },
+  { id:"d_13", nombre:"Remo con mancuerna", grupo:"Espalda", equipamiento:"Mancuernas", video_url:"" },
+  { id:"d_14", nombre:"Remo con barra", grupo:"Espalda", equipamiento:"Barra", video_url:"" },
+  { id:"d_15", nombre:"Peso muerto rumano", grupo:"Espalda", equipamiento:"Barra", video_url:"" },
+  { id:"d_16", nombre:"Dominadas asistidas", grupo:"Espalda", equipamiento:"Máquina", video_url:"" },
+  { id:"d_17", nombre:"Curl con barra", grupo:"Bíceps", equipamiento:"Barra", video_url:"" },
+  { id:"d_18", nombre:"Curl con mancuerna alterno", grupo:"Bíceps", equipamiento:"Mancuernas", video_url:"" },
+  { id:"d_19", nombre:"Curl martillo", grupo:"Bíceps", equipamiento:"Mancuernas", video_url:"" },
+  { id:"d_20", nombre:"Sentadilla con barra", grupo:"Cuádriceps", equipamiento:"Barra", video_url:"" },
+  { id:"d_21", nombre:"Prensa de piernas", grupo:"Cuádriceps", equipamiento:"Máquina", video_url:"" },
+  { id:"d_22", nombre:"Extensión de cuádriceps", grupo:"Cuádriceps", equipamiento:"Máquina", video_url:"" },
+  { id:"d_23", nombre:"Zancadas con mancuernas", grupo:"Cuádriceps", equipamiento:"Mancuernas", video_url:"" },
+  { id:"d_24", nombre:"Curl femoral acostado", grupo:"Isquiotibiales", equipamiento:"Máquina", video_url:"" },
+  { id:"d_25", nombre:"Hip thrust con barra", grupo:"Glúteos", equipamiento:"Barra", video_url:"" },
+  { id:"d_26", nombre:"Patada de glúteo en polea", grupo:"Glúteos", equipamiento:"Polea", video_url:"" },
+  { id:"d_27", nombre:"Elevación de talones de pie", grupo:"Pantorrillas", equipamiento:"Máquina", video_url:"" },
+  { id:"d_28", nombre:"Plancha abdominal", grupo:"Abdomen", equipamiento:"Peso corporal", video_url:"" },
+  { id:"d_29", nombre:"Crunch en máquina", grupo:"Abdomen", equipamiento:"Máquina", video_url:"" },
+  { id:"d_30", nombre:"Elevación de piernas colgado", grupo:"Abdomen", equipamiento:"Barra fija", video_url:"" },
+  { id:"d_31", nombre:"Cinta de correr (cardio)", grupo:"Cardio", equipamiento:"Cinta", video_url:"" },
+  { id:"d_32", nombre:"Bicicleta estática (cardio)", grupo:"Cardio", equipamiento:"Bicicleta", video_url:"" }
+];

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Formulario de Inscripción — FitApp</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#0A0A0A; --surface:#141414; --surface2:#1C1C1C;
+    --accent:#C8E000; --text:#FFFFFF; --muted:rgba(255,255,255,.4);
+    --border:rgba(255,255,255,.08); --red:#FF453A;
+  }
+  body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);}
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+  .intake-wrap{max-width:480px;margin:0 auto;padding:24px 20px 60px;}
+  .intake-logo{font-size:22px;font-weight:800;color:var(--accent);margin-bottom:32px;text-align:center;}
+  .step-dots{display:flex;gap:8px;justify-content:center;margin-bottom:28px;}
+  .step-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s;}
+  .step-dot.active{background:var(--accent);width:24px;border-radius:99px;}
+  .step-dot.done{background:rgba(200,224,0,.4);}
+
+  .step{display:none;animation:fadeIn .3s;}
+  .step.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  h2{font-size:22px;font-weight:800;margin-bottom:6px;}
+  .step-sub{font-size:14px;color:var(--muted);margin-bottom:24px;}
+
+  .form-group{margin-bottom:16px;}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
+  input,select,textarea{
+    width:100%;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+    padding:0 16px;color:var(--text);font-size:15px;font-family:inherit;outline:none;
+    transition:border .2s;
+  }
+  input:focus,select:focus,textarea:focus{border-color:rgba(200,224,0,.4);}
+  textarea{height:100px;padding:14px 16px;resize:none;}
+  select option{background:#1C1C1C;}
+
+  .pills-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+  .pill-opt{
+    padding:8px 16px;border-radius:99px;border:1px solid var(--border);
+    background:transparent;color:rgba(255,255,255,.6);font-size:13px;font-weight:600;cursor:pointer;
+    font-family:inherit;transition:all .2s;
+  }
+  .pill-opt.sel{background:var(--accent);color:#1C1C1E;border-color:var(--accent);}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  .btn-next{
+    width:100%;height:52px;background:var(--accent);color:#1C1C1E;border:none;border-radius:50px;
+    font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;margin-top:8px;
+  }
+  .btn-back{
+    width:100%;height:44px;background:transparent;color:var(--muted);border:none;
+    font-size:14px;font-family:inherit;cursor:pointer;margin-top:6px;
+  }
+  .error-msg{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+
+  /* Step 5 final */
+  .final-card{text-align:center;padding:32px 0;}
+  .final-icon{font-size:64px;margin-bottom:16px;}
+  .final-title{font-size:24px;font-weight:800;margin-bottom:8px;}
+  .final-sub{font-size:14px;color:var(--muted);line-height:1.6;}
+  .wa-btn{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    height:52px;background:#25D366;color:#FFF;border:none;border-radius:50px;
+    font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;
+    width:100%;margin-top:24px;
+  }
+</style>
+</head>
+<body>
+<div class="intake-wrap">
+  <div class="intake-logo">FitApp</div>
+  <div class="step-dots" id="step-dots">
+    <div class="step-dot active" id="dot-0"></div>
+    <div class="step-dot" id="dot-1"></div>
+    <div class="step-dot" id="dot-2"></div>
+    <div class="step-dot" id="dot-3"></div>
+    <div class="step-dot" id="dot-4"></div>
+  </div>
+
+  <!-- STEP 1: Datos personales -->
+  <div class="step active" id="step-0">
+    <h2>¡Hola! 👋</h2>
+    <p class="step-sub">Cuéntanos un poco sobre ti para personalizar tu experiencia.</p>
+    <div class="form-group"><label>Nombre completo</label><input id="s1-nombre" placeholder="Ej: María García"></div>
+    <div class="form-group"><label>Email</label><input id="s1-email" type="email" placeholder="tu@email.com"></div>
+    <div class="row2">
+      <div class="form-group"><label>Teléfono / WhatsApp</label><input id="s1-tel" placeholder="+34 600..."></div>
+      <div class="form-group"><label>Edad</label><input id="s1-edad" type="number" placeholder="25"></div>
+    </div>
+    <div class="row2">
+      <div class="form-group"><label>Sexo</label>
+        <select id="s1-sexo"><option value="">Seleccionar</option><option value="hombre">Hombre</option><option value="mujer">Mujer</option><option value="otro">Otro</option></select>
+      </div>
+      <div class="form-group"><label>Ciudad</label><input id="s1-ciudad" placeholder="Madrid"></div>
+    </div>
+    <p class="error-msg" id="err-0">Por favor completa todos los campos.</p>
+    <button class="btn-next" onclick="nextStep(0)">Continuar →</button>
+  </div>
+
+  <!-- STEP 2: Objetivo -->
+  <div class="step" id="step-1">
+    <h2>¿Cuál es tu objetivo? 🎯</h2>
+    <p class="step-sub">Selecciona el que más te representa.</p>
+    <div class="pills-wrap" id="pills-objetivo">
+      <button class="pill-opt" data-val="perdida_grasa">Perder grasa</button>
+      <button class="pill-opt" data-val="ganancia_muscular">Ganar músculo</button>
+      <button class="pill-opt" data-val="mantenimiento">Mantenerme</button>
+      <button class="pill-opt" data-val="definicion">Definición</button>
+      <button class="pill-opt" data-val="salud">Mejorar mi salud</button>
+      <button class="pill-opt" data-val="rendimiento">Rendimiento</button>
+    </div>
+    <div class="form-group" style="margin-top:20px;"><label>¿Tienes algún objetivo extra?</label><textarea id="s2-objetivo-extra" placeholder="Ej: Quiero correr un 10K en 6 meses..."></textarea></div>
+    <p class="error-msg" id="err-1">Por favor selecciona un objetivo.</p>
+    <button class="btn-next" onclick="nextStep(1)">Continuar →</button>
+    <button class="btn-back" onclick="prevStep(1)">← Atrás</button>
+  </div>
+
+  <!-- STEP 3: Nivel y experiencia -->
+  <div class="step" id="step-2">
+    <h2>Tu experiencia 💪</h2>
+    <p class="step-sub">Selecciona tu nivel actual de entrenamiento.</p>
+    <div class="pills-wrap" id="pills-nivel">
+      <button class="pill-opt" data-val="principiante">Principiante (0-6 meses)</button>
+      <button class="pill-opt" data-val="intermedio">Intermedio (1-3 años)</button>
+      <button class="pill-opt" data-val="avanzado">Avanzado (+3 años)</button>
+    </div>
+    <div class="form-group" style="margin-top:20px;"><label>¿Cuántos días por semana puedes entrenar?</label>
+      <div class="pills-wrap" id="pills-dias">
+        <button class="pill-opt" data-val="2">2 días</button>
+        <button class="pill-opt" data-val="3">3 días</button>
+        <button class="pill-opt" data-val="4">4 días</button>
+        <button class="pill-opt" data-val="5">5 días</button>
+        <button class="pill-opt" data-val="6+">6+ días</button>
+      </div>
+    </div>
+    <div class="form-group"><label>¿Tienes alguna lesión o limitación física?</label><textarea id="s3-lesion" placeholder="Ej: Tengo problemas de rodilla derecha..."></textarea></div>
+    <p class="error-msg" id="err-2">Por favor selecciona tu nivel y días disponibles.</p>
+    <button class="btn-next" onclick="nextStep(2)">Continuar →</button>
+    <button class="btn-back" onclick="prevStep(2)">← Atrás</button>
+  </div>
+
+  <!-- STEP 4: Cuerpo y hábitos -->
+  <div class="step" id="step-3">
+    <h2>Tu cuerpo y hábitos 📏</h2>
+    <p class="step-sub">Esta info nos ayuda a personalizar tu plan.</p>
+    <div class="row2">
+      <div class="form-group"><label>Peso actual (kg)</label><input id="s4-peso" type="number" step="0.1" placeholder="70"></div>
+      <div class="form-group"><label>Altura (cm)</label><input id="s4-altura" type="number" placeholder="175"></div>
+    </div>
+    <div class="form-group"><label>¿Cómo describes tu alimentación actual?</label>
+      <div class="pills-wrap" id="pills-dieta">
+        <button class="pill-opt" data-val="muy_mala">Muy mala</button>
+        <button class="pill-opt" data-val="irregular">Irregular</button>
+        <button class="pill-opt" data-val="normal">Normal</button>
+        <button class="pill-opt" data-val="buena">Buena</button>
+        <button class="pill-opt" data-val="muy_buena">Muy buena</button>
+      </div>
+    </div>
+    <div class="form-group"><label>¿Cuántas horas duermes de media?</label>
+      <div class="pills-wrap" id="pills-sueno">
+        <button class="pill-opt" data-val="menos5">Menos de 5h</button>
+        <button class="pill-opt" data-val="5-6">5-6 h</button>
+        <button class="pill-opt" data-val="7-8">7-8 h</button>
+        <button class="pill-opt" data-val="mas8">Más de 8h</button>
+      </div>
+    </div>
+    <div class="form-group"><label>¿Algo más que quieras contarnos?</label><textarea id="s4-extra" placeholder="Alergias, preferencias, horarios..."></textarea></div>
+    <button class="btn-next" onclick="nextStep(3)">Enviar formulario ✓</button>
+    <button class="btn-back" onclick="prevStep(3)">← Atrás</button>
+  </div>
+
+  <!-- STEP 5: Final -->
+  <div class="step" id="step-4">
+    <div class="final-card">
+      <div class="final-icon">🎉</div>
+      <div class="final-title">¡Formulario enviado!</div>
+      <p class="final-sub">Hemos guardado tu información. Tu coach se pondrá en contacto contigo pronto para comenzar tu transformación.</p>
+      <button class="wa-btn" id="btn-wa">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFF"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Contactar por WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+var data = {};
+var currentStep = 0;
+
+function pillGroup(groupId, key){
+  document.getElementById(groupId).querySelectorAll(".pill-opt").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.getElementById(groupId).querySelectorAll(".pill-opt").forEach(function(x){ x.classList.remove("sel"); });
+      b.classList.add("sel");
+      data[key] = b.getAttribute("data-val");
+    });
+  });
+}
+pillGroup("pills-objetivo","objetivo");
+pillGroup("pills-nivel","nivel");
+pillGroup("pills-dias","dias_semana");
+pillGroup("pills-dieta","dieta");
+pillGroup("pills-sueno","sueno");
+
+function updateDots(step){
+  for(var i=0;i<5;i++){
+    var d = document.getElementById("dot-"+i);
+    d.className = "step-dot" + (i<step?" done":(i===step?" active":""));
+  }
+}
+
+function nextStep(from){
+  document.getElementById("err-"+from).style.display="none";
+
+  if(from===0){
+    if(!document.getElementById("s1-nombre").value.trim()||!document.getElementById("s1-email").value.trim()){
+      document.getElementById("err-0").style.display="block"; return;
+    }
+    data.nombre   = document.getElementById("s1-nombre").value.trim();
+    data.email    = document.getElementById("s1-email").value.trim();
+    data.telefono = document.getElementById("s1-tel").value.trim();
+    data.edad     = document.getElementById("s1-edad").value;
+    data.sexo     = document.getElementById("s1-sexo").value;
+    data.ciudad   = document.getElementById("s1-ciudad").value.trim();
+  }
+  if(from===1){
+    if(!data.objetivo){ document.getElementById("err-1").style.display="block"; return; }
+    data.objetivo_extra = document.getElementById("s2-objetivo-extra").value.trim();
+  }
+  if(from===2){
+    if(!data.nivel||!data.dias_semana){ document.getElementById("err-2").style.display="block"; return; }
+    data.lesion = document.getElementById("s3-lesion").value.trim();
+  }
+  if(from===3){
+    data.peso   = document.getElementById("s4-peso").value;
+    data.altura = document.getElementById("s4-altura").value;
+    data.extra  = document.getElementById("s4-extra").value.trim();
+    data.fecha  = new Date().toISOString().split("T")[0];
+    // Guardar
+    var intakes = JSON.parse(localStorage.getItem("fitapp_intakes")||"[]");
+    intakes.push(data);
+    localStorage.setItem("fitapp_intakes", JSON.stringify(intakes));
+    // WhatsApp link
+    var msg = "Hola, acabo de completar el formulario de FitApp!\n" +
+      "Nombre: " + data.nombre + "\nObjetivo: " + (data.objetivo||"").replace("_"," ") + "\nTeléfono: " + (data.telefono||"—");
+    document.getElementById("btn-wa").onclick = function(){
+      window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+    };
+  }
+
+  document.getElementById("step-"+from).classList.remove("active");
+  currentStep = from+1;
+  document.getElementById("step-"+currentStep).classList.add("active");
+  updateDots(currentStep);
+  window.scrollTo(0,0);
+}
+
+function prevStep(from){
+  document.getElementById("step-"+from).classList.remove("active");
+  currentStep = from-1;
+  document.getElementById("step-"+currentStep).classList.add("active");
+  updateDots(currentStep);
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
