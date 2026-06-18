@@ -266,20 +266,100 @@
     var suRacha = window.db.calcularRacha(otroId);
     var miPct = _calcPctMes(alumnoId);
     var suPct = _calcPctMes(otroId);
+    var misRegs = window.db.getRegistros(alumnoId);
+    var susRegs = window.db.getRegistros(otroId);
+    var misMes = misRegs.filter(function(r){ var f=new Date(r.fecha); var h=new Date(); return f.getMonth()===h.getMonth()&&f.getFullYear()===h.getFullYear(); }).length;
+    var susMes = susRegs.filter(function(r){ var f=new Date(r.fecha); var h=new Date(); return f.getMonth()===h.getMonth()&&f.getFullYear()===h.getFullYear(); }).length;
+    var misHoras = Math.round(misRegs.reduce(function(s,r){ return s+(r.duracion_min||0); },0)/60);
+    var susHoras = Math.round(susRegs.reduce(function(s,r){ return s+(r.duracion_min||0); },0)/60);
+    var miHabCheck = window.db.getHabitoChecks ? window.db.getHabitoChecks(alumnoId) : {};
+    var suHabCheck = window.db.getHabitoChecks ? window.db.getHabitoChecks(otroId) : {};
+    var miHabTotal = Object.values(miHabCheck).reduce(function(s,d){ return s+Object.keys(d).filter(function(k){ return d[k]; }).length; },0);
+    var suHabTotal = Object.values(suHabCheck).reduce(function(s,d){ return s+Object.keys(d).filter(function(k){ return d[k]; }).length; },0);
 
-    function vsRow(miVal, suVal, label){
-      return '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:12px;">' +
-        '<div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:' + (miVal>=suVal?"#C8E000":"#FFF") + ';">' + miVal + '</div><div style="font-size:10px;color:rgba(255,255,255,.35);">Tú</div></div>' +
-        '<div style="font-size:11px;color:rgba(255,255,255,.2);text-align:center;">' + label + '</div>' +
-        '<div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:' + (suVal>miVal?"#C8E000":"#FFF") + ';">' + suVal + '</div><div style="font-size:10px;color:rgba(255,255,255,.35);">' + (otro?otro.nombre:"Rival") + '</div></div>' +
+    function vsBar(miVal, suVal, label, color){
+      var total = Math.max(miVal + suVal, 1);
+      var miPctBar = Math.round(miVal/total*100);
+      var suPctBar = 100 - miPctBar;
+      var miGana = miVal >= suVal;
+      return '<div style="margin-bottom:14px;">' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:5px;">' +
+          '<span style="font-size:12px;font-weight:800;color:' + (miGana?color:"rgba(255,255,255,.5)") + ';">' + miVal + '</span>' +
+          '<span style="font-size:11px;color:rgba(255,255,255,.3);">' + label + '</span>' +
+          '<span style="font-size:12px;font-weight:800;color:' + (!miGana?color:"rgba(255,255,255,.5)") + ';">' + suVal + '</span>' +
+        '</div>' +
+        '<div style="height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden;display:flex;">' +
+          '<div style="width:' + miPctBar + '%;background:' + (miGana?color:"rgba(255,255,255,.2)") + ';border-radius:99px 0 0 99px;"></div>' +
+          '<div style="width:' + suPctBar + '%;background:' + (!miGana?color:"rgba(255,255,255,.1)") + ';border-radius:0 99px 99px 0;margin-left:2px;"></div>' +
+        '</div>' +
       '</div>';
     }
 
+    var yoGanando = (miRacha>=suRacha?1:0)+(misMes>=susMes?1:0)+(misHoras>=susHoras?1:0)+(miHabTotal>=suHabTotal?1:0);
+    var ganando = yoGanando >= 3;
+
+    // Reto personalizado (apuesta) guardado
+    var apuesta = localStorage.getItem("fitapp_apuesta_" + vinculo.id) || "";
+
     container.innerHTML =
-      '<div style="font-size:14px;font-weight:700;color:#FFF;margin-bottom:14px;">⚔️ Reto activo</div>' +
-      vsRow(miRacha, suRacha, "Racha días") +
-      vsRow(miPct+"%", suPct+"%", "Cumplimiento mes") +
-      '<div style="font-size:11px;color:rgba(255,255,255,.25);text-align:center;margin-top:4px;">Constancia — no peso ni cuerpo 💪</div>';
+      '<div style="text-align:center;margin-bottom:16px;">' +
+        '<div style="font-size:28px;margin-bottom:6px;">' + (ganando?"🏆":"⚔️") + '</div>' +
+        '<div style="font-size:16px;font-weight:800;color:#FFF;">' + (ganando?"¡Vas ganando!":"Tú vs " + (otro?otro.nombre:"tu rival")) + '</div>' +
+        (apuesta ? '<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px;">🎯 Apuesta: ' + apuesta + '</div>' : '') +
+      '</div>' +
+      // Nombres
+      '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:14px;">' +
+        '<div style="text-align:center;">' +
+          '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#C8E000,#8FB200);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#0A0A0A;margin:0 auto 4px;">' + (window.db.getAlumnoPorId(alumnoId)||{nombre:"Yo"}).nombre[0] + '</div>' +
+          '<div style="font-size:12px;font-weight:700;color:#FFF;">Tú</div>' +
+        '</div>' +
+        '<div style="font-size:14px;font-weight:900;color:rgba(255,255,255,.2);">VS</div>' +
+        '<div style="text-align:center;">' +
+          '<div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#FFF;margin:0 auto 4px;">' + (otro?otro.nombre[0]:"?") + '</div>' +
+          '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);">' + (otro?otro.nombre:"?") + '</div>' +
+        '</div>' +
+      '</div>' +
+      vsBar(miRacha, suRacha, "🔥 Racha (días)", "#C8E000") +
+      vsBar(misMes, susMes, "🏋️ Entrenos este mes", "#60A5FA") +
+      vsBar(misHoras, susHoras, "⏱️ Horas totales", "#FF9F0A") +
+      vsBar(miHabTotal, suHabTotal, "🌿 Hábitos completados", "#A78BFA") +
+      // Marcador
+      '<div style="background:rgba(200,224,0,0.06);border-radius:12px;padding:12px;text-align:center;margin-top:4px;border:1px solid rgba(200,224,0,0.1);">' +
+        '<div style="font-size:11px;font-weight:700;color:rgba(200,224,0,0.7);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Marcador</div>' +
+        '<div style="font-size:22px;font-weight:900;color:#FFF;">' + yoGanando + ' – ' + (4-yoGanando) + '</div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:2px;">' + (ganando?"Tú lideras 💪":"Sigue esforzándote 🔥") + '</div>' +
+      '</div>' +
+      // Apuesta
+      (!apuesta ? '<div style="margin-top:12px;">' +
+        '<input id="apuesta-input" placeholder="Añade una apuesta (ej: batido fit al perdedor)" style="width:100%;height:42px;background:#1C1C1C;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:0 12px;color:#FFF;font-family:inherit;font-size:13px;">' +
+        '<button id="btn-guardar-apuesta" style="width:100%;margin-top:8px;height:42px;background:rgba(200,224,0,0.1);color:#C8E000;border:1px solid rgba(200,224,0,0.2);border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">💰 Establecer apuesta</button>' +
+      '</div>' : '') +
+      '<div style="margin-top:10px;display:flex;gap:8px;">' +
+        '<button id="btn-desvincular" style="flex:1;height:40px;background:rgba(255,69,58,.08);color:#FF453A;border:1px solid rgba(255,69,58,.2);border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Terminar reto</button>' +
+        '<button id="btn-ver-rutina-rival" style="flex:1;height:40px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.08);border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 Ver rutina rival</button>' +
+      '</div>';
+
+    var btnApuesta = document.getElementById("btn-guardar-apuesta");
+    if(btnApuesta) btnApuesta.addEventListener("click", function(){
+      var val = (document.getElementById("apuesta-input").value||"").trim();
+      if(!val) return;
+      localStorage.setItem("fitapp_apuesta_" + vinculo.id, val);
+      window.mostrarToast && window.mostrarToast("💰 Apuesta guardada: " + val);
+      _renderComparativaCard(alumnoId);
+    });
+    var btnDesv = document.getElementById("btn-desvincular");
+    if(btnDesv) btnDesv.addEventListener("click", function(){
+      if(!confirm("¿Terminar este reto?")) return;
+      window.db.rechazarVinculo(vinculo.id);
+      window.mostrarToast && window.mostrarToast("Reto terminado");
+      _renderComparativaCard(alumnoId);
+    });
+    var btnRut = document.getElementById("btn-ver-rutina-rival");
+    if(btnRut) btnRut.addEventListener("click", function(){
+      var rutOtro = otro ? window.db.getRutinaPorId(otro.rutina_id) : null;
+      var msg = rutOtro ? "Rutina de " + otro.nombre + ": " + (rutOtro.nombre || rutOtro.id) : "Tu rival aún no tiene rutina asignada.";
+      window.mostrarToast && window.mostrarToast(msg);
+    });
   }
 
   function sectionHead(icon, label, color){

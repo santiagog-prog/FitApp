@@ -250,8 +250,8 @@
     var header = document.getElementById("app-header");
     header.innerHTML =
       "<div class='ah-top'>" +
-        "<div class='ah-logo'>" +
-          "<svg viewBox='0 0 24 24' fill='#1C1C1E'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>" +
+        "<div class='ah-logo' id='ah-logo-btn' style='cursor:pointer;background:linear-gradient(135deg,#C8E000,#8FB200);border-radius:12px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(200,224,0,0.35);'>" +
+          "<svg viewBox='0 0 24 24' fill='none' stroke='#1C1C1E' stroke-width='2.2' stroke-linecap='round' width='20' height='20'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>" +
         "</div>" +
         "<div class='ah-icons'>" +
           "<button class='ah-icon-btn' id='ah-btn-videos' style='position:relative;'>" +
@@ -357,8 +357,23 @@
       var fechaMacros = window.db.fechaHoy();
       var nutM = window.db.getNutricion(alumno.id, fechaMacros);
       var protM=0, carbsM=0, grasM=0;
-      var sumarAlimentos = function(lista){ if(!lista) return; lista.forEach(function(a){ protM+=(a.proteina||0); carbsM+=(a.carbos||a.carbohidratos||0); grasM+=(a.grasas||0); }); };
-      sumarAlimentos(nutM.alimentos); sumarAlimentos(nutM.extras);
+      // Sumar alimentos marcados como comidos desde el plan
+      var planM = window.db.getPlanPorId(alumno.plan_alimentacion_id);
+      if(planM && nutM.comidos){
+        planM.comidas.forEach(function(comida, ci){
+          var opIdx = nutM.opciones ? (nutM.opciones[ci] || 0) : 0;
+          var op = comida.opciones[opIdx];
+          if(op) op.alimentos.forEach(function(a, ai){
+            var key = ci + "_" + ai;
+            if(nutM.comidos[key] !== true) return;
+            protM  += (a.proteina || 0);
+            carbsM += (a.carbos || a.carbohidratos || 0);
+            grasM  += (a.grasas  || 0);
+          });
+        });
+      }
+      // Extras y food scans
+      if(nutM.extras) nutM.extras.forEach(function(a){ protM+=(a.proteina||0); carbsM+=(a.carbos||a.carbohidratos||0); grasM+=(a.grasas||0); });
       var scansM = window.db.getFoodScans(alumno.id, fechaMacros);
       scansM.forEach(function(s){ protM+=(s.proteinas||0); carbsM+=(s.carbohidratos||0); grasM+=(s.grasas||0); });
       protM = Math.round(protM); carbsM = Math.round(carbsM); grasM = Math.round(grasM);
@@ -520,37 +535,45 @@
       var planObj2 = window.db.getPlanPorId(alumno.plan_alimentacion_id);
       var kcalMeta = planObj2 ? (planObj2.calorias_objetivo||2000) : 2000;
 
-      html += '<div style="margin:0 20px 14px;">';
-      html += '<div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;margin-bottom:10px;">Progreso semanal</div>';
-      html += '<div style="background:#141414;border-radius:20px;overflow:hidden;">';
-      // Header row
-      html += '<div style="display:grid;grid-template-columns:36px 1fr 1fr 1fr 1fr;gap:0;border-bottom:1px solid rgba(255,255,255,0.05);">';
-      html += '<div style="padding:10px 8px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);text-align:center;"></div>';
-      ['Kcal','Pasos','Entreno','Hábitos'].forEach(function(h){
-        html += '<div style="padding:10px 6px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-align:center;text-transform:uppercase;letter-spacing:.4px;">'+h+'</div>';
+      html += '<div style="margin:0 20px 14px;" id="progreso-semanal-card">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+        '<div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;">📊 Esta semana</div>' +
+        '<div style="font-size:12px;font-weight:700;color:#C8E000;cursor:pointer;">Ver todo →</div>' +
+      '</div>';
+      // Mini bar chart de entrenos semana
+      html += '<div style="background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:14px 16px;">';
+      // Fila de días como pills glassmorphism
+      html += '<div style="display:flex;gap:6px;margin-bottom:12px;">';
+      semData.forEach(function(row){
+        var kcalPct = Math.min(100, Math.round(row.kcal/kcalMeta*100));
+        var bg = row.esHoy ? '#C8E000' : row.entreno > 0 ? 'rgba(52,199,89,0.2)' : 'rgba(255,255,255,0.05)';
+        var textCol = row.esHoy ? '#0A0A0A' : row.entreno > 0 ? '#34C759' : 'rgba(255,255,255,0.4)';
+        var emoji = row.esHoy ? '⚡' : row.entreno > 0 ? '✅' : row.habitos > 0 ? '🌿' : '';
+        html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:'+bg+';border-radius:12px;padding:8px 2px;">' +
+          '<div style="font-size:9px;font-weight:700;color:'+textCol+';">'+row.label+'</div>' +
+          '<div style="font-size:11px;font-weight:800;color:'+textCol+';">'+row.dia+'</div>' +
+          (emoji ? '<div style="font-size:10px;">'+emoji+'</div>' : '<div style="height:14px;"></div>') +
+        '</div>';
       });
       html += '</div>';
-      // Data rows
-      semData.forEach(function(row){
-        var rowBg = row.esHoy ? 'background:rgba(200,224,0,0.05);' : '';
-        var dayColor = row.esHoy ? '#C8E000' : 'rgba(255,255,255,0.6)';
-        var kcalPct = Math.min(100, Math.round(row.kcal/kcalMeta*100));
-        var pasosPct = Math.min(100, Math.round(row.pasos/10000*100));
-        function cell(pct, color, val, fmt){
-          var dot = pct>=80 ? '●' : pct>=40 ? '◐' : pct>0 ? '○' : '·';
-          var dc  = pct>=80 ? color : pct>=40 ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.15)';
-          return '<div style="padding:10px 6px;text-align:center;">' +
-            '<div style="font-size:11px;color:'+dc+';font-weight:700;">'+(pct>0?fmt:'—')+'</div>' +
-          '</div>';
-        }
-        html += '<div style="display:grid;grid-template-columns:36px 1fr 1fr 1fr 1fr;gap:0;border-bottom:1px solid rgba(255,255,255,0.04);'+rowBg+'">';
-        html += '<div style="padding:10px 0;text-align:center;"><div style="font-size:10px;font-weight:700;color:'+dayColor+';">'+row.label+'</div><div style="font-size:9px;color:rgba(255,255,255,0.2);">'+row.dia+'</div></div>';
-        html += cell(kcalPct, '#FF9F0A', row.kcal, row.kcal>0?(row.kcal>999?(Math.round(row.kcal/100)/10)+'k':row.kcal):'—');
-        html += cell(pasosPct,'#5AC8FA', row.pasos, row.pasos>0?(row.pasos>999?(Math.round(row.pasos/100)/10)+'k':row.pasos):'—');
-        html += '<div style="padding:10px 6px;text-align:center;"><div style="font-size:14px;">'+(row.entreno>0?'✅':'·')+'</div></div>';
-        html += '<div style="padding:10px 6px;text-align:center;"><div style="font-size:11px;font-weight:700;color:'+(row.habitos>0?'#BF5AF2':'rgba(255,255,255,0.15)')+';">'+(row.habitos>0?row.habitos:'—')+'</div></div>';
-        html += '</div>';
-      });
+      // Stats row
+      var totalEnt = semData.filter(function(r){ return r.entreno>0; }).length;
+      var totalHab = semData.reduce(function(s,r){ return s+r.habitos; }, 0);
+      var totalKcal = semData.reduce(function(s,r){ return s+r.kcal; }, 0);
+      html += '<div style="display:flex;gap:8px;">';
+      html += '<div style="flex:1;background:rgba(255,149,0,0.1);border-radius:12px;padding:10px;text-align:center;border:1px solid rgba(255,149,0,0.15);">' +
+        '<div style="font-size:16px;font-weight:900;color:#FF9F0A;">' + totalEnt + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:600;margin-top:2px;">🏋️ entrenos</div>' +
+      '</div>';
+      html += '<div style="flex:1;background:rgba(91,200,250,0.1);border-radius:12px;padding:10px;text-align:center;border:1px solid rgba(91,200,250,0.15);">' +
+        '<div style="font-size:16px;font-weight:900;color:#5AC8FA;">' + (totalKcal > 0 ? (totalKcal > 999 ? (Math.round(totalKcal/100)/10)+'k' : totalKcal) : '0') + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:600;margin-top:2px;">🔥 kcal</div>' +
+      '</div>';
+      html += '<div style="flex:1;background:rgba(191,90,242,0.1);border-radius:12px;padding:10px;text-align:center;border:1px solid rgba(191,90,242,0.15);">' +
+        '<div style="font-size:16px;font-weight:900;color:#BF5AF2;">' + totalHab + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:600;margin-top:2px;">🌿 hábitos</div>' +
+      '</div>';
+      html += '</div>';
       html += '</div></div>';
     })();
 
@@ -573,6 +596,32 @@
     "</div>";
     html += "</div>";
 
+    // ── Reto con amigos shortcut ────────────────────────
+    (function(){
+      var vinculo = window.db.getVinculoDe ? window.db.getVinculoDe(alumno.id) : null;
+      var activo = vinculo && window.db.vinculoEstaActivo && window.db.vinculoEstaActivo(vinculo);
+      if(activo){
+        var rivalId = vinculo.alumno1===alumno.id ? vinculo.alumno2 : vinculo.alumno1;
+        var rival = window.db.getAlumnoPorId(rivalId);
+        html += "<div id='reto-card-home' style='background:#141414;border-radius:18px;margin:0 20px 14px;padding:16px;border:1px solid rgba(200,224,0,0.12);cursor:pointer;'>" +
+          "<div style='font-size:11px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;'>⚔️ Reto activo</div>" +
+          "<div style='display:flex;align-items:center;justify-content:space-between;'>" +
+            "<div style='font-size:15px;font-weight:700;color:#FFF;'>Tú vs " + (rival?rival.nombre:"tu rival") + "</div>" +
+            "<div style='font-size:12px;color:rgba(255,255,255,.4);'>Ver →</div>" +
+          "</div>" +
+        "</div>";
+      } else {
+        html += "<div id='reto-card-home' style='background:#141414;border-radius:18px;margin:0 20px 14px;padding:14px 16px;border:1px dashed rgba(255,255,255,0.08);cursor:pointer;display:flex;align-items:center;gap:12px;'>" +
+          "<span style='font-size:22px;'>🤝</span>" +
+          "<div style='flex:1;'>" +
+            "<div style='font-size:14px;font-weight:700;color:#FFF;'>Retar a un amigo</div>" +
+            "<div style='font-size:12px;color:rgba(255,255,255,.35);margin-top:2px;'>Compita con su código · Toca para comenzar</div>" +
+          "</div>" +
+          "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='2'><polyline points='9 18 15 12 9 6'/></svg>" +
+        "</div>";
+      }
+    })();
+
     // ── Nota del coach ──────────────────────────────────
     if(notas.length){
       var ultima = notas[notas.length-1];
@@ -592,6 +641,10 @@
     // ── FitScore animado ────────────────────────────────
     var fscEl = document.getElementById("fsc-num");
     if(fscEl && fsObj) animarNumero(fscEl, fsObj.total, 1000, "");
+
+    // ── Logo btn ─────────────────────────────────────────
+    var ahLogo = document.getElementById("ah-logo-btn");
+    if(ahLogo) ahLogo.addEventListener("click", function(){ window.irAPagina("inicio"); });
 
     // ── Header: botones videos, búsqueda, notificaciones ─
     var ahVideos = document.getElementById("ah-btn-videos");
@@ -620,6 +673,18 @@
     // ── Macros donut → Nutrición ─────────────────────────
     var macrosCard = document.getElementById("macros-home-card");
     if(macrosCard) macrosCard.addEventListener("click", function(){ window.irAPagina("nutricion"); });
+
+    // ── FitScore → Evolución ─────────────────────────────
+    var fscCard = document.querySelector(".fitscore-home-card");
+    if(fscCard) fscCard.addEventListener("click", function(){ window.irAPagina("evolucion"); });
+
+    // ── Progreso semanal → Evolución ─────────────────────
+    var progCard = document.getElementById("progreso-semanal-card");
+    if(progCard) progCard.addEventListener("click", function(){ window.irAPagina("evolucion"); });
+
+    // ── Reto → Perfil ────────────────────────────────────
+    var retoCard = document.getElementById("reto-card-home");
+    if(retoCard) retoCard.addEventListener("click", function(){ window.irAPagina("perfil"); });
 
     // ── Días de la semana: clic muestra detalle ──────────
     document.querySelectorAll(".dia-strip-item").forEach(function(el){

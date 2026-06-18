@@ -6,6 +6,16 @@
 
   var DIAS_SEMANA = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
 
+  // Genera descripción legible de la receta basada en los ingredientes
+  function _generarDescReceta(opcion){
+    if(!opcion || !opcion.alimentos || !opcion.alimentos.length) return "";
+    var items = opcion.alimentos.map(function(a){ return a.cantidad + " de " + a.nombre.toLowerCase(); });
+    if(items.length === 1) return items[0].charAt(0).toUpperCase() + items[0].slice(1) + ".";
+    if(items.length === 2) return items[0].charAt(0).toUpperCase() + items[0].slice(1) + " con " + items[1] + ".";
+    var ultimo = items.pop();
+    return items[0].charAt(0).toUpperCase() + items[0].slice(1) + " con " + items.slice(1).join(", ") + " y " + ultimo + ".";
+  }
+
   // Índice 0=Lun … 6=Dom (igual que el resto de la app)
   function diaIdxHoy(){ return (new Date().getDay() + 6) % 7; }
 
@@ -93,7 +103,10 @@
         '<div class="ncb-icon">' + icono + '</div>' +
         '<div class="ncb-info">' +
           '<div class="ncb-nombre">' + comida.nombre + (comida.hora ? ' <span style="font-size:11px;color:rgba(255,255,255,0.35);font-weight:400;">· ' + comida.hora + '</span>' : '') + '</div>' +
-          (elegida && elegida.nombre ? '<div style="margin-top:6px;padding:10px 14px;background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.09);border-radius:12px;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.5;">' + elegida.nombre + '</div>' : '') +
+          (elegida ? (function(){
+            var desc = _generarDescReceta(elegida);
+            return '<div style="margin-top:8px;padding:12px 14px;background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;font-style:italic;">' + desc + '</div>';
+          })() : '') +
         '</div>' +
         (elegida ? '<div class="ncb-kcal">' + (elegida.calorias_total || 0) + ' kcal</div>' : '') +
       '</div>';

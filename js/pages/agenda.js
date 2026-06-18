@@ -211,14 +211,47 @@
   function iniciarEntrenamiento(diaRutina, rutina){
     _workout.ejercicios   = diaRutina.ejercicios;
     _workout.seriesData   = {};
+    _workout.historialPrev = {};
     _workout.cronSegundos = 0;
     _workout.diaNumero    = diaRutina.numero;
 
+    // Cargar historial anterior para pre-rellenar pesos/reps
+    var alumno = window.db.getAlumnoPorId(window.ALUMNO_ID);
+    var registros = window.db.getRegistros(alumno.id);
+    // Buscar la última sesión del mismo día de rutina
+    var prevReg = registros.slice().reverse().find(function(r){
+      return r.dia_numero === diaRutina.numero ||
+             r.sesion_nombre === diaRutina.nombre;
+    });
+    var prevEjData = {};
+    if(prevReg){
+      // From series_data (new format)
+      if(prevReg.series_data){
+        Object.keys(prevReg.series_data).forEach(function(k){
+          prevEjData[k] = prevReg.series_data[k];
+        });
+      }
+      // From ejercicios array (also new format, richer)
+      if(Array.isArray(prevReg.ejercicios)){
+        prevReg.ejercicios.forEach(function(ej){
+          var k = ej.id || ej.nombre;
+          if(k && ej.series && ej.series.length) prevEjData[k] = ej.series;
+        });
+      }
+    }
+
     diaRutina.ejercicios.forEach(function(ej){
       var key = ej.id || ej.nombre;
+      var prev = prevEjData[key] || [];
       _workout.seriesData[key] = [];
+      _workout.historialPrev[key] = prev;
       for(var s=0; s<(ej.series||3); s++){
-        _workout.seriesData[key].push({ reps: parseInt(ej.repeticiones)||0, kg:0, done:false });
+        var prevSerie = prev[s] || {};
+        _workout.seriesData[key].push({
+          reps: prevSerie.reps || parseInt(ej.repeticiones) || 0,
+          kg:   prevSerie.kg   || 0,
+          done: false
+        });
       }
     });
 
@@ -272,6 +305,20 @@
 
       if(ej.nota_tecnica){
         html += "<div style='background:rgba(200,224,0,0.06);border-left:3px solid #C8E000;border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:14px;font-size:13px;color:rgba(255,255,255,0.55);'>ℹ️ " + ej.nota_tecnica + "</div>";
+      }
+
+      // Historial sesión anterior
+      var prevH = (_workout.historialPrev && _workout.historialPrev[ejKey]) || [];
+      if(prevH.length){
+        html += "<div style='background:rgba(255,255,255,0.03);border-radius:10px;padding:8px 12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.05);'>" +
+          "<div style='font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;'>📊 Sesión anterior</div>" +
+          "<div style='display:flex;flex-wrap:wrap;gap:6px;'>" +
+          prevH.map(function(ps, pi){
+            return "<span style='font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.06);border-radius:6px;padding:3px 8px;'>" +
+              "S" + (pi+1) + ": " + (ps.reps||"?") + " × " + (ps.kg||0) + "kg" +
+            "</span>";
+          }).join("") +
+          "</div></div>";
       }
 
       series.forEach(function(serie, sIdx){
@@ -485,18 +532,25 @@
 
     document.getElementById("mc-guardar").addEventListener("click", function(){
       var nota = (document.getElementById("mc-nota")||{}).value || "";
+      // Build ejercicios array with series for history
+      var ejArray = _workout.ejercicios.map(function(ej){
+        var key = ej.id || ej.nombre;
+        var ss = _workout.seriesData[key] || [];
+        return { id:ej.id, nombre:ej.nombre, series: ss.map(function(s){ return { reps:s.reps, kg:s.kg, done:s.done }; }) };
+      });
       var nuevas = window.db.saveRegistro(window.ALUMNO_ID, {
         id: window.db.generarId("reg"),
         fecha: window.db.fechaHoy(),
         dia_numero: _workout.diaNumero,
-        sesion_nombre: (_workout.ejercicios[0]||{}).nombre || "Sesión",
+        sesion_nombre: _workout.ejercicios.length > 0 ? (_workout.ejercicios[0].grupo || _workout.ejercicios[0].nombre) : "Sesión",
         nombre_sesion: _workout.ejercicios.length + " ejercicios",
         ejercicios_completados: _workout.ejercicios.length,
         ejercicios_total: _workout.ejercicios.length,
         duracion_min: duracion,
         sensacion: _sensacion,
         nota: nota,
-        series_data: _workout.seriesData
+        series_data: _workout.seriesData,
+        ejercicios: ejArray
       });
       modal.remove();
       _workout.seriesData = {};

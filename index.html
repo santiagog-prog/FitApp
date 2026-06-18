@@ -415,13 +415,17 @@
   });
 
   // ── ALUMNO (ambos contextos) ──────────────────────────────
+  var _loginContext = "entrenador"; // track which context for routing
+
   document.getElementById("btn-alumno-de-entrenador").addEventListener("click", function(){
+    _loginContext = "entrenador";
     closeAll();
     cardE.classList.add("active-trainer");
     subCod.classList.add("visible");
     setTimeout(function(){ document.getElementById("d0").focus(); }, 100);
   });
   document.getElementById("btn-alumno-de-gym").addEventListener("click", function(){
+    _loginContext = "gym";
     closeAll();
     cardG.classList.add("active-gym");
     subCod.classList.add("visible");
@@ -465,7 +469,7 @@
     if(a){
       err.style.display = "none";
       window.db.setAlumnoActual(a.id);
-      location.href = "alumno/index.html";
+      location.href = _loginContext === "gym" ? "gym/alumno.html" : "alumno/index.html";
     } else {
       err.style.display = "block";
       digits.forEach(function(d){ d.classList.add("filled"); });

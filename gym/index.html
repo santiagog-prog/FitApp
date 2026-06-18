@@ -94,6 +94,10 @@
       </button>
       <div class="gs-divider"></div>
       <div class="gs-label">Gym</div>
+      <button data-sec="novedades">
+        <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        <span class="label">Novedades</span>
+      </button>
       <button data-sec="equipos">
         <svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4"/></svg>
         <span class="label">Equipos</span>
@@ -163,13 +167,14 @@
     miembros:      renderMiembros,
     clases:        renderClases,
     ingresos:      renderIngresos,
+    novedades:     renderNovedades,
     equipos:       renderEquipos,
     configuracion: renderConfiguracion,
   };
 
   var TITULOS = {
     dashboard:"Dashboard", miembros:"Miembros", clases:"Clases",
-    ingresos:"Ingresos", equipos:"Equipos", configuracion:"Configuración"
+    ingresos:"Ingresos", novedades:"Novedades & Videos", equipos:"Equipos", configuracion:"Configuración"
   };
 
   // ── Nav ────────────────────────────────────────────────
@@ -486,6 +491,113 @@
     });
     html += "</div>";
     document.getElementById("gym-content").innerHTML = html;
+  }
+
+  // ── NOVEDADES & VIDEOS ─────────────────────────────────
+  var _posts = [
+    { id:1, tipo:"novedad", icono:"🆕", titulo:"Nuevas máquinas instaladas", texto:"Ya están los 4 racks nuevos y las cables funcionales. Disponibles desde mañana.", likes:24, fecha:"Hoy" },
+    { id:2, tipo:"video", icono:"🎬", titulo:"Técnica sentadilla profunda", texto:"Video subido al feed. Coach Pablo explica paso a paso la sentadilla perfecta.", likes:41, fecha:"Ayer" },
+    { id:3, tipo:"reto", icono:"⚡", titulo:"Reto semana: 100 sentadillas", texto:"Quien lo complete esta semana gana sesión personal gratis. ¡14 inscritos!", likes:31, fecha:"Hace 2d" },
+  ];
+
+  function renderNovedades(){
+    var html = "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;'>" +
+      "<div style='font-size:13px;color:rgba(255,255,255,.4);'>Publicaciones para tus miembros</div>" +
+      "<button class='gym-btn primary' id='btn-nueva-publicacion'>+ Publicar</button>" +
+    "</div>";
+
+    // Post composer
+    html += "<div class='gym-card' id='composer-area' style='display:none;margin-bottom:16px;'>" +
+      "<div class='gym-card-title'>✍️ Nueva publicación</div>" +
+      "<div style='display:flex;gap:8px;margin-bottom:10px;'>" +
+        ["Novedad","Video","Reto","Receta"].map(function(t){
+          return "<div data-tipo='" + t.toLowerCase() + "' class='tipo-pill' style='flex:1;height:34px;border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:rgba(255,255,255,.5);cursor:pointer;'>" + t + "</div>";
+        }).join("") +
+      "</div>" +
+      "<input class='gym-input' id='post-titulo' placeholder='Título'>" +
+      "<textarea id='post-texto' placeholder='Descripción para tus miembros...' style='width:100%;min-height:80px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;color:#FFF;font-family:inherit;font-size:14px;resize:none;box-sizing:border-box;margin-bottom:10px;'></textarea>" +
+      "<div style='display:flex;gap:8px;align-items:center;margin-bottom:12px;'>" +
+        "<input class='gym-input' id='post-video-url' placeholder='URL del video (YouTube, mp4...)' style='flex:1;'>" +
+        "<div id='post-thumb-preview' style='width:80px;height:45px;border-radius:8px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(255,255,255,.3);flex-shrink:0;overflow:hidden;'><img id='post-thumb-img' style='width:100%;height:100%;object-fit:cover;display:none;'/>Portada</div>" +
+      "</div>" +
+      "<div style='display:flex;gap:8px;'>" +
+        "<button class='gym-btn secondary' id='btn-cancelar-post' style='flex:1;'>Cancelar</button>" +
+        "<button class='gym-btn primary' id='btn-publicar' style='flex:1;'>📢 Publicar</button>" +
+      "</div>" +
+    "</div>";
+
+    // Feed de posts
+    _posts.forEach(function(p){
+      html += "<div class='gym-card' style='padding:0;overflow:hidden;'>" +
+        "<div style='padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.04);'>" +
+          "<div style='display:flex;align-items:center;gap:10px;'>" +
+            "<span style='font-size:24px;'>" + p.icono + "</span>" +
+            "<div><div style='font-size:15px;font-weight:700;color:#FFF;'>" + p.titulo + "</div>" +
+            "<div style='font-size:12px;color:rgba(255,255,255,.35);margin-top:2px;'>" + p.fecha + " · ♥ " + p.likes + " likes</div></div>" +
+          "</div>" +
+          "<button class='gym-btn secondary' data-del='" + p.id + "' style='height:32px;padding:0 12px;font-size:12px;color:#FF453A;border-color:rgba(255,69,58,.3);'>Borrar</button>" +
+        "</div>" +
+        "<div style='padding:12px 16px;font-size:13px;color:rgba(255,255,255,.55);line-height:1.5;'>" + p.texto + "</div>" +
+      "</div>";
+    });
+
+    document.getElementById("gym-content").innerHTML = html;
+
+    document.getElementById("btn-nueva-publicacion").addEventListener("click", function(){
+      var c = document.getElementById("composer-area");
+      c.style.display = c.style.display === "none" ? "block" : "none";
+    });
+    document.getElementById("btn-cancelar-post").addEventListener("click", function(){
+      document.getElementById("composer-area").style.display = "none";
+    });
+
+    // Video URL → thumbnail preview
+    document.getElementById("post-video-url").addEventListener("input", function(){
+      var url = this.value;
+      var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+      var thumb = document.getElementById("post-thumb-img");
+      if(ytMatch){
+        thumb.src = "https://img.youtube.com/vi/" + ytMatch[1] + "/mqdefault.jpg";
+        thumb.style.display = "block";
+        document.getElementById("post-thumb-preview").style.color = "transparent";
+      } else {
+        thumb.style.display = "none";
+        document.getElementById("post-thumb-preview").style.color = "rgba(255,255,255,.3)";
+      }
+    });
+
+    // Tipo pills
+    document.querySelectorAll(".tipo-pill").forEach(function(pill){
+      pill.addEventListener("click", function(){
+        document.querySelectorAll(".tipo-pill").forEach(function(p){ p.style.background="transparent"; p.style.color="rgba(255,255,255,.5)"; p.style.borderColor="rgba(255,255,255,.1)"; });
+        this.style.background = "rgba(59,130,246,0.15)";
+        this.style.color = "#60A5FA";
+        this.style.borderColor = "rgba(59,130,246,0.3)";
+      });
+    });
+
+    document.getElementById("btn-publicar").addEventListener("click", function(){
+      var titulo = (document.getElementById("post-titulo").value||"").trim();
+      var texto  = (document.getElementById("post-texto").value||"").trim();
+      if(!titulo){ alert("Añade un título"); return; }
+      var iconos = { novedad:"🆕", video:"🎬", reto:"⚡", receta:"🥗" };
+      var tipoSel = document.querySelector(".tipo-pill[style*='rgba(59,130,246']");
+      var tipo = tipoSel ? tipoSel.getAttribute("data-tipo") : "novedad";
+      _posts.unshift({ id: Date.now(), tipo:tipo, icono: iconos[tipo]||"📢", titulo:titulo, texto:texto||"Sin descripción", likes:0, fecha:"Ahora" });
+      document.getElementById("composer-area").style.display = "none";
+      renderNovedades();
+      alert("✅ Publicado para todos tus miembros");
+    });
+
+    document.getElementById("gym-content").addEventListener("click", function(e){
+      var delBtn = e.target.closest("[data-del]");
+      if(delBtn){
+        var id = parseInt(delBtn.getAttribute("data-del"));
+        if(!confirm("¿Eliminar esta publicación?")) return;
+        _posts = _posts.filter(function(p){ return p.id !== id; });
+        renderNovedades();
+      }
+    });
   }
 
   // ── CONFIGURACIÓN ──────────────────────────────────────

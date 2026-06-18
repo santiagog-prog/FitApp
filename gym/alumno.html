@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FitZone Members</title>
+<style>
+  :root{
+    --acc:#3B82F6; --acc2:#8B5CF6; --acc3:#F59E0B;
+    --bg:#060A14; --surf:#0D1220; --surf2:#121828;
+    --border:rgba(59,130,246,0.12); --text:rgba(255,255,255,0.85);
+    --muted:rgba(255,255,255,0.35); --safe-bot:env(safe-area-inset-bottom,0px);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;min-height:100vh;overflow-x:hidden;}
+  /* Header */
+  #gx-header{position:sticky;top:0;z-index:100;background:rgba(6,10,20,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:calc(env(safe-area-inset-top,0px)+12px) 20px 12px;display:flex;align-items:center;justify-content:space-between;}
+  .gx-logo{font-size:20px;font-weight:900;letter-spacing:-0.5px;}
+  .gx-logo span{background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .gx-header-right{display:flex;align-items:center;gap:10px;}
+  .gx-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;cursor:pointer;}
+  .gx-notif-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.06);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;}
+  .gx-notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#FF453A;border:2px solid var(--bg);}
+  /* Tab bar */
+  #gx-tabbar{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(6,10,20,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:10px 0 calc(var(--safe-bot) + 6px);display:flex;justify-content:space-around;}
+  .gx-tab{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:2px 14px;min-width:50px;}
+  .gx-tab svg{width:22px;height:22px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s;}
+  .gx-tab span{font-size:10px;font-weight:600;color:var(--muted);transition:color .2s;}
+  .gx-tab.active svg{stroke:var(--acc);}
+  .gx-tab.active span{color:var(--acc);}
+  /* Content */
+  #gx-content{padding:16px 0 calc(var(--safe-bot) + 80px);}
+  /* Cards */
+  .gx-card{background:var(--surf);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;overflow:hidden;}
+  .gx-card-pad{padding:16px;}
+  /* Stories row */
+  .stories-scroll{display:flex;gap:10px;overflow-x:auto;padding:4px 16px 12px;scrollbar-width:none;}
+  .stories-scroll::-webkit-scrollbar{display:none;}
+  .story-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;cursor:pointer;}
+  .story-ring{width:58px;height:58px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--acc),var(--acc2),#EC4899);flex-shrink:0;}
+  .story-ring.seen{background:rgba(255,255,255,0.1);}
+  .story-inner{width:100%;height:100%;border-radius:50%;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:20px;border:2px solid var(--bg);}
+  .story-name{font-size:11px;font-weight:600;color:var(--muted);max-width:58px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* Post */
+  .gx-post{background:var(--surf);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;overflow:hidden;}
+  .gx-post-header{display:flex;align-items:center;gap:10px;padding:14px 14px 10px;}
+  .gx-post-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
+  .gx-post-name{font-size:14px;font-weight:700;color:#FFF;}
+  .gx-post-time{font-size:11px;color:var(--muted);}
+  .gx-post-badge{font-size:10px;font-weight:700;background:rgba(59,130,246,0.15);color:var(--acc);border-radius:99px;padding:2px 8px;margin-left:auto;}
+  .gx-post-img{width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:60px;}
+  .gx-post-video{width:100%;background:#000;position:relative;cursor:pointer;}
+  .gx-post-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .gx-post-play-btn{width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;}
+  .gx-post-body{padding:10px 14px 12px;}
+  .gx-post-text{font-size:14px;line-height:1.5;color:var(--text);margin-bottom:10px;}
+  .gx-post-actions{display:flex;gap:16px;padding:0 14px 14px;}
+  .gx-post-action{display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);}
+  .gx-post-action.liked{color:#FF453A;}
+  /* Leaderboard */
+  .lb-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-rank{width:28px;font-size:16px;font-weight:900;text-align:center;flex-shrink:0;}
+  .lb-rank.gold{color:#F59E0B;}
+  .lb-rank.silver{color:#94A3B8;}
+  .lb-rank.bronze{color:#CD7F32;}
+  .lb-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;}
+  .lb-info{flex:1;}
+  .lb-name{font-size:14px;font-weight:700;color:#FFF;}
+  .lb-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .lb-score{font-size:18px;font-weight:900;}
+  /* Challenges */
+  .chall-card{background:var(--surf);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;padding:16px;position:relative;overflow:hidden;}
+  .chall-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,0.15),transparent);}
+  .chall-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+  .chall-icon{font-size:28px;line-height:1;}
+  .chall-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;}
+  .chall-badge.activo{background:rgba(52,211,153,0.15);color:#34D399;}
+  .chall-badge.pendiente{background:rgba(251,191,36,0.15);color:#FBBF24;}
+  .chall-badge.completado{background:rgba(59,130,246,0.15);color:var(--acc);}
+  .chall-title{font-size:17px;font-weight:800;color:#FFF;margin-bottom:4px;}
+  .chall-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;}
+  .chall-prog{height:6px;background:rgba(255,255,255,0.07);border-radius:99px;overflow:hidden;margin-bottom:6px;}
+  .chall-prog-fill{height:100%;border-radius:99px;transition:width .6s;}
+  .chall-footer{display:flex;justify-content:space-between;align-items:center;}
+  /* Profile */
+  .prof-stat{background:var(--surf2);border-radius:14px;padding:14px;text-align:center;border:1px solid rgba(255,255,255,0.05);}
+  .prof-stat-val{font-size:22px;font-weight:900;color:var(--acc);}
+  .prof-stat-lbl{font-size:11px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+  /* Reward modal */
+  .reward-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .reward-card{background:var(--surf);border:1px solid rgba(251,191,36,0.4);border-radius:24px;padding:32px 24px;text-align:center;max-width:340px;width:100%;box-shadow:0 0 60px rgba(251,191,36,0.2);}
+  /* Pill btn */
+  .gx-btn{height:44px;padding:0 20px;border:none;border-radius:50px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+  .gx-btn.primary{background:var(--acc);color:#FFF;}
+  .gx-btn.outline{background:rgba(59,130,246,0.1);color:var(--acc);border:1px solid rgba(59,130,246,0.3);}
+  .gx-btn.danger{background:rgba(255,69,58,0.1);color:#FF453A;border:1px solid rgba(255,69,58,0.3);}
+  /* Section title */
+  .gx-section-title{font-size:18px;font-weight:800;letter-spacing:-0.3px;padding:4px 16px 12px;}
+  /* Input */
+  .gx-input{width:100%;height:46px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:0 14px;color:#FFF;font-family:inherit;font-size:14px;}
+  .gx-input:focus{outline:none;border-color:var(--acc);}
+  /* Feed skeleton */
+  @keyframes shimmer{0%{opacity:.4}50%{opacity:.8}100%{opacity:.4}}
+  .shimmer{animation:shimmer 1.5s infinite;}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="gx-header">
+  <div class="gx-logo">Fit<span>Zone</span> Members</div>
+  <div class="gx-header-right">
+    <button class="gx-notif-btn" id="gx-notif-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span class="gx-notif-dot"></span>
+    </button>
+    <div class="gx-avatar" id="gx-header-avatar">S</div>
+  </div>
+</div>
+
+<!-- Content -->
+<div id="gx-content"></div>
+
+<!-- Tab bar -->
+<div id="gx-tabbar">
+  <button class="gx-tab active" data-tab="feed">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Inicio</span>
+  </button>
+  <button class="gx-tab" data-tab="retos">
+    <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+    <span>Retos</span>
+  </button>
+  <button class="gx-tab" data-tab="ranking">
+    <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+    <span>Ranking</span>
+  </button>
+  <button class="gx-tab" data-tab="videos">
+    <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+    <span>Videos</span>
+  </button>
+  <button class="gx-tab" data-tab="perfil">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Yo</span>
+  </button>
+</div>
+
+<script src="../js/db.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // ── Init ─────────────────────────────────────────────
+  window.db.seedDemo();
+  var alumnoId = window.db.getAlumnoActual();
+  var alumno = alumnoId ? window.db.getAlumnoPorId(alumnoId) : null;
+  var nombre = alumno ? alumno.nombre : "Miembro";
+  var inicial = nombre[0].toUpperCase();
+
+  document.getElementById("gx-header-avatar").textContent = inicial;
+
+  // ── Demo data ────────────────────────────────────────
+  var GYM = { nombre:"FitZone Gym", codigo:"GYM01" };
+
+  var POSTS = [
+    { id:1, autor:"Coach Pablo", inicial:"P", color:"linear-gradient(135deg,#3B82F6,#8B5CF6)", tiempo:"hace 2h", tipo:"video", thumb:"🏋️", titulo:"Técnica perfecta: Sentadilla", texto:"Aprende a hacer sentadilla sin lesionarte. Postura, respiración y profundidad.", likes:42, comentarios:8, recompensa:"🏆 Técnica PRO", propio:false },
+    { id:2, autor:"FitZone Gym", inicial:"F", color:"linear-gradient(135deg,#F59E0B,#EF4444)", tiempo:"hace 4h", tipo:"receta", thumb:"🥗", titulo:"Bowl proteico post-entreno", texto:"140g pollo · 1 taza quinoa · aguacate · espinaca fresca · limón. Solo 520 kcal y 42g de proteína. ¡Perfecto después del gym!", likes:67, comentarios:12, recompensa:null, propio:false },
+    { id:3, autor:"Santiago G.", inicial:"S", color:"linear-gradient(135deg,#34D399,#059669)", tiempo:"hace 1d", tipo:"logro", thumb:"🔥", titulo:"¡7 días seguidos!", texto:"No paré ni un día esta semana 💪 El gym se volvió mi hábito. A todos los que empezaron: sigan, vale la pena.", likes:89, comentarios:15, recompensa:"🥇 Racha de Hierro", propio:true },
+    { id:4, autor:"Coach Laura", inicial:"L", color:"linear-gradient(135deg,#EC4899,#8B5CF6)", tiempo:"hace 1d", tipo:"reto", thumb:"⚡", titulo:"Reto de la semana: 100 sentadillas", texto:"¿Puedes hacer 100 sentadillas en una sola sesión? Quién lo logre esta semana gana una sesión personal gratis 🎁", likes:31, comentarios:24, recompensa:"🎁 Sesión personal gratis", propio:false },
+    { id:5, autor:"FitZone Gym", inicial:"F", color:"linear-gradient(135deg,#F59E0B,#EF4444)", tiempo:"hace 2d", tipo:"novedad", thumb:"🆕", titulo:"Nuevas máquinas disponibles", texto:"Ya están instalados los 4 nuevos racks de sentadillas y las cables funcionales. ¡Disponibles desde mañana para todos!", likes:118, comentarios:5, recompensa:null, propio:false },
+  ];
+
+  var STORIES = [
+    { nombre:"Tu historia", inicial:inicial, color:"linear-gradient(135deg,var(--acc),var(--acc2))", seen:false, esPropio:true },
+    { nombre:"Pablo", inicial:"P", color:"linear-gradient(135deg,#3B82F6,#8B5CF6)", seen:false },
+    { nombre:"Laura", inicial:"L", color:"linear-gradient(135deg,#EC4899,#8B5CF6)", seen:false },
+    { nombre:"FitZone", inicial:"F", color:"linear-gradient(135deg,#F59E0B,#EF4444)", seen:true },
+    { nombre:"Carlos", inicial:"C", color:"linear-gradient(135deg,#34D399,#059669)", seen:true },
+    { nombre:"Ana", inicial:"A", color:"linear-gradient(135deg,#F59E0B,#EC4899)", seen:true },
+  ];
+
+  var RANKING = [
+    { nombre:"Ana Ruiz", inicial:"A", color:"#F59E0B", puntos:2840, entrenos:28, racha:12, plan:"Anual" },
+    { nombre:"Carlos M.", inicial:"C", color:"#94A3B8", puntos:2560, entrenos:24, racha:8, plan:"Trimestral" },
+    { nombre:"Lucía T.", inicial:"L", color:"#CD7F32", puntos:2210, entrenos:20, racha:6, plan:"Anual" },
+    { nombre:nombre, inicial:inicial, color:"#3B82F6", puntos:1980, entrenos:18, racha:7, plan:"Mensual", esYo:true },
+    { nombre:"Marcos G.", inicial:"M", color:"#8B5CF6", puntos:1650, entrenos:15, racha:4, plan:"Mensual" },
+    { nombre:"Sofía N.", inicial:"S", color:"#EC4899", puntos:1420, entrenos:12, racha:3, plan:"Mensual" },
+  ];
+
+  var RETOS = [
+    { id:1, icon:"💪", titulo:"100 Sentadillas", desc:"Completa 100 sentadillas en una sola sesión. Coach verificará la forma.", estado:"activo", progreso:68, meta:100, recompensa:"Sesión personal gratis 🎁", participantes:14, vence:"22 Jun" },
+    { id:2, icon:"🔥", titulo:"Racha de 30 días", desc:"Entrena 30 días seguidos sin saltarte ninguno. Se verifica por asistencia.", estado:"activo", progreso:7, meta:30, recompensa:"Membresía 1 mes gratis 🏅", participantes:8, vence:"18 Jul" },
+    { id:3, icon:"🏃", titulo:"10,000 pasos diarios", desc:"Registra 10,000 pasos al día durante 2 semanas. Conecta tu app de salud.", estado:"activo", progreso:10, meta:14, recompensa:"Camiseta FitZone 👕", participantes:21, vence:"30 Jun" },
+    { id:4, icon:"🥗", titulo:"Semana detox fit", desc:"Sigue tu plan de nutrición al 100% durante 7 días sin excepciones.", estado:"pendiente", progreso:0, meta:7, recompensa:"Consulta nutricional gratuita 📋", participantes:6, vence:"25 Jun" },
+    { id:5, icon:"🏆", titulo:"Rey del Mes - Jun", desc:"El miembro con más puntos FitScore al final del mes.", estado:"activo", progreso:1980, meta:3000, recompensa:"Placa de campeón + mes gratis 🥇", participantes:32, vence:"30 Jun" },
+  ];
+
+  var VIDEOS = [
+    { thumb:"🏋️", titulo:"Sentadilla perfecta", autor:"Coach Pablo", duracion:"4:32", likes:142, cat:"Técnica" },
+    { thumb:"🍗", titulo:"Meal prep semanal fit", autor:"Nutricionista Ana", duracion:"8:15", likes:98, cat:"Nutrición" },
+    { thumb:"🔥", titulo:"HIIT 20 min full body", autor:"Coach Laura", duracion:"20:00", likes:231, cat:"Cardio" },
+    { thumb:"💪", titulo:"Errores en el press banca", autor:"Coach Pablo", duracion:"6:44", likes:87, cat:"Técnica" },
+    { thumb:"🥗", titulo:"5 desayunos proteicos", autor:"Nutricionista Ana", duracion:"5:20", likes:176, cat:"Nutrición" },
+    { thumb:"🧘", titulo:"Movilidad post-entreno", autor:"Coach Sara", duracion:"12:00", likes:64, cat:"Recuperación" },
+  ];
+
+  var _likes = {};
+  var _currentTab = "feed";
+
+  // ── Tab navigation ────────────────────────────────────
+  document.getElementById("gx-tabbar").addEventListener("click", function(e){
+    var btn = e.target.closest(".gx-tab[data-tab]");
+    if(!btn) return;
+    var tab = btn.getAttribute("data-tab");
+    document.querySelectorAll(".gx-tab").forEach(function(t){ t.classList.remove("active"); });
+    btn.classList.add("active");
+    _currentTab = tab;
+    renderTab(tab);
+  });
+
+  function renderTab(tab){
+    var fn = { feed:renderFeed, retos:renderRetos, ranking:renderRanking, videos:renderVideos, perfil:renderPerfil };
+    if(fn[tab]) fn[tab]();
+  }
+
+  renderFeed();
+
+  // ── FEED ─────────────────────────────────────────────
+  function renderFeed(){
+    var html = "";
+
+    // Banner bienvenida
+    html += '<div style="margin:0 16px 14px;background:linear-gradient(135deg,#0E1E40,#0D0D20);border-radius:20px;padding:20px;border:1px solid rgba(59,130,246,0.2);position:relative;overflow:hidden;">' +
+      '<div style="position:absolute;right:-10px;top:-10px;width:80px;height:80px;background:radial-gradient(circle,rgba(59,130,246,0.2),transparent);border-radius:50%;"></div>' +
+      '<div style="font-size:12px;font-weight:700;color:rgba(59,130,246,0.7);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Bienvenido</div>' +
+      '<div style="font-size:22px;font-weight:900;color:#FFF;margin-bottom:8px;">¡Hola, ' + nombre + '! 💪</div>' +
+      '<div style="display:flex;gap:8px;">' +
+        '<div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:8px 12px;text-align:center;flex:1;">' +
+          '<div style="font-size:18px;font-weight:900;color:#C8E000;">7</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.35);">Racha 🔥</div>' +
+        '</div>' +
+        '<div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:8px 12px;text-align:center;flex:1;">' +
+          '<div style="font-size:18px;font-weight:900;color:#F59E0B;">1,980</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.35);">Puntos ⭐</div>' +
+        '</div>' +
+        '<div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:8px 12px;text-align:center;flex:1;">' +
+          '<div style="font-size:18px;font-weight:900;color:#60A5FA;">#4</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.35);">Ranking 🏅</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+    // Stories
+    html += '<div class="stories-scroll">';
+    STORIES.forEach(function(s, i){
+      html += '<div class="story-item" data-story="' + i + '">' +
+        '<div class="story-ring' + (s.seen?" seen":"") + '">' +
+          '<div class="story-inner" style="background:' + (s.color||"var(--surf2)") + ';">' + s.inicial + '</div>' +
+        '</div>' +
+        '<span class="story-name">' + s.nombre + '</span>' +
+      '</div>';
+    });
+    html += '</div>';
+
+    // Posts
+    POSTS.forEach(function(post){
+      var typeColors = { video:"#3B82F6", receta:"#34D399", logro:"#F59E0B", reto:"#EC4899", novedad:"#8B5CF6" };
+      var typeLabels = { video:"Video", receta:"Receta", logro:"Logro", reto:"Reto", novedad:"Novedad" };
+      var c = typeColors[post.tipo] || "#FFF";
+      html += '<div class="gx-post" data-post-id="' + post.id + '">' +
+        '<div class="gx-post-header">' +
+          '<div class="gx-post-avatar" style="background:' + post.color + ';">' + post.inicial + '</div>' +
+          '<div>' +
+            '<div class="gx-post-name">' + post.autor + '</div>' +
+            '<div class="gx-post-time">' + post.tiempo + '</div>' +
+          '</div>' +
+          '<div class="gx-post-badge" style="background:' + c + '22;color:' + c + ';">' + (typeLabels[post.tipo]||"") + '</div>' +
+        '</div>';
+      // Media
+      html += '<div class="gx-post-img" style="font-size:80px;background:rgba(255,255,255,0.03);">' + post.thumb + '</div>';
+      // Body
+      html += '<div class="gx-post-body">';
+      if(post.titulo) html += '<div style="font-size:16px;font-weight:800;color:#FFF;margin-bottom:6px;">' + post.titulo + '</div>';
+      html += '<div class="gx-post-text">' + post.texto + '</div>';
+      if(post.recompensa) html += '<div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700;color:#F59E0B;">🎁 Recompensa: ' + post.recompensa + '</div>';
+      html += '</div>';
+      // Actions
+      var liked = !!_likes[post.id];
+      html += '<div class="gx-post-actions">' +
+        '<button class="gx-post-action' + (liked?" liked":"") + '" data-action="like" data-id="' + post.id + '">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="' + (liked?"#FF453A":"none") + '" stroke="' + (liked?"#FF453A":"currentColor") + '" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>' +
+          '<span id="like-count-' + post.id + '">' + (post.likes + (liked?1:0)) + '</span>' +
+        '</button>' +
+        '<button class="gx-post-action" data-action="comment" data-id="' + post.id + '">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' +
+          post.comentarios +
+        '</button>' +
+        '<button class="gx-post-action" data-action="share" data-id="' + post.id + '">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' +
+          'Compartir' +
+        '</button>' +
+      '</div>';
+      html += '</div>';
+    });
+
+    document.getElementById("gx-content").innerHTML = html;
+
+    // Events
+    document.getElementById("gx-content").addEventListener("click", function(e){
+      var likeBtn = e.target.closest("[data-action='like']");
+      if(likeBtn){
+        var id = parseInt(likeBtn.getAttribute("data-id"));
+        var post = POSTS.find(function(p){ return p.id===id; });
+        if(!post) return;
+        _likes[id] = !_likes[id];
+        var lc = document.getElementById("like-count-" + id);
+        if(lc) lc.textContent = post.likes + (_likes[id]?1:0);
+        likeBtn.classList.toggle("liked", !!_likes[id]);
+        likeBtn.querySelector("svg").setAttribute("fill", _likes[id]?"#FF453A":"none");
+        likeBtn.querySelector("svg").setAttribute("stroke", _likes[id]?"#FF453A":"currentColor");
+        return;
+      }
+      var storyEl = e.target.closest("[data-story]");
+      if(storyEl){ mostrarToast("📸 Historia de " + STORIES[parseInt(storyEl.getAttribute("data-story"))].nombre); return; }
+    });
+  }
+
+  // ── RETOS ────────────────────────────────────────────
+  function renderRetos(){
+    var html = '<div class="gx-section-title">🏆 Retos del Gym</div>';
+
+    RETOS.forEach(function(r){
+      var pct = Math.min(100, Math.round(r.progreso/r.meta*100));
+      var barColor = r.estado === "completado" ? "#34D399" : r.estado === "activo" ? "linear-gradient(90deg,#3B82F6,#8B5CF6)" : "#F59E0B";
+      html += '<div class="chall-card">' +
+        '<div class="chall-header">' +
+          '<div class="chall-icon">' + r.icon + '</div>' +
+          '<span class="chall-badge ' + r.estado + '">' + (r.estado==="activo"?"🟢 Activo":r.estado==="completado"?"✅ Completado":"⏳ Próximo") + '</span>' +
+        '</div>' +
+        '<div class="chall-title">' + r.titulo + '</div>' +
+        '<div class="chall-desc">' + r.desc + '</div>' +
+        '<div class="chall-prog"><div class="chall-prog-fill" style="width:' + pct + '%;background:' + barColor + ';"></div></div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:12px;">' +
+          '<span>' + r.progreso + ' / ' + r.meta + (r.meta>100?"":" completado") + '</span>' +
+          '<span>' + pct + '% · vence ' + r.vence + '</span>' +
+        '</div>' +
+        '<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.15);border-radius:10px;padding:10px 12px;margin-bottom:12px;">' +
+          '<div style="font-size:11px;font-weight:700;color:#F59E0B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Premio</div>' +
+          '<div style="font-size:13px;font-weight:700;color:#FFF;">' + r.recompensa + '</div>' +
+        '</div>' +
+        '<div class="chall-footer">' +
+          '<span style="font-size:12px;color:var(--muted);">👥 ' + r.participantes + ' participantes</span>' +
+          (r.estado !== "completado" ?
+            '<button class="gx-btn primary" data-reto="' + r.id + '" style="height:36px;font-size:13px;">' + (pct===0?"Unirme":"Ver progreso") + '</button>'
+            : '<span style="font-size:13px;font-weight:700;color:#34D399;">✅ Completado</span>') +
+        '</div>' +
+      '</div>';
+    });
+
+    // Crear reto entre amigos
+    html += '<div style="margin:4px 16px 12px;border:2px dashed rgba(59,130,246,0.25);border-radius:18px;padding:20px;text-align:center;">' +
+      '<div style="font-size:28px;margin-bottom:8px;">🤝</div>' +
+      '<div style="font-size:16px;font-weight:800;color:#FFF;margin-bottom:6px;">Reto personalizado</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin-bottom:14px;">Crea un reto privado con un amigo del gym. Tú defines la apuesta y el ganador.</div>' +
+      '<button class="gx-btn primary" id="btn-crear-reto-privado">+ Crear reto con amigo</button>' +
+    '</div>';
+
+    document.getElementById("gx-content").innerHTML = html;
+
+    document.getElementById("btn-crear-reto-privado").addEventListener("click", function(){
+      mostrarModalRetroPrivado();
+    });
+
+    document.getElementById("gx-content").addEventListener("click", function(e){
+      var btn = e.target.closest("[data-reto]");
+      if(btn) mostrarToast("🏆 ¡Te has unido al reto!");
+    });
+  }
+
+  function mostrarModalRetroPrivado(){
+    var overlay = document.createElement("div");
+    overlay.className = "reward-modal";
+    overlay.innerHTML =
+      '<div style="background:var(--surf);border:1px solid var(--border);border-radius:24px;padding:28px 20px;width:100%;max-width:380px;">' +
+        '<div style="font-size:28px;text-align:center;margin-bottom:12px;">🤝</div>' +
+        '<div style="font-size:20px;font-weight:800;text-align:center;margin-bottom:4px;">Crear reto privado</div>' +
+        '<div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;">Define el reto y la apuesta. Cuando ambos lo completen, el ganador cobra.</div>' +
+        '<div style="margin-bottom:10px;"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">Código del amigo</label>' +
+          '<input class="gx-input" id="reto-codigo-amigo" placeholder="Ej: 2345"></div>' +
+        '<div style="margin-bottom:10px;"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">Nombre del reto</label>' +
+          '<input class="gx-input" id="reto-nombre" placeholder="Ej: Quien baje 1kg primero"></div>' +
+        '<div style="margin-bottom:16px;"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">La apuesta (si ganas, ganas esto)</label>' +
+          '<input class="gx-input" id="reto-apuesta" placeholder="Ej: El perdedor invita un batido fit"></div>' +
+        '<div style="display:flex;gap:10px;">' +
+          '<button class="gx-btn outline" id="reto-cancel" style="flex:1;">Cancelar</button>' +
+          '<button class="gx-btn primary" id="reto-crear" style="flex:1;">Enviar reto</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", function(e){ if(e.target===overlay) overlay.remove(); });
+    document.getElementById("reto-cancel").addEventListener("click", function(){ overlay.remove(); });
+    document.getElementById("reto-crear").addEventListener("click", function(){
+      var amigo = (document.getElementById("reto-codigo-amigo").value||"").trim();
+      var nombre = (document.getElementById("reto-nombre").value||"").trim();
+      var apuesta = (document.getElementById("reto-apuesta").value||"").trim();
+      if(!amigo||!nombre){ mostrarToast("Completa todos los campos"); return; }
+      overlay.remove();
+      mostrarToast("✅ Reto enviado a " + amigo + ". Esperando aceptación…");
+    });
+  }
+
+  // ── RANKING ──────────────────────────────────────────
+  function renderRanking(){
+    var html = '<div class="gx-section-title">🏅 Top del Gym</div>';
+
+    // Podio top 3
+    html += '<div style="display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:0 16px 16px;height:130px;">';
+    var podio = [RANKING[1], RANKING[0], RANKING[2]];
+    var heights = [90, 120, 75];
+    var medals = ["🥈","🥇","🥉"];
+    var colors = ["#94A3B8","#F59E0B","#CD7F32"];
+    podio.forEach(function(m, i){
+      html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;">' +
+        '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:4px;">' + m.nombre.split(" ")[0] + '</div>' +
+        '<div style="width:100%;height:' + heights[i] + 'px;background:rgba(255,255,255,0.05);border-radius:12px 12px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1px solid rgba(255,255,255,0.07);">' +
+          '<div style="font-size:22px;">' + medals[i] + '</div>' +
+          '<div style="font-size:13px;font-weight:900;color:' + colors[i] + ';">' + m.puntos.toLocaleString() + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+
+    // Tabla completa
+    html += '<div class="gx-card" style="padding:0;">';
+    html += '<div style="padding:12px 16px 8px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,0.04);">Clasificación · Junio 2026</div>';
+    RANKING.forEach(function(m, i){
+      var rankClass = i===0?"gold":i===1?"silver":i===2?"bronze":"";
+      var rankLabel = i===0?"🥇":i===1?"🥈":i===2?"🥉":"#"+(i+1);
+      html += '<div class="lb-row' + (m.esYo?" " :"") + '" style="' + (m.esYo?"background:rgba(59,130,246,0.06);":"") + '">' +
+        '<div class="lb-rank ' + rankClass + '">' + rankLabel + '</div>' +
+        '<div class="lb-avatar" style="background:' + m.color + ';">' + m.inicial + '</div>' +
+        '<div class="lb-info">' +
+          '<div class="lb-name">' + m.nombre + (m.esYo?' <span style="font-size:10px;color:var(--acc);font-weight:700;">Tú</span>':'') + '</div>' +
+          '<div class="lb-sub">🏋️ ' + m.entrenos + ' entrenos · 🔥 ' + m.racha + ' días racha</div>' +
+        '</div>' +
+        '<div class="lb-score" style="color:' + (i===0?"#F59E0B":"var(--acc)") + ';">' + m.puntos.toLocaleString() + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+
+    // Tu posición
+    html += '<div style="margin:12px 16px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:16px;padding:16px;text-align:center;">' +
+      '<div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Estás a</div>' +
+      '<div style="font-size:24px;font-weight:900;color:var(--acc);">580 puntos</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin-top:4px;">de llegar al podio 🏆 Entrena 3 días más esta semana para subir.</div>' +
+    '</div>';
+
+    document.getElementById("gx-content").innerHTML = html;
+  }
+
+  // ── VIDEOS ───────────────────────────────────────────
+  function renderVideos(){
+    var cats = ["Todos","Técnica","Nutrición","Cardio","Recuperación"];
+    var _cat = "Todos";
+
+    function draw(){
+      var filtered = _cat === "Todos" ? VIDEOS : VIDEOS.filter(function(v){ return v.cat===_cat; });
+      var html = '<div class="gx-section-title">🎬 Videos del Gym</div>';
+      // Cat pills
+      html += '<div style="display:flex;gap:8px;overflow-x:auto;padding:0 16px 14px;scrollbar-width:none;">';
+      cats.forEach(function(c){
+        html += '<div data-cat="' + c + '" style="flex-shrink:0;height:32px;padding:0 14px;border-radius:99px;display:flex;align-items:center;font-size:12px;font-weight:700;cursor:pointer;background:' + (c===_cat?"var(--acc)":"rgba(255,255,255,0.06)") + ';color:' + (c===_cat?"#FFF":"var(--muted)") + ';">' + c + '</div>';
+      });
+      html += '</div>';
+      // Grid
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;">';
+      filtered.forEach(function(v){
+        html += '<div style="background:var(--surf);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;" data-video-play>' +
+          '<div style="aspect-ratio:16/9;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;">' +
+            v.thumb +
+            '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">' +
+              '<div style="width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;">' +
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="#FFF"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="padding:10px;">' +
+            '<div style="font-size:12px;font-weight:700;color:#FFF;line-height:1.3;margin-bottom:4px;">' + v.titulo + '</div>' +
+            '<div style="font-size:11px;color:var(--muted);">' + v.autor + ' · ' + v.duracion + '</div>' +
+            '<div style="font-size:11px;color:#F59E0B;margin-top:3px;font-weight:700;">♥ ' + v.likes + '</div>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div><div style="height:12px;"></div>';
+      document.getElementById("gx-content").innerHTML = html;
+
+      document.querySelectorAll("[data-cat]").forEach(function(el){
+        el.addEventListener("click", function(){ _cat = this.getAttribute("data-cat"); draw(); });
+      });
+      document.querySelectorAll("[data-video-play]").forEach(function(el){
+        el.addEventListener("click", function(){ mostrarToast("▶️ Reproduciendo video…"); });
+      });
+    }
+    draw();
+  }
+
+  // ── PERFIL ───────────────────────────────────────────
+  function renderPerfil(){
+    var registros = window.db.getRegistros(window.db.getAlumnoActual()||"a_demo1") || [];
+    var racha = window.db.calcularRacha ? window.db.calcularRacha(alumnoId) : 7;
+    var html = "";
+
+    // Header perfil
+    html += '<div style="background:linear-gradient(180deg,#0E1E40 0%,var(--bg) 100%);padding:28px 20px 20px;text-align:center;">' +
+      '<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;margin:0 auto 12px;border:3px solid rgba(59,130,246,0.3);">' + inicial + '</div>' +
+      '<div style="font-size:22px;font-weight:900;color:#FFF;margin-bottom:4px;">' + nombre + '</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Miembro · ' + GYM.nombre + '</div>' +
+      '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:99px;padding:6px 16px;">' +
+        '<span style="font-size:12px;font-weight:700;color:var(--acc);">Código: ' + (alumno ? alumno.codigo : "1111") + '</span>' +
+      '</div>' +
+    '</div>';
+
+    // Stats
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:0 16px 16px;">';
+    [
+      { val: registros.length, lbl:"Entrenos" },
+      { val: racha, lbl:"Racha 🔥" },
+      { val: "1,980", lbl:"Puntos ⭐" },
+      { val: "#4", lbl:"Ranking" },
+    ].forEach(function(s){
+      html += '<div class="prof-stat"><div class="prof-stat-val">' + s.val + '</div><div class="prof-stat-lbl">' + s.lbl + '</div></div>';
+    });
+    html += '</div>';
+
+    // Logros
+    html += '<div style="padding:0 16px 12px;font-size:16px;font-weight:800;color:#FFF;">🏅 Mis logros</div>';
+    html += '<div style="display:flex;gap:10px;overflow-x:auto;padding:0 16px 16px;scrollbar-width:none;">';
+    var logros = [
+      { icon:"🔥", nombre:"Racha 7", desc:"7 días seguidos" },
+      { icon:"🏋️", nombre:"15 entrenos", desc:"Constancia" },
+      { icon:"🥗", nombre:"Semana fit", desc:"Nutrición al 100%" },
+      { icon:"⚡", nombre:"HIIT Master", desc:"10 sesiones HIIT" },
+    ];
+    logros.forEach(function(l){
+      html += '<div style="flex-shrink:0;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:16px;padding:14px 16px;text-align:center;min-width:90px;">' +
+        '<div style="font-size:28px;margin-bottom:6px;">' + l.icon + '</div>' +
+        '<div style="font-size:12px;font-weight:700;color:#FFF;">' + l.nombre + '</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:2px;">' + l.desc + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+
+    // Opciones
+    html += '<div style="margin:0 16px;">';
+    [
+      { icon:"🔔", label:"Notificaciones" },
+      { icon:"🔒", label:"Privacidad" },
+      { icon:"💬", label:"Contactar al gym" },
+    ].forEach(function(op){
+      html += '<div style="display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;">' +
+        '<div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:18px;">' + op.icon + '</div>' +
+        '<div style="flex:1;font-size:14px;font-weight:600;color:#FFF;">' + op.label + '</div>' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>' +
+      '</div>';
+    });
+    html += '</div>';
+
+    // Volver
+    html += '<div style="padding:16px 16px 8px;">' +
+      '<a href="../index.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:44px;background:rgba(255,69,58,0.1);border:1px solid rgba(255,69,58,0.2);border-radius:50px;font-size:14px;font-weight:700;color:#FF453A;text-decoration:none;">← Cambiar de gimnasio</a>' +
+    '</div>';
+
+    document.getElementById("gx-content").innerHTML = html;
+  }
+
+  // ── Toast ────────────────────────────────────────────
+  function mostrarToast(msg){
+    var t = document.createElement("div");
+    t.style.cssText = "position:fixed;bottom:calc(var(--safe-bot) + 90px);left:50%;transform:translateX(-50%);background:#1C1C1E;border:1px solid rgba(255,255,255,0.12);color:#FFF;padding:10px 18px;border-radius:99px;font-size:13px;font-weight:600;z-index:9999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ t.style.opacity="0"; t.style.transition="opacity .3s"; setTimeout(function(){ t.remove(); },300); }, 2200);
+  }
+
+  document.getElementById("gx-notif-btn").addEventListener("click", function(){
+    mostrarToast("🔔 2 nuevas notificaciones");
+  });
+
+})();
+</script>
+</body>
+</html>
