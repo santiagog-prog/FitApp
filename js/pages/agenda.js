@@ -79,8 +79,28 @@
     html += "</div>";
 
     var completadosSemana = diasInfo.filter(function(di){ return registros.some(function(r){ return r.fecha === di.key; }); }).length;
-    html += "<div class='progreso-semana-bar'><div class='fill' style='width:" + (completadosSemana/7*100) + "%;'></div></div>";
-    html += "<p style='padding:0 20px 10px;font-size:12px;color:rgba(255,255,255,0.35);'>" + completadosSemana + " de 7 días con actividad</p>";
+    var rachaAct = window.db.calcularRacha ? window.db.calcularRacha(alumno.id) : 0;
+    var pctSemana = Math.round(completadosSemana/7*100);
+    html += "<div style='margin:0 16px 14px;background:#141414;border-radius:16px;padding:14px 16px;border:1px solid rgba(255,255,255,0.05);'>" +
+      "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;'>" +
+        "<div style='font-size:13px;font-weight:700;color:#FFF;'>Progreso semanal</div>" +
+        "<div style='display:flex;align-items:center;gap:12px;'>" +
+          "<span style='font-size:11px;color:rgba(255,255,255,0.4);'>" + completadosSemana + "/7 días</span>" +
+          (rachaAct > 0 ? "<span style='font-size:11px;font-weight:700;color:#C8E000;'>🔥 " + rachaAct + " racha</span>" : "") +
+        "</div>" +
+      "</div>" +
+      "<div style='display:flex;gap:5px;margin-bottom:8px;'>" +
+        diasInfo.map(function(di, idx){
+          var hecho = registros.some(function(r){ return r.fecha === di.key; });
+          var esSel = di.key === state.selectedDate;
+          var esHoy = di.key === fechaKey(new Date());
+          return "<div style='flex:1;height:6px;border-radius:99px;background:" + (hecho?"#C8E000":(esHoy?"rgba(200,224,0,0.2)":"rgba(255,255,255,0.07)")) + ";'></div>";
+        }).join("") +
+      "</div>" +
+      "<div style='display:flex;justify-content:space-between;'>" +
+        diasInfo.map(function(di){ return "<span style='flex:1;font-size:9px;text-align:center;color:rgba(255,255,255,0.2);font-weight:600;'>" + DIAS_L[(di.d.getDay()+6)%7] + "</span>"; }).join("") +
+      "</div>" +
+    "</div>";
 
     // Actividad del día seleccionado
     var selDate   = new Date(state.selectedDate);
@@ -129,7 +149,20 @@
       "<div style='background:linear-gradient(135deg,#1a2200,#0A0A0A);padding:28px 20px 20px;'>" +
         "<div style='font-size:12px;font-weight:600;color:#C8E000;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;'>Entrenamiento</div>" +
         "<div style='font-size:24px;font-weight:800;color:#FFF;margin-bottom:12px;letter-spacing:-.5px;'>" + diaRutina.nombre + "</div>" +
-        "<div style='display:inline-flex;align-items:center;height:26px;padding:0 12px;background:rgba(255,255,255,0.08);border-radius:50px;font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:14px;'>" + (rutina.mesociclo||"") + "</div>" +
+        (function(){
+          var meso = rutina.mesociclo || "";
+          var parts = meso.split("–").map(function(s){ return s.trim(); });
+          if(parts.length < 2) return "<div style='font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:16px;letter-spacing:.3px;'>" + meso + "</div>";
+          var icons = ["🏋️", "🔄", "🎯", "📅"];
+          return "<div style='display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;'>" +
+            parts.map(function(p,i){
+              return "<div style='display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:50px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.65);letter-spacing:.2px;'>" +
+                "<span>" + (icons[i]||"•") + "</span>" +
+                "<span>" + p + "</span>" +
+              "</div>";
+            }).join("") +
+          "</div>";
+        })() +
         "<div style='display:flex;gap:20px;'>" +
           "<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.5);'>" +
             "<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><circle cx='12' cy='12' r='10'/><path d='M12 6v6l4 2'/></svg>" +

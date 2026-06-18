@@ -365,7 +365,7 @@
       var total = protM + carbsM + grasM;
 
       // Colores
-      var cProt = "#0A84FF"; var cCarbs = "#FF9F0A"; var cGras = "#BF5AF2";
+      var cProt = "#60A5FA"; var cCarbs = "#FBBF24"; var cGras = "#A78BFA";
 
       // SVG donut
       var R = 46, CX = 60, CY = 60, stroke = 10;

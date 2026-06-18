@@ -165,46 +165,95 @@
     }
   }
 
-  // ── CALENDARIO 14 DÍAS ─────────────────────────────────
+  // ── CALENDARIO IPHONE — CRONOGRAMA HORARIO ─────────────
+  var HAB_COLORS = ["#C8E000","#60A5FA","#FF9F0A","#A78BFA","#34D399","#F472B6","#FB923C","#38BDF8"];
+
   function _renderCalendario(alumnoId){
     var container = document.getElementById("habitos-vista-cal");
     if(!container) return;
     var habitos = window.db.getHabitos(alumnoId) || [];
     if(!habitos.length){ container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.3);">Sin hábitos asignados.</div>'; return; }
 
-    var dias = [];
-    for(var i=13; i>=0; i--){
-      var d = new Date(); d.setDate(d.getDate()-i);
-      dias.push(d);
+    var HORA_INI = 5, HORA_FIN = 23;
+    var PX_POR_HORA = 64;
+    var totalHoras = HORA_FIN - HORA_INI;
+    var totalPx = totalHoras * PX_POR_HORA;
+    var hoyKey = window.db.fechaHoy();
+    var completadosHoy = window.db.getHabitosCompletadosHoy(alumnoId, hoyKey) || [];
+
+    // Hora actual para línea roja
+    var ahora = new Date();
+    var horaActualFrac = ahora.getHours() + ahora.getMinutes()/60;
+    var lineaY = (horaActualFrac - HORA_INI) * PX_POR_HORA;
+    var mostrarLinea = horaActualFrac >= HORA_INI && horaActualFrac <= HORA_FIN;
+
+    // Columna de horas (izquierda)
+    var horasHTML = "";
+    for(var h = HORA_INI; h <= HORA_FIN; h++){
+      var y = (h - HORA_INI) * PX_POR_HORA;
+      var label = h < 12 ? (h + " AM") : (h === 12 ? "12 PM" : (h-12) + " PM");
+      horasHTML += '<div style="position:absolute;top:' + (y-8) + 'px;right:0;font-size:10px;font-weight:600;color:rgba(255,255,255,0.25);line-height:1;text-align:right;">' + label + '</div>';
     }
 
-    var html = '<div style="padding:0 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;">';
-    html += '<table style="width:100%;border-collapse:separate;border-spacing:4px;min-width:520px;">';
+    // Líneas horizontales
+    var lineasHTML = "";
+    for(var lh = HORA_INI; lh <= HORA_FIN; lh++){
+      var ly = (lh - HORA_INI) * PX_POR_HORA;
+      lineasHTML += '<div style="position:absolute;top:' + ly + 'px;left:0;right:0;height:1px;background:rgba(255,255,255,0.04);"></div>';
+    }
 
-    // Cabecera días
-    html += '<tr><td style="font-size:10px;color:rgba(255,255,255,.25);padding:4px;min-width:110px;">Hábito</td>';
-    dias.forEach(function(d){
-      var esHoy = d.toDateString() === new Date().toDateString();
-      var letras = ["D","L","M","X","J","V","S"];
-      html += '<td style="text-align:center;padding:4px 2px;">' +
-        '<div style="font-size:9px;color:rgba(255,255,255,.3);">' + letras[d.getDay()] + '</div>' +
-        '<div style="font-size:10px;font-weight:700;color:' + (esHoy?"#C8E000":"rgba(255,255,255,.4)") + ';">' + d.getDate() + '</div>' +
-      '</td>';
+    // Bloques de hábitos
+    var bloquesHTML = "";
+    habitos.forEach(function(hab, idx){
+      var horaStr = hab.hora_sugerida || "08:00";
+      var parts = horaStr.split(":");
+      var hNum = parseInt(parts[0], 10);
+      var mNum = parseInt(parts[1]||"0", 10);
+      var frac = hNum + mNum/60;
+      if(frac < HORA_INI || frac >= HORA_FIN) frac = Math.max(HORA_INI, Math.min(HORA_FIN - 0.5, frac));
+      var topY = (frac - HORA_INI) * PX_POR_HORA;
+      var done = completadosHoy.indexOf(hab.id) !== -1;
+      var color = HAB_COLORS[idx % HAB_COLORS.length];
+      bloquesHTML +=
+        '<div style="position:absolute;top:' + topY + 'px;left:0;right:0;height:' + (PX_POR_HORA * 0.85) + 'px;background:' + (done ? color : "rgba(255,255,255,0.05)") + ';border-left:3px solid ' + color + ';border-radius:0 8px 8px 0;padding:6px 10px;opacity:' + (done?"1":"0.7") + ';transition:all .3s;">' +
+          '<div style="font-size:12px;font-weight:700;color:' + (done?"#0A0A0A":"#FFF") + ';overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">' + hab.nombre + '</div>' +
+          '<div style="font-size:10px;color:' + (done?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.4)") + ';margin-top:2px;">' + horaStr + (done?" · ✓ completado":"") + '</div>' +
+        '</div>';
     });
-    html += '</tr>';
 
-    habitos.forEach(function(h){
-      html += '<tr><td style="font-size:12px;color:rgba(255,255,255,.7);padding:4px;white-space:nowrap;overflow:hidden;max-width:110px;text-overflow:ellipsis;">' + h.nombre + '</td>';
-      dias.forEach(function(d){
-        var fKey = fechaStr(d);
-        var checks = window.db.getHabitosCompletadosHoy(alumnoId, fKey);
-        var hecho = checks.indexOf(h.id) !== -1;
-        html += '<td style="text-align:center;padding:4px 2px;"><div style="width:16px;height:16px;border-radius:50%;margin:0 auto;background:' + (hecho?"#C8E000":"rgba(255,255,255,0.07)") + ';"></div></td>';
-      });
-      html += '</tr>';
-    });
+    // Línea de hora actual
+    var ahoraHTML = mostrarLinea
+      ? '<div style="position:absolute;top:' + lineaY + 'px;left:-6px;right:0;height:2px;background:#FF453A;z-index:10;">' +
+          '<div style="position:absolute;left:-3px;top:-4px;width:10px;height:10px;border-radius:50%;background:#FF453A;"></div>' +
+        '</div>'
+      : "";
 
-    html += '</table></div>';
+    var html =
+      '<div style="padding:0 20px 8px;">' +
+        // Day selector chips
+        (function(){
+          var dias = ["Hoy","L","M","X","J","V","S"];
+          return '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;">' +
+            dias.map(function(d, i){
+              var activo = i === 0;
+              return '<div style="flex-shrink:0;height:32px;padding:0 14px;border-radius:99px;display:flex;align-items:center;font-size:12px;font-weight:700;background:' + (activo?"#C8E000":"rgba(255,255,255,0.06)") + ';color:' + (activo?"#0A0A0A":"rgba(255,255,255,0.5)") + ';">' + d + '</div>';
+            }).join("") +
+          '</div>';
+        })() +
+      '</div>' +
+      '<div style="position:relative;padding:0 20px;overflow-y:auto;max-height:70vh;-webkit-overflow-scrolling:touch;">' +
+        '<div style="position:relative;height:' + totalPx + 'px;display:flex;">' +
+          // Columna horas
+          '<div style="position:relative;width:52px;flex-shrink:0;">' + horasHTML + '</div>' +
+          // Área eventos
+          '<div style="position:relative;flex:1;margin-left:8px;">' +
+            lineasHTML +
+            bloquesHTML +
+            ahoraHTML +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
     container.innerHTML = html;
   }
 

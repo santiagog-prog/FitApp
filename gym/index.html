@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel del Gym — FitApp</title>
+<link rel="stylesheet" href="../styles/global.css?v=20260618a">
+<link rel="stylesheet" href="../styles/coach.css?v=20260618a">
+<style>
+  :root{
+    --gym-accent:#3B82F6;
+    --gym-accent2:#8B5CF6;
+    --gym-bg:#070B14;
+    --gym-surface:#0E1420;
+    --gym-border:rgba(59,130,246,0.15);
+  }
+  .gym-body{ background:var(--gym-bg); min-height:100vh; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif; color:#FFF; }
+  #gym-app{ display:flex; height:100vh; overflow:hidden; }
+
+  /* Sidebar */
+  #gym-sidebar{ width:220px; background:var(--gym-surface); border-right:1px solid var(--gym-border); display:flex; flex-direction:column; flex-shrink:0; padding:24px 0; overflow-y:auto; }
+  .gs-logo{ padding:0 20px 24px; font-size:22px; font-weight:900; letter-spacing:-1px; color:#FFF; }
+  .gs-logo span{ color:var(--gym-accent); }
+  #gym-sidebar nav button{ width:100%; padding:12px 20px; border:none; background:transparent; color:rgba(255,255,255,.5); font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:10px; text-align:left; border-radius:0; transition:all .2s; }
+  #gym-sidebar nav button:hover{ background:rgba(59,130,246,0.08); color:#FFF; }
+  #gym-sidebar nav button.active{ background:rgba(59,130,246,0.15); color:var(--gym-accent); border-right:3px solid var(--gym-accent); }
+  #gym-sidebar nav button svg{ width:18px; height:18px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .gs-divider{ height:1px; background:var(--gym-border); margin:12px 0; }
+  .gs-label{ padding:4px 20px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,.2); }
+  .gs-back{ margin-top:auto; padding:16px 20px 0; }
+  .gs-back a{ font-size:12px; color:rgba(255,255,255,.3); text-decoration:none; display:flex; align-items:center; gap:6px; }
+
+  /* Main */
+  #gym-main{ flex:1; overflow-y:auto; background:var(--gym-bg); }
+  #gym-topbar{ padding:20px 28px; border-bottom:1px solid var(--gym-border); display:flex; align-items:center; justify-content:space-between; background:var(--gym-surface); }
+  #gym-topbar h1{ font-size:20px; font-weight:800; margin:0; }
+  #gym-content{ padding:28px; }
+
+  /* Cards & Sections */
+  .gym-card{ background:var(--gym-surface); border:1px solid var(--gym-border); border-radius:16px; padding:20px; margin-bottom:16px; }
+  .gym-card-title{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,.35); margin-bottom:14px; }
+  .gym-stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+  .gym-stat{ background:var(--gym-surface); border:1px solid var(--gym-border); border-radius:14px; padding:18px; text-align:center; }
+  .gym-stat-val{ font-size:28px; font-weight:900; color:var(--gym-accent); letter-spacing:-.5px; }
+  .gym-stat-lbl{ font-size:11px; font-weight:600; color:rgba(255,255,255,.3); margin-top:4px; text-transform:uppercase; letter-spacing:.5px; }
+  .gym-row{ display:flex; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.04); gap:12px; }
+  .gym-row:last-child{ border-bottom:none; }
+  .gym-badge{ display:inline-block; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:700; }
+  .gym-badge.activo{ background:rgba(52,211,153,.15); color:#34D399; }
+  .gym-badge.vencido{ background:rgba(255,69,58,.1); color:#FF453A; }
+  .gym-badge.pendiente{ background:rgba(251,191,36,.1); color:#FBBF24; }
+  .gym-btn{ height:40px; padding:0 18px; border:none; border-radius:50px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .gym-btn.primary{ background:var(--gym-accent); color:#FFF; }
+  .gym-btn.secondary{ background:rgba(59,130,246,0.1); color:var(--gym-accent); border:1px solid rgba(59,130,246,0.3); }
+  .gym-input{ width:100%; height:44px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:10px; padding:0 14px; color:#FFF; font-family:inherit; font-size:14px; box-sizing:border-box; margin-bottom:10px; }
+  .gym-input:focus{ outline:none; border-color:var(--gym-accent); }
+  .gym-section-hidden{ display:none; }
+  .gym-section-visible{ display:block; }
+
+  /* Mobile */
+  @media(max-width:680px){
+    #gym-sidebar{ width:60px; }
+    .gs-logo span.full{ display:none; }
+    #gym-sidebar nav button .label{ display:none; }
+    .gs-label{ display:none; }
+    .gym-stat-grid{ grid-template-columns:1fr 1fr; }
+    #gym-content{ padding:16px; }
+    #gym-topbar{ padding:14px 16px; }
+  }
+</style>
+</head>
+<body class="gym-body">
+<div id="gym-app">
+
+  <!-- Sidebar -->
+  <aside id="gym-sidebar">
+    <div class="gs-logo">Gym<span>HQ</span></div>
+    <nav id="gym-nav">
+      <button data-sec="dashboard" class="active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="label">Dashboard</span>
+      </button>
+      <button data-sec="miembros">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span class="label">Miembros</span>
+      </button>
+      <button data-sec="clases">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span class="label">Clases</span>
+      </button>
+      <button data-sec="ingresos">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        <span class="label">Ingresos</span>
+      </button>
+      <div class="gs-divider"></div>
+      <div class="gs-label">Gym</div>
+      <button data-sec="equipos">
+        <svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4"/></svg>
+        <span class="label">Equipos</span>
+      </button>
+      <button data-sec="configuracion">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 1021 12h-1"/></svg>
+        <span class="label">Configuración</span>
+      </button>
+    </nav>
+    <div class="gs-back">
+      <a href="../index.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Volver
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div id="gym-main">
+    <div id="gym-topbar">
+      <h1 id="gym-topbar-title">Dashboard</h1>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="font-size:13px;color:rgba(255,255,255,.35);" id="gym-fecha"></div>
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gym-accent),var(--gym-accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;">G</div>
+      </div>
+    </div>
+    <div id="gym-content"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ── Fecha ──────────────────────────────────────────────
+  var fechaEl = document.getElementById("gym-fecha");
+  if(fechaEl){
+    var now = new Date();
+    fechaEl.textContent = now.toLocaleDateString("es-ES", { weekday:"long", day:"numeric", month:"long" });
+  }
+
+  // ── Demo data ──────────────────────────────────────────
+  var DATA = {
+    gym: { nombre: "FitZone Gym", slogan: "Donde nace el campeón", plan: "Premium", miembros_cap: 200 },
+    miembros: [
+      { id:1, nombre:"Carlos Mendoza",  plan:"Mensual",    estado:"activo",   vence:"2026-07-15", ingresos:35 },
+      { id:2, nombre:"Ana Ruiz",         plan:"Trimestral", estado:"activo",   vence:"2026-08-01", ingresos:90 },
+      { id:3, nombre:"Pedro Salas",      plan:"Mensual",    estado:"vencido",  vence:"2026-06-10", ingresos:35 },
+      { id:4, nombre:"Lucía Torres",     plan:"Anual",      estado:"activo",   vence:"2027-01-01", ingresos:300 },
+      { id:5, nombre:"Marcos Gil",       plan:"Mensual",    estado:"pendiente",vence:"2026-06-30", ingresos:35 },
+      { id:6, nombre:"Sofía Navarro",    plan:"Mensual",    estado:"activo",   vence:"2026-07-20", ingresos:35 },
+    ],
+    clases: [
+      { nombre:"Spinning", instructor:"Coach Laura", dias:"L·M·X·J·V", hora:"07:00", cupo:20, inscritos:14 },
+      { nombre:"Yoga Flow", instructor:"Coach Ana",   dias:"M·J·S",     hora:"09:00", cupo:15, inscritos:12 },
+      { nombre:"HIIT Power", instructor:"Coach Pablo",dias:"L·X·V",     hora:"18:30", cupo:25, inscritos:22 },
+      { nombre:"Pilates",    instructor:"Coach Sara", dias:"M·J",       hora:"10:00", cupo:12, inscritos:8 },
+    ],
+    ingresos_mes: [3200, 2850, 3600, 4100, 3750, 4300, 3900, 4500, 3800, 4200, 4600, 5100],
+    meses: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+  };
+
+  // ── Secciones ──────────────────────────────────────────
+  var SECCIONES = {
+    dashboard:     renderDashboard,
+    miembros:      renderMiembros,
+    clases:        renderClases,
+    ingresos:      renderIngresos,
+    equipos:       renderEquipos,
+    configuracion: renderConfiguracion,
+  };
+
+  var TITULOS = {
+    dashboard:"Dashboard", miembros:"Miembros", clases:"Clases",
+    ingresos:"Ingresos", equipos:"Equipos", configuracion:"Configuración"
+  };
+
+  // ── Nav ────────────────────────────────────────────────
+  document.getElementById("gym-nav").addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-sec]");
+    if(!btn) return;
+    document.querySelectorAll("#gym-nav button").forEach(function(b){ b.classList.remove("active"); });
+    btn.classList.add("active");
+    var sec = btn.getAttribute("data-sec");
+    document.getElementById("gym-topbar-title").textContent = TITULOS[sec] || sec;
+    var fn = SECCIONES[sec];
+    if(fn) fn();
+  });
+
+  // Init
+  renderDashboard();
+
+  // ── DASHBOARD ──────────────────────────────────────────
+  function renderDashboard(){
+    var activos = DATA.miembros.filter(function(m){ return m.estado==="activo"; }).length;
+    var vencidos = DATA.miembros.filter(function(m){ return m.estado==="vencido"; }).length;
+    var ingresosMes = DATA.miembros.reduce(function(s,m){ return m.estado==="activo"?s+m.ingresos:s; }, 0);
+
+    var html = "";
+
+    // Banner gym
+    html += "<div style='background:linear-gradient(135deg,#0E1E40,#0D0D20);border-radius:20px;padding:24px 28px;margin-bottom:20px;border:1px solid rgba(59,130,246,0.2);position:relative;overflow:hidden;'>" +
+      "<div style='position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(59,130,246,0.15),transparent);border-radius:50%;'></div>" +
+      "<div style='font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(59,130,246,0.7);margin-bottom:6px;'>Tu Gimnasio</div>" +
+      "<div style='font-size:26px;font-weight:900;color:#FFF;margin-bottom:4px;'>" + DATA.gym.nombre + "</div>" +
+      "<div style='font-size:13px;color:rgba(255,255,255,0.4);'>" + DATA.gym.slogan + "</div>" +
+    "</div>";
+
+    // Stats
+    html += "<div class='gym-stat-grid'>" +
+      gymStat(activos, "Activos", "#34D399") +
+      gymStat(vencidos, "Vencidos", "#FF453A") +
+      gymStat(DATA.clases.length, "Clases", "#60A5FA") +
+      gymStat("$"+ingresosMes, "Este mes", "#A78BFA") +
+    "</div>";
+
+    // Vencimientos próximos
+    var hoy = new Date();
+    var proximos = DATA.miembros.filter(function(m){
+      if(m.estado !== "activo") return false;
+      var diff = (new Date(m.vence) - hoy) / (1000*60*60*24);
+      return diff <= 7 && diff >= 0;
+    });
+    html += "<div class='gym-card'>" +
+      "<div class='gym-card-title'>⚠️ Vencimientos esta semana</div>";
+    if(proximos.length === 0){
+      html += "<div style='color:rgba(255,255,255,.3);font-size:13px;'>Sin vencimientos en los próximos 7 días.</div>";
+    } else {
+      proximos.forEach(function(m){
+        var diff = Math.ceil((new Date(m.vence) - hoy) / (1000*60*60*24));
+        html += "<div class='gym-row'>" +
+          "<div style='width:36px;height:36px;border-radius:50%;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);display:flex;align-items:center;justify-content:center;font-size:16px;'>⏰</div>" +
+          "<div style='flex:1;'>" +
+            "<div style='font-size:14px;font-weight:600;color:#FFF;'>" + m.nombre + "</div>" +
+            "<div style='font-size:12px;color:rgba(255,255,255,.35);'>Vence en " + diff + " día" + (diff===1?"":"s") + " · " + m.plan + "</div>" +
+          "</div>" +
+          "<button class='gym-btn secondary' data-action='recordar' data-id='" + m.id + "'>Recordar</button>" +
+        "</div>";
+      });
+    }
+    html += "</div>";
+
+    // Clases hoy
+    html += "<div class='gym-card'>" +
+      "<div class='gym-card-title'>📅 Clases activas</div>";
+    DATA.clases.forEach(function(c){
+      var pct = Math.round(c.inscritos/c.cupo*100);
+      html += "<div class='gym-row'>" +
+        "<div style='flex:1;'>" +
+          "<div style='font-size:14px;font-weight:700;color:#FFF;'>" + c.nombre + "</div>" +
+          "<div style='font-size:12px;color:rgba(255,255,255,.35);margin-top:2px;'>" + c.dias + " · " + c.hora + " · " + c.instructor + "</div>" +
+          "<div style='height:4px;background:rgba(255,255,255,0.06);border-radius:99px;margin-top:8px;overflow:hidden;'>" +
+            "<div style='height:100%;width:" + pct + "%;background:" + (pct>=90?"#FF453A":pct>=70?"#FBBF24":"#34D399") + ";border-radius:99px;'></div>" +
+          "</div>" +
+        "</div>" +
+        "<div style='font-size:12px;color:rgba(255,255,255,.4);margin-left:12px;white-space:nowrap;'>" + c.inscritos + "/" + c.cupo + "</div>" +
+      "</div>";
+    });
+    html += "</div>";
+
+    document.getElementById("gym-content").innerHTML = html;
+
+    document.querySelectorAll("[data-action='recordar']").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = this.getAttribute("data-id");
+        var m = DATA.miembros.find(function(x){ return x.id==id; });
+        if(m) alert("Recordatorio enviado a " + m.nombre + " ✓");
+      });
+    });
+  }
+
+  function gymStat(val, label, color){
+    return '<div class="gym-stat">' +
+      '<div class="gym-stat-val" style="color:' + color + ';">' + val + '</div>' +
+      '<div class="gym-stat-lbl">' + label + '</div>' +
+    '</div>';
+  }
+
+  // ── MIEMBROS ───────────────────────────────────────────
+  function renderMiembros(){
+    var html = "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;'>" +
+      "<div style='font-size:13px;color:rgba(255,255,255,.4);'>" + DATA.miembros.length + " miembros registrados</div>" +
+      "<button class='gym-btn primary' id='btn-nuevo-miembro'>+ Nuevo miembro</button>" +
+    "</div>";
+
+    // Search
+    html += "<input class='gym-input' id='gym-search-miembro' placeholder='Buscar miembro...' style='margin-bottom:16px;'>";
+
+    // Tabla
+    html += "<div class='gym-card' style='padding:0;overflow:hidden;'>";
+    html += "<table style='width:100%;border-collapse:collapse;'>" +
+      "<thead><tr style='background:rgba(255,255,255,0.03);'>" +
+        "<th style='padding:12px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.3);'>Nombre</th>" +
+        "<th style='padding:12px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.3);'>Plan</th>" +
+        "<th style='padding:12px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.3);'>Estado</th>" +
+        "<th style='padding:12px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.3);'>Vence</th>" +
+        "<th style='padding:12px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.3);'></th>" +
+      "</tr></thead>" +
+      "<tbody id='tabla-miembros'>";
+    DATA.miembros.forEach(function(m){
+      html += filasMiembro(m);
+    });
+    html += "</tbody></table></div>";
+
+    document.getElementById("gym-content").innerHTML = html;
+
+    document.getElementById("gym-search-miembro").addEventListener("input", function(){
+      var q = this.value.toLowerCase();
+      var tbody = document.getElementById("tabla-miembros");
+      if(!tbody) return;
+      tbody.innerHTML = DATA.miembros.filter(function(m){ return m.nombre.toLowerCase().indexOf(q) !== -1; }).map(filasMiembro).join("");
+    });
+
+    document.getElementById("btn-nuevo-miembro").addEventListener("click", function(){
+      modalNuevoMiembro();
+    });
+  }
+
+  function filasMiembro(m){
+    return '<tr style="border-top:1px solid rgba(255,255,255,0.04);">' +
+      '<td style="padding:14px 16px;"><div style="font-size:14px;font-weight:600;color:#FFF;">' + m.nombre + '</div></td>' +
+      '<td style="padding:14px 16px;font-size:13px;color:rgba(255,255,255,.5);">' + m.plan + '</td>' +
+      '<td style="padding:14px 16px;"><span class="gym-badge ' + m.estado + '">' + m.estado + '</span></td>' +
+      '<td style="padding:14px 16px;font-size:13px;color:rgba(255,255,255,.4);">' + m.vence + '</td>' +
+      '<td style="padding:14px 16px;text-align:right;"><button class="gym-btn secondary" style="font-size:12px;height:32px;padding:0 12px;" data-mid="' + m.id + '" data-action="ver-miembro">Ver</button></td>' +
+    '</tr>';
+  }
+
+  function modalNuevoMiembro(){
+    var overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:1000;";
+    overlay.innerHTML =
+      '<div style="background:#0E1420;border:1px solid rgba(59,130,246,0.2);border-radius:20px;padding:28px;width:90%;max-width:440px;">' +
+        '<div style="font-size:20px;font-weight:800;margin-bottom:20px;">Nuevo miembro</div>' +
+        '<input class="gym-input" id="nm-nombre" placeholder="Nombre completo">' +
+        '<select class="gym-input" id="nm-plan" style="appearance:none;">' +
+          '<option value="Mensual">Plan Mensual — $35</option>' +
+          '<option value="Trimestral">Plan Trimestral — $90</option>' +
+          '<option value="Anual">Plan Anual — $300</option>' +
+        '</select>' +
+        '<input class="gym-input" id="nm-vence" type="date" placeholder="Fecha vencimiento">' +
+        '<div style="display:flex;gap:10px;margin-top:8px;">' +
+          '<button id="nm-cancel" class="gym-btn secondary" style="flex:1;">Cancelar</button>' +
+          '<button id="nm-save" class="gym-btn primary" style="flex:1;">Crear miembro</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", function(e){ if(e.target===overlay) overlay.remove(); });
+    document.getElementById("nm-cancel").addEventListener("click", function(){ overlay.remove(); });
+    document.getElementById("nm-save").addEventListener("click", function(){
+      var nombre = (document.getElementById("nm-nombre").value||"").trim();
+      var plan   = document.getElementById("nm-plan").value;
+      var vence  = document.getElementById("nm-vence").value;
+      if(!nombre){ alert("Escribe el nombre"); return; }
+      DATA.miembros.push({ id: Date.now(), nombre:nombre, plan:plan, estado:"activo", vence:vence||"—", ingresos:35 });
+      overlay.remove();
+      renderMiembros();
+    });
+  }
+
+  // ── CLASES ─────────────────────────────────────────────
+  function renderClases(){
+    var html = "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;'>" +
+      "<div style='font-size:13px;color:rgba(255,255,255,.4);'>" + DATA.clases.length + " clases programadas</div>" +
+      "<button class='gym-btn primary' id='btn-nueva-clase'>+ Nueva clase</button>" +
+    "</div>";
+
+    DATA.clases.forEach(function(c, i){
+      var pct = Math.round(c.inscritos/c.cupo*100);
+      var barColor = pct>=90?"#FF453A":pct>=70?"#FBBF24":"#34D399";
+      html += "<div class='gym-card'>" +
+        "<div style='display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;'>" +
+          "<div>" +
+            "<div style='font-size:18px;font-weight:800;color:#FFF;'>" + c.nombre + "</div>" +
+            "<div style='font-size:13px;color:rgba(255,255,255,.4);margin-top:3px;'>" + c.instructor + "</div>" +
+          "</div>" +
+          "<div style='text-align:right;'>" +
+            "<div style='font-size:20px;font-weight:900;color:" + barColor + ";'>" + pct + "%</div>" +
+            "<div style='font-size:11px;color:rgba(255,255,255,.3);'>" + c.inscritos + "/" + c.cupo + " plazas</div>" +
+          "</div>" +
+        "</div>" +
+        "<div style='display:flex;gap:8px;margin-bottom:12px;'>" +
+          "<span style='background:rgba(59,130,246,0.1);color:#60A5FA;border-radius:99px;padding:4px 10px;font-size:11px;font-weight:700;'>📅 " + c.dias + "</span>" +
+          "<span style='background:rgba(255,255,255,0.06);color:rgba(255,255,255,.5);border-radius:99px;padding:4px 10px;font-size:11px;font-weight:700;'>⏰ " + c.hora + "</span>" +
+        "</div>" +
+        "<div style='height:6px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;'>" +
+          "<div style='height:100%;width:" + pct + "%;background:" + barColor + ";border-radius:99px;transition:width .6s;'></div>" +
+        "</div>" +
+        "<div style='display:flex;gap:8px;margin-top:14px;'>" +
+          "<button class='gym-btn secondary' data-action='whatsapp-clase' data-nombre='" + c.nombre + "' style='flex:1;'>📲 WhatsApp</button>" +
+          "<button class='gym-btn primary' data-action='editar-clase' data-i='" + i + "' style='flex:1;'>Gestionar</button>" +
+        "</div>" +
+      "</div>";
+    });
+
+    document.getElementById("gym-content").innerHTML = html;
+
+    document.getElementById("gym-content").addEventListener("click", function(e){
+      var btn = e.target.closest("[data-action]");
+      if(!btn) return;
+      var action = btn.getAttribute("data-action");
+      if(action==="whatsapp-clase"){
+        var nombre = btn.getAttribute("data-nombre");
+        var msg = encodeURIComponent("Hola, me interesa inscribirme a la clase de " + nombre + " en " + DATA.gym.nombre + ". ¿Hay plazas disponibles?");
+        window.open("https://wa.me/?text=" + msg, "_blank");
+      }
+      if(action==="nueva-clase" || btn.id==="btn-nueva-clase"){
+        alert("Próximamente: crear nueva clase");
+      }
+    });
+
+    document.getElementById("btn-nueva-clase").addEventListener("click", function(){
+      alert("Próximamente: crear nueva clase");
+    });
+  }
+
+  // ── INGRESOS ───────────────────────────────────────────
+  function renderIngresos(){
+    var totalAnual = DATA.ingresos_mes.reduce(function(s,v){ return s+v; }, 0);
+    var mesActual = DATA.ingresos_mes[new Date().getMonth()];
+    var maxVal = Math.max.apply(null, DATA.ingresos_mes);
+
+    var html = "<div class='gym-stat-grid' style='grid-template-columns:1fr 1fr 1fr;'>" +
+      gymStat("$"+totalAnual, "Total anual", "#C8E000") +
+      gymStat("$"+mesActual, "Este mes", "#60A5FA") +
+      gymStat(DATA.miembros.filter(function(m){ return m.estado==="activo"; }).length, "Activos", "#34D399") +
+    "</div>";
+
+    // Gráfico barras
+    html += "<div class='gym-card'>" +
+      "<div class='gym-card-title'>📊 Ingresos mensuales (2026)</div>" +
+      "<div style='display:flex;align-items:flex-end;gap:8px;height:120px;margin-bottom:10px;'>";
+    DATA.ingresos_mes.forEach(function(v, i){
+      var h = Math.round(v/maxVal*110);
+      var esActual = i === new Date().getMonth();
+      html += "<div style='flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;'>" +
+        "<div style='font-size:10px;font-weight:700;color:" + (esActual?"#60A5FA":"rgba(255,255,255,.25)") + ";'>" + (v>=1000?(v/1000).toFixed(1)+"k":v) + "</div>" +
+        "<div style='width:100%;height:" + h + "px;background:" + (esActual?"#60A5FA":"rgba(59,130,246,0.25)") + ";border-radius:6px 6px 0 0;min-height:4px;transition:height .4s;'></div>" +
+        "<div style='font-size:10px;color:rgba(255,255,255,.25);font-weight:600;'>" + DATA.meses[i] + "</div>" +
+      "</div>";
+    });
+    html += "</div></div>";
+
+    // Desglose planes
+    var planes = {};
+    DATA.miembros.forEach(function(m){
+      if(!planes[m.plan]) planes[m.plan]= { count:0, ingresos:0 };
+      if(m.estado==="activo"){ planes[m.plan].count++; planes[m.plan].ingresos+=m.ingresos; }
+    });
+    html += "<div class='gym-card'><div class='gym-card-title'>💳 Por tipo de plan</div>";
+    Object.keys(planes).forEach(function(p){
+      html += "<div class='gym-row'>" +
+        "<div style='flex:1;font-size:14px;font-weight:600;color:#FFF;'>" + p + "</div>" +
+        "<div style='font-size:13px;color:rgba(255,255,255,.4);margin-right:16px;'>" + planes[p].count + " miembros</div>" +
+        "<div style='font-size:14px;font-weight:700;color:#34D399;'>$" + planes[p].ingresos + "/mes</div>" +
+      "</div>";
+    });
+    html += "</div>";
+
+    document.getElementById("gym-content").innerHTML = html;
+  }
+
+  // ── EQUIPOS ────────────────────────────────────────────
+  function renderEquipos(){
+    var equipos = [
+      { nombre:"Mancuernas 5-50kg", estado:"Bueno", ultimo:"2026-05-10" },
+      { nombre:"Barras olímpicas (x6)", estado:"Bueno", ultimo:"2026-04-20" },
+      { nombre:"Cinta Cardio #1", estado:"Reparación", ultimo:"2026-06-01" },
+      { nombre:"Cinta Cardio #2", estado:"Bueno", ultimo:"2026-05-15" },
+      { nombre:"Banco plano (x4)", estado:"Bueno", ultimo:"2026-05-20" },
+      { nombre:"Rack sentadillas", estado:"Revisión", ultimo:"2026-06-10" },
+    ];
+    var estadoColors = { "Bueno":"#34D399", "Reparación":"#FF453A", "Revisión":"#FBBF24" };
+    var html = "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;'>" +
+      "<div style='font-size:13px;color:rgba(255,255,255,.4);'>" + equipos.length + " equipos registrados</div>" +
+      "<button class='gym-btn primary'>+ Equipo</button>" +
+    "</div>";
+    html += "<div class='gym-card'><div class='gym-card-title'>🏋️ Inventario</div>";
+    equipos.forEach(function(eq){
+      var color = estadoColors[eq.estado] || "#FFF";
+      html += "<div class='gym-row'>" +
+        "<div style='width:10px;height:10px;border-radius:50%;background:" + color + ";flex-shrink:0;'></div>" +
+        "<div style='flex:1;'>" +
+          "<div style='font-size:14px;font-weight:600;color:#FFF;'>" + eq.nombre + "</div>" +
+          "<div style='font-size:12px;color:rgba(255,255,255,.3);margin-top:2px;'>Revisado: " + eq.ultimo + "</div>" +
+        "</div>" +
+        "<span class='gym-badge' style='background:rgba(255,255,255,0.05);color:" + color + ";border:1px solid " + color + "40;'>" + eq.estado + "</span>" +
+      "</div>";
+    });
+    html += "</div>";
+    document.getElementById("gym-content").innerHTML = html;
+  }
+
+  // ── CONFIGURACIÓN ──────────────────────────────────────
+  function renderConfiguracion(){
+    var html = "<div class='gym-card'>" +
+      "<div class='gym-card-title'>🏢 Datos del Gimnasio</div>" +
+      "<div style='margin-bottom:12px;'><label style='font-size:12px;color:rgba(255,255,255,.35);display:block;margin-bottom:6px;'>Nombre del gym</label>" +
+        "<input class='gym-input' id='cfg-nombre' value='" + DATA.gym.nombre + "'></div>" +
+      "<div style='margin-bottom:12px;'><label style='font-size:12px;color:rgba(255,255,255,.35);display:block;margin-bottom:6px;'>Slogan</label>" +
+        "<input class='gym-input' id='cfg-slogan' value='" + DATA.gym.slogan + "'></div>" +
+      "<div style='margin-bottom:16px;'><label style='font-size:12px;color:rgba(255,255,255,.35);display:block;margin-bottom:6px;'>Capacidad máxima</label>" +
+        "<input class='gym-input' id='cfg-cap' type='number' value='" + DATA.gym.miembros_cap + "'></div>" +
+      "<button class='gym-btn primary' id='btn-guardar-cfg' style='width:100%;height:48px;font-size:15px;border-radius:12px;'>Guardar cambios</button>" +
+    "</div>";
+
+    html += "<div class='gym-card' style='margin-top:16px;'>" +
+      "<div class='gym-card-title'>🔗 Acceso al gym</div>" +
+      "<div style='background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:16px;'>" +
+        "<div style='font-size:13px;color:rgba(255,255,255,.5);margin-bottom:8px;'>App para alumnos del gym:</div>" +
+        "<div style='font-size:14px;font-weight:700;color:#60A5FA;'>Código de acceso: <span style='background:#0A0A0A;padding:4px 10px;border-radius:8px;letter-spacing:2px;'>GYM01</span></div>" +
+      "</div>" +
+    "</div>";
+
+    document.getElementById("gym-content").innerHTML = html;
+
+    document.getElementById("btn-guardar-cfg").addEventListener("click", function(){
+      DATA.gym.nombre = document.getElementById("cfg-nombre").value || DATA.gym.nombre;
+      DATA.gym.slogan = document.getElementById("cfg-slogan").value || DATA.gym.slogan;
+      DATA.gym.miembros_cap = parseInt(document.getElementById("cfg-cap").value) || DATA.gym.miembros_cap;
+      alert("Configuración guardada ✓");
+    });
+  }
+
+})();
+</script>
+</body>
+</html>

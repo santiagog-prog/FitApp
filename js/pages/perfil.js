@@ -50,8 +50,8 @@
     "</div>";
 
     // Datos del programa
-    html += "<div style='margin:0 20px 4px;font-size:12px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase;'>Programa</div>";
-    html += "<div class='perfil-list'>" +
+    html += sectionHead("📋", "Mi Programa", "#60A5FA");
+    html += "<div style='margin:0 20px 16px;background:#111;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);'>" +
       row("Fecha de inicio", alumno.fecha_inicio||"—") +
       row("Rutina", alumno.rutina_nombre||alumno.rutina_id||"—") +
       row("Peso inicial", (alumno.peso_inicial||"—") + " kg") +
@@ -59,43 +59,41 @@
     "</div>";
 
     // Preferencias
-    html += "<div style='margin:16px 20px 4px;font-size:12px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase;'>Preferencias</div>";
-    html += "<div class='perfil-list'>" +
+    html += sectionHead("⚙️", "Preferencias", "#A78BFA");
+    html += "<div style='margin:0 20px 16px;background:#111;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);'>" +
       toggle("Sonidos en temporizador", "tg-sonido", prefs.sonido!==false) +
       toggle("Vibración al completar serie", "tg-vibra", prefs.vibracion!==false) +
       toggle("Notificaciones", "tg-notif", !!prefs.notif) +
     "</div>";
 
     // Notas del coach
-    html += "<div style='margin:16px 20px 4px;font-size:12px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase;'>Notas de mi coach</div>";
+    html += sectionHead("📝", "Notas de mi Coach", "#FBBF24");
     if(notas.length === 0){
-      html += "<div style='padding:16px 20px;color:rgba(255,255,255,.3);font-size:13px;'>Sin notas todavía.</div>";
+      html += "<div style='margin:0 20px 16px;background:#111;border-radius:18px;padding:20px;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,.3);font-size:13px;text-align:center;'>Tu coach aún no ha escrito notas</div>";
     } else {
-      html += "<div class='perfil-list'>";
+      html += "<div style='margin:0 20px 16px;display:flex;flex-direction:column;gap:8px;'>";
       notas.slice().reverse().slice(0,5).forEach(function(n){
-        html += "<div class='nota-coach-dark'>" +
-          (!n.leida ? "<span style='color:#C8E000;margin-right:6px;'>●</span>" : "") +
-          n.texto +
-          "<div style='font-size:11px;color:rgba(255,255,255,.25);margin-top:4px;'>" + n.fecha + "</div>" +
+        html += "<div style='background:#111;border-radius:14px;padding:14px 16px;border:1px solid " + (!n.leida?"rgba(200,224,0,0.2)":"rgba(255,255,255,0.06)") + ";'>" +
+          (!n.leida ? "<div style='font-size:10px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;'>● Nueva</div>" : "") +
+          "<div style='font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;'>" + n.texto + "</div>" +
+          "<div style='font-size:11px;color:rgba(255,255,255,.2);margin-top:6px;'>" + n.fecha + "</div>" +
         "</div>";
       });
       html += "</div>";
     }
 
     // Comparativa entre alumnos
-    html += "<div style='margin:16px 20px 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase;'>Reto entre amigos</div>";
-    html += "<div id='comparativa-card' style='background:var(--surface);border-radius:16px;padding:18px;margin:8px 20px 0;'></div>";
+    html += sectionHead("🏆", "Reto con Amigos", "#FF9F0A");
+    html += "<div id='comparativa-card' style='background:#111;border-radius:18px;padding:18px;margin:0 20px 16px;border:1px solid rgba(255,255,255,0.06);'></div>";
 
     // ── Ajustes IA ──
     var currentApiKey = window.db.getOpenAIKey();
-    html += "<div style='padding:8px 20px;'>" +
-      "<div style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;'>" +
-        "<div style='font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:12px;'>Ajustes IA · Food Vision</div>" +
-        "<div style='font-size:13px;font-weight:600;margin-bottom:6px;'>OpenAI API Key</div>" +
+    html += sectionHead("🤖", "Ajustes IA", "#34D399");
+    html += "<div style='margin:0 20px 16px;background:#111;border-radius:18px;padding:18px;border:1px solid rgba(255,255,255,0.06);'>" +
+        "<div style='font-size:13px;font-weight:600;margin-bottom:8px;color:#FFF;'>OpenAI API Key</div>" +
         "<input id='openai-key-input' class='api-key-field' type='password' placeholder='sk-...' autocomplete='off'>" +
-        "<div style='font-size:11px;color:var(--text-muted);margin-top:6px;'>Para Escanear Comida con IA (Nutrición). Se guarda solo en este dispositivo.</div>" +
-        "<button id='btn-save-api-key' style='margin-top:10px;width:100%;height:42px;background:var(--accent);border:none;border-radius:99px;color:#1C1C1E;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;'>Guardar API Key</button>" +
-      "</div>" +
+        "<div style='font-size:11px;color:rgba(255,255,255,.3);margin-top:6px;'>Para Escanear Comida con IA. Guardada solo en este dispositivo.</div>" +
+        "<button id='btn-save-api-key' style='margin-top:12px;width:100%;height:44px;background:#C8E000;border:none;border-radius:50px;color:#1C1C1E;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;'>Guardar API Key</button>" +
     "</div>";
 
     // Logout
@@ -284,20 +282,26 @@
       '<div style="font-size:11px;color:rgba(255,255,255,.25);text-align:center;margin-top:4px;">Constancia — no peso ni cuerpo 💪</div>';
   }
 
+  function sectionHead(icon, label, color){
+    return '<div style="display:flex;align-items:center;gap:10px;margin:4px 20px 10px;padding:12px 14px;background:linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02));border-radius:14px;border-left:3px solid ' + (color||"#C8E000") + ';">' +
+      '<span style="font-size:20px;line-height:1;">' + icon + '</span>' +
+      '<span style="font-size:15px;font-weight:800;color:#FFF;letter-spacing:-.3px;">' + label + '</span>' +
+    '</div>';
+  }
   function stat(val, label){
-    return '<div style="background:var(--surface);border-radius:14px;padding:16px;text-align:center;">' +
-      '<div style="font-size:22px;font-weight:800;color:#C8E000;">' + val + '</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;">' + label + '</div>' +
+    return '<div style="background:linear-gradient(145deg,#151515,#0d0d0d);border-radius:16px;padding:18px 12px;text-align:center;border:1px solid rgba(255,255,255,0.07);box-shadow:0 4px 16px rgba(0,0,0,.4);">' +
+      '<div style="font-size:26px;font-weight:900;color:#C8E000;letter-spacing:-.5px;line-height:1;">' + val + '</div>' +
+      '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.3);margin-top:5px;text-transform:uppercase;letter-spacing:.5px;">' + label + '</div>' +
     '</div>';
   }
   function row(label, val){
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.04);">' +
-      '<span style="font-size:14px;color:rgba(255,255,255,.55);">' + label + '</span>' +
-      '<span style="font-size:14px;font-weight:600;color:#FFF;">' + val + '</span>' +
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:15px 20px;border-bottom:1px solid rgba(255,255,255,.04);">' +
+      '<span style="font-size:14px;color:rgba(255,255,255,.45);font-weight:500;">' + label + '</span>' +
+      '<span style="font-size:14px;font-weight:700;color:#FFF;">' + val + '</span>' +
     '</div>';
   }
   function toggle(label, id, on){
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.04);">' +
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:15px 20px;border-bottom:1px solid rgba(255,255,255,.04);">' +
       '<span style="font-size:14px;color:rgba(255,255,255,.55);">' + label + '</span>' +
       '<div class="toggle-switch' + (on?" on":"") + '" id="' + id + '"><div class="knob"></div></div>' +
     '</div>';

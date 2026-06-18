@@ -129,32 +129,46 @@
   function renderHistorial(registros){
     if(registros.length === 0) return '<p style="padding:0 20px;color:rgba(255,255,255,.3);font-size:13px;">Aún no hay entrenamientos.</p>';
     var emojis = ["😫","😕","😐","💪","🔥"];
+    var sensColors = ["#FF453A","#FF9F0A","rgba(255,255,255,.4)","#30D158","#C8E000"];
     return registros.slice().reverse().slice(0,10).map(function(r, i){
+      var ejercsHTML = "";
+      if(Array.isArray(r.ejercicios) && r.ejercicios.length){
+        ejercsHTML = '<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">' +
+          r.ejercicios.map(function(ej){
+            var setsInfo = Array.isArray(ej.series) && ej.series.length
+              ? ej.series.map(function(s,si){ return '<span style="display:inline-block;padding:3px 8px;background:rgba(200,224,0,0.08);border-radius:6px;font-size:11px;font-weight:700;color:#C8E000;margin:2px;">' + (s.reps||"—") + ' reps × ' + (s.kg||0) + ' kg</span>'; }).join("")
+              : '<span style="font-size:11px;color:rgba(255,255,255,.3);">Sin datos de series</span>';
+            return '<div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,0.05);">' +
+              '<div style="font-size:13px;font-weight:700;color:#FFF;margin-bottom:6px;">' + (ej.nombre||ej.name||"Ejercicio") + '</div>' +
+              '<div style="display:flex;flex-wrap:wrap;gap:4px;">' + setsInfo + '</div>' +
+            '</div>';
+          }).join("") +
+        '</div>';
+      } else if(r.nota){
+        ejercsHTML = '<p style="font-size:13px;color:rgba(255,255,255,.5);font-style:italic;padding:8px 0 0;">"' + r.nota + '"</p>';
+      } else {
+        ejercsHTML = '<p style="font-size:12px;color:rgba(255,255,255,.25);padding:8px 0 0;">Sin detalle disponible para esta sesión.</p>';
+      }
+      var sColor = sensColors[(r.sensacion||3)-1];
       return '<div class="historial-row" id="hw-' + i + '">' +
-        '<div class="historial-row-head" onclick="window._toggleHW(' + i + ')">' +
+        '<div class="historial-row-head" data-hw="' + i + '">' +
           '<div style="flex:1;">' +
-            '<div style="font-size:12px;color:rgba(255,255,255,.35);margin-bottom:3px;">' + r.fecha + '</div>' +
-            '<div style="font-size:15px;font-weight:600;color:#FFF;">' + (r.sesion_nombre||r.nombre_sesion||"Sesión") + '</div>' +
-            '<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px;">' + (r.duracion_min||0) + ' min · ' + (r.ejercicios_completados||0) + ' ejercicios</div>' +
+            '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;">' + r.fecha + '</div>' +
+            '<div style="font-size:15px;font-weight:700;color:#FFF;">' + (r.sesion_nombre||r.nombre_sesion||"Sesión") + '</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;margin-top:4px;">' +
+              '<span style="font-size:11px;color:rgba(255,255,255,.35);">⏱ ' + (r.duracion_min||0) + ' min</span>' +
+              '<span style="font-size:11px;color:rgba(255,255,255,.35);">·</span>' +
+              '<span style="font-size:11px;color:rgba(255,255,255,.35);">🏋️ ' + (r.ejercicios_completados||0) + ' ejercicios</span>' +
+            '</div>' +
           '</div>' +
-          '<div style="font-size:22px;">' + (emojis[(r.sensacion||3)-1]) + '</div>' +
-          '<div id="chev-hw-' + i + '" style="color:rgba(255,255,255,.2);font-size:18px;margin-left:8px;transition:transform .2s;">›</div>' +
+          '<div style="font-size:24px;line-height:1;">' + (emojis[(r.sensacion||3)-1]) + '</div>' +
+          '<div id="chev-hw-' + i + '" style="color:rgba(255,255,255,.2);font-size:20px;margin-left:10px;transition:transform .3s;">›</div>' +
         '</div>' +
-        '<div id="detail-hw-' + i + '" class="historial-row-body">' +
-          (r.nota ? '<p style="font-size:13px;color:rgba(255,255,255,.5);font-style:italic;padding:10px 0;">"' + r.nota + '"</p>' : '') +
-        '</div>' +
+        '<div id="detail-hw-' + i + '" class="historial-row-body">' + ejercsHTML + '</div>' +
       '</div>';
     }).join("");
   }
 
-  window._toggleHW = function(i){
-    var detail = document.getElementById("detail-hw-" + i);
-    var chev   = document.getElementById("chev-hw-" + i);
-    if(!detail) return;
-    var open = detail.classList.contains("open");
-    detail.classList.toggle("open", !open);
-    if(chev) chev.style.transform = open ? "" : "rotate(90deg)";
-  };
 
   // ── INIT ────────────────────────────────────────────────
   window.init_evolucion = function(){
@@ -176,11 +190,12 @@
     var html = "<div style='padding-top:4px;'>";
 
     // Stats chips
-    html += "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 16px;'>" +
-      chip(regsMes.length,     "Entrenos este mes") +
-      chip(window.db.calcularRacha(alumno.id), "Racha actual · días") +
-      chip(Math.floor(horasTotal/60)+"h " + (horasTotal%60)+"m", "Horas entrenadas") +
-      chip(registros.length,   "Total entrenamientos") +
+    var rachaVal = window.db.calcularRacha(alumno.id);
+    html += "<div style='display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px 20px;'>" +
+      chip(regsMes.length, "Este mes", "📅", "#C8E000") +
+      chip(rachaVal + (rachaVal === 1 ? " día" : " días"), "Racha activa", "🔥", "#FF9F0A") +
+      chip(Math.floor(horasTotal/60)+"h " + (horasTotal%60)+"m", "Horas totales", "⏱️", "#60A5FA") +
+      chip(registros.length, "Entrenamientos", "🏋️", "#A78BFA") +
     "</div>";
 
     // Link fotos
@@ -328,12 +343,27 @@
     });
 
     document.getElementById("btn-medidas").addEventListener("click", function(){ abrirModalMedidas(alumno.id); });
+
+    document.querySelectorAll(".historial-row-head[data-hw]").forEach(function(el){
+      el.addEventListener("click", function(){
+        var i = this.getAttribute("data-hw");
+        var detail = document.getElementById("detail-hw-" + i);
+        var chev   = document.getElementById("chev-hw-" + i);
+        if(!detail) return;
+        var open = detail.classList.contains("open");
+        detail.classList.toggle("open", !open);
+        if(chev) chev.style.transform = open ? "" : "rotate(90deg)";
+      });
+    });
   };
 
-  function chip(val, label){
-    return '<div style="background:#141414;border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,.06);">' +
-      '<div style="font-size:22px;font-weight:800;color:#C8E000;letter-spacing:-.5px;">' + val + '</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,.35);margin-top:3px;">' + label + '</div>' +
+  function chip(val, label, icon, color){
+    var c = color || "#C8E000";
+    var ic = icon || "";
+    return '<div style="background:linear-gradient(145deg,#161616,#0f0f0f);border-radius:18px;padding:18px 16px;border:1px solid rgba(255,255,255,.08);box-shadow:0 4px 20px rgba(0,0,0,.4);position:relative;overflow:hidden;">' +
+      '<div style="position:absolute;top:-10px;right:-6px;font-size:42px;opacity:.07;">' + ic + '</div>' +
+      '<div style="font-size:11px;font-weight:700;color:' + c + ';text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">' + label + '</div>' +
+      '<div style="font-size:26px;font-weight:900;color:#FFF;letter-spacing:-.5px;line-height:1;">' + val + '</div>' +
     '</div>';
   }
 

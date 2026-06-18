@@ -43,29 +43,57 @@
     '</div>';
   }
 
-  // ── ANILLO GRANDE CALORÍAS ──────────────────────────────
-  function anilloKcal(actual, objetivo){
-    var pct = objetivo > 0 ? Math.min(100, actual / objetivo * 100) : 0;
-    var R = 52, C = 2 * Math.PI * R;
-    var off = C - (pct / 100) * C;
-    return '<svg width="130" height="130" viewBox="0 0 130 130">' +
-      '<circle cx="65" cy="65" r="' + R + '" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="10"/>' +
-      '<circle cx="65" cy="65" r="' + R + '" fill="none" stroke="#C8E000" stroke-width="10"' +
-        ' stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '"' +
-        ' stroke-linecap="round" transform="rotate(-90 65 65)"/>' +
-      '<text x="65" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#C8E000" font-family="Inter,-apple-system,sans-serif">' + Math.round(pct) + '%</text>' +
-      '<text x="65" y="78" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.35)" font-family="Inter,-apple-system,sans-serif">del objetivo</text>' +
-    '</svg>';
+  // Colores neutros consistentes con inicio.js
+  var COLOR_PROT = "#60A5FA", COLOR_CARB = "#FBBF24", COLOR_GRAS = "#A78BFA";
+
+  // ── ANILLO MACROS (3 colores, se llena progresivamente) ──
+  function anilloKcal(kcalConsum, kcalObj, prot, carb, grasa){
+    var cP = COLOR_PROT, cC = COLOR_CARB, cG = COLOR_GRAS;
+    var R = 52, CX = 65, CY = 65, SW = 10;
+    var circ = 2 * Math.PI * R;
+    var pct = kcalObj > 0 ? Math.min(100, kcalConsum / kcalObj * 100) : 0;
+    var totalArc = (pct / 100) * circ;
+    var macTotal = prot + carb + grasa;
+    var svgBase = '<svg width="130" height="130" viewBox="0 0 130 130">' +
+      '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="'+SW+'"/>';
+
+    if(macTotal <= 0 || pct === 0){
+      svgBase +=
+        '<text x="'+CX+'" y="'+(CY-4)+'" text-anchor="middle" font-size="20" font-weight="800" fill="rgba(255,255,255,0.25)" font-family="Inter,sans-serif">0</text>' +
+        '<text x="'+CX+'" y="'+(CY+14)+'" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)" font-family="Inter,sans-serif">kcal</text>';
+      return svgBase + '</svg>';
+    }
+
+    var arcP = (prot / macTotal) * totalArc;
+    var arcC = (carb / macTotal) * totalArc;
+    var arcG = (grasa / macTotal) * totalArc;
+    var offP = circ - arcP, offC = circ - arcC, offG = circ - arcG;
+    var rotP = -90;
+    var rotC = rotP + (prot  / macTotal) * (pct / 100) * 360;
+    var rotG = rotC + (carb  / macTotal) * (pct / 100) * 360;
+
+    svgBase +=
+      '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cP+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offP.toFixed(1)+'" transform="rotate('+rotP+' '+CX+' '+CY+')" stroke-linecap="butt"/>' +
+      '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cC+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offC.toFixed(1)+'" transform="rotate('+rotC+' '+CX+' '+CY+')" stroke-linecap="butt"/>' +
+      '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cG+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offG.toFixed(1)+'" transform="rotate('+rotG+' '+CX+' '+CY+')" stroke-linecap="butt"/>' +
+      '<text x="'+CX+'" y="'+(CY-4)+'" text-anchor="middle" font-size="19" font-weight="800" fill="#FFF" font-family="Inter,sans-serif">' + Math.round(kcalConsum) + '</text>' +
+      '<text x="'+CX+'" y="'+(CY+12)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.35)" font-family="Inter,sans-serif">kcal</text>' +
+      '<text x="'+CX+'" y="'+(CY+24)+'" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.2)" font-family="Inter,sans-serif">' + Math.round(pct) + '% objetivo</text>';
+
+    return svgBase + '</svg>';
   }
 
   // ── COMIDA BLOQUE ───────────────────────────────────────
   function comidaHTML(comida, ci, opcionElegida, estado, alumnoId, hoyKey){
     var elegida = opcionElegida;
+    var COMIDA_ICONS = { "Desayuno":"☀️", "Comida":"🥗", "Cena":"🌙", "Post-entreno":"⚡", "Merienda":"🍎" };
+    var icono = COMIDA_ICONS[comida.nombre] || "🍽️";
     var html = '<div class="nutri-comida-blk">' +
       '<div class="ncb-head">' +
-        '<div class="ncb-icon">' + (comida.icono || "🍽️") + '</div>' +
-        '<div class="ncb-info"><div class="ncb-nombre">' + comida.nombre + '</div>' +
-          (comida.descripcion ? '<div class="ncb-desc">' + comida.descripcion + '</div>' : '') +
+        '<div class="ncb-icon">' + icono + '</div>' +
+        '<div class="ncb-info">' +
+          '<div class="ncb-nombre">' + comida.nombre + (comida.hora ? ' <span style="font-size:11px;color:rgba(255,255,255,0.35);font-weight:400;">· ' + comida.hora + '</span>' : '') + '</div>' +
+          (elegida && elegida.nombre ? '<div style="margin-top:6px;padding:10px 14px;background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.09);border-radius:12px;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.5;">' + elegida.nombre + '</div>' : '') +
         '</div>' +
         (elegida ? '<div class="ncb-kcal">' + (elegida.calorias_total || 0) + ' kcal</div>' : '') +
       '</div>';
@@ -84,7 +112,7 @@
       elegida.alimentos.forEach(function(a, ai){
         var key = ci + "_" + ai;
         var reemplazo = estado.reemplazos && estado.reemplazos[key];
-        var comido = estado.comidos && estado.comidos[key] !== false;
+        var comido = !!(estado.comidos && estado.comidos[key] === true);
         html += '<div class="ali-row' + (reemplazo ? " reemplazado" : "") + '">' +
           '<button class="ali-check' + (comido && !reemplazo ? " done" : "") + '" onclick="window._toggleComido(' + ci + ',' + ai + ')">' +
             (comido && !reemplazo ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>' : '') +
@@ -116,7 +144,7 @@
     if(!_estado.comidos) _estado.comidos = {};
     var key = ci + "_" + ai;
     if(_estado.reemplazos && _estado.reemplazos[key]) return;
-    _estado.comidos[key] = _estado.comidos[key] === false ? true : false;
+    _estado.comidos[key] = _estado.comidos[key] === true ? false : true;
     window.db.saveNutricion(_alumno.id, _diasFecha[_diaSelIdx], _estado);
     window.init_nutricion();
   };
@@ -191,7 +219,7 @@
       var op = comida.opciones[opIdx];
       if(op) op.alimentos.forEach(function(a, ai){
         var key = ci + "_" + ai;
-        if(_estado.comidos[key] === false) return;
+        if(_estado.comidos[key] !== true) return;
         if(_estado.reemplazos[key]) return;
         totKcal  += (a.calorias  || 0);
         totProt  += (a.proteina  || 0);
@@ -230,44 +258,13 @@
         '<div class="nutri-kcal-big">' + Math.round(totKcal) + '</div>' +
         '<div class="nutri-kcal-obj">/ ' + obj + ' kcal</div>' +
         '<div class="nutri-macros-bars">' +
-          macroBar("Proteína",      totProt,  mac.proteina,        "#C8E000") +
-          macroBar("Carbohidratos", totCarb,  mac.carbohidratos,   "#34C759") +
-          macroBar("Grasas",        totGrasa, mac.grasas,          "#0A84FF") +
+          macroBar("Proteína",      totProt,  mac.proteina,        COLOR_PROT) +
+          macroBar("Carbohidratos", totCarb,  mac.carbohidratos,   COLOR_CARB) +
+          macroBar("Grasas",        totGrasa, mac.grasas,          COLOR_GRAS) +
         '</div>' +
       '</div>' +
-      '<div style="flex-shrink:0;">' + anilloKcal(totKcal, obj) + '</div>' +
+      '<div style="flex-shrink:0;">' + anilloKcal(totKcal, obj, totProt, totCarb, totGrasa) + '</div>' +
     '</div>';
-
-    // ── Anillo 3 colores macros (PARTE 2B) ──
-    var macTotal = totProt + totCarb + totGrasa;
-    if(macTotal > 0){
-      var cProt = "#0A84FF", cCarbs = "#FF9F0A", cGras = "#BF5AF2";
-      var R2 = 46, CX2 = 60, CY2 = 60, stroke2 = 10;
-      var circ2 = 2 * Math.PI * R2;
-      var arcProt  = (totProt  / macTotal) * circ2;
-      var arcCarbs = (totCarb  / macTotal) * circ2;
-      var arcGras  = (totGrasa / macTotal) * circ2;
-      var offProt  = circ2 - arcProt;
-      var offCarbs = circ2 - arcCarbs;
-      var offGras  = circ2 - arcGras;
-      var rotProt  = -90;
-      var rotCarbs = -90 + (totProt  / macTotal) * 360;
-      var rotGras  = rotCarbs + (totCarb / macTotal) * 360;
-      html += '<div style="background:#141414;border-radius:18px;margin:0 16px 16px;padding:18px;display:flex;align-items:center;gap:20px;border:1px solid rgba(255,255,255,0.05);">' +
-        '<svg width="120" height="120" viewBox="0 0 120 120" style="flex-shrink:0;">' +
-          '<circle cx="'+CX2+'" cy="'+CY2+'" r="'+R2+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="'+stroke2+'"/>' +
-          '<circle cx="'+CX2+'" cy="'+CY2+'" r="'+R2+'" fill="none" stroke="'+cProt+'" stroke-width="'+stroke2+'" stroke-dasharray="'+circ2.toFixed(1)+'" stroke-dashoffset="'+offProt.toFixed(1)+'" transform="rotate('+rotProt+' '+CX2+' '+CY2+')" stroke-linecap="butt"/>' +
-          '<circle cx="'+CX2+'" cy="'+CY2+'" r="'+R2+'" fill="none" stroke="'+cCarbs+'" stroke-width="'+stroke2+'" stroke-dasharray="'+circ2.toFixed(1)+'" stroke-dashoffset="'+offCarbs.toFixed(1)+'" transform="rotate('+rotCarbs+' '+CX2+' '+CY2+')" stroke-linecap="butt"/>' +
-          '<circle cx="'+CX2+'" cy="'+CY2+'" r="'+R2+'" fill="none" stroke="'+cGras+'" stroke-width="'+stroke2+'" stroke-dasharray="'+circ2.toFixed(1)+'" stroke-dashoffset="'+offGras.toFixed(1)+'" transform="rotate('+rotGras+' '+CX2+' '+CY2+')" stroke-linecap="butt"/>' +
-          '<text x="'+CX2+'" y="'+CY2+'" text-anchor="middle" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="13" font-weight="800" fill="#FFF">' + Math.round(macTotal) + 'g</text>' +
-        '</svg>' +
-        '<div style="display:flex;flex-direction:column;gap:8px;">' +
-          '<div style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:'+cProt+';display:block;flex-shrink:0;"></span><span style="font-size:13px;color:rgba(255,255,255,0.7);">Proteína <strong style="color:#FFF;">' + totProt.toFixed(0) + 'g</strong></span></div>' +
-          '<div style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:'+cCarbs+';display:block;flex-shrink:0;"></span><span style="font-size:13px;color:rgba(255,255,255,0.7);">Carbos <strong style="color:#FFF;">' + totCarb.toFixed(0) + 'g</strong></span></div>' +
-          '<div style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:'+cGras+';display:block;flex-shrink:0;"></span><span style="font-size:13px;color:rgba(255,255,255,0.7);">Grasas <strong style="color:#FFF;">' + totGrasa.toFixed(0) + 'g</strong></span></div>' +
-        '</div>' +
-      '</div>';
-    }
 
     // ── Comidas del día ──
     _plan.comidas.forEach(function(comida, ci){
@@ -292,9 +289,16 @@
 
     // ── Hidratación ──
     html += '<div style="padding:0 16px 4px;"><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">Hidratación 💧</div>';
-    html += '<div class="agua-row">';
-    for(var i=0; i<8; i++){
-      html += '<button class="agua-vaso' + (i < _estado.agua ? " full" : "") + '" onclick="window._toggleAgua(' + i + ')"></button>';
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;padding:4px 0;">';
+    for(var wi=0; wi<8; wi++){
+      var wFull = wi < _estado.agua;
+      html += '<button onclick="window._toggleAgua(' + wi + ')" style="background:none;border:none;cursor:pointer;padding:2px;transition:transform .15s;" title="Vaso ' + (wi+1) + '">' +
+        '<svg width="32" height="46" viewBox="0 0 32 46" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<path d="M6 3 L3 43 H29 L26 3 Z" stroke="' + (wFull?"rgba(90,200,250,0.7)":"rgba(255,255,255,0.2)") + '" stroke-width="1.5" fill="none" stroke-linejoin="round"/>' +
+          (wFull ? '<path d="M7.5 22 L4.5 43 H27.5 L24.5 22 Z" fill="rgba(90,200,250,0.3)"/><path d="M7.3 20.5 L24.7 20.5 C24.7 20.5 25 22 16 22 C7 22 7.3 20.5 7.3 20.5Z" fill="rgba(90,200,250,0.5)"/>' : '') +
+          '<line x1="9" y1="8" x2="7.5" y2="38" stroke="' + (wFull?"rgba(255,255,255,0.15)":"rgba(255,255,255,0.06)") + '" stroke-width="1.5" stroke-linecap="round"/>' +
+        '</svg>' +
+      '</button>';
     }
     html += '</div>';
     html += '<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:6px;">' + _estado.agua + '/8 vasos completados</div></div>';
