@@ -397,10 +397,18 @@
               { nombre:"Opción 1", dias:[0,2,4,5,6], calorias_total:515, alimentos:[ {nombre:"Arroz cocido",cantidad:"150g",calorias:195,proteina:4,carbos:43,grasas:0},{nombre:"Pechuga de pollo",cantidad:"180g",calorias:198,proteina:40,carbos:0,grasas:4},{nombre:"Brócoli al vapor",cantidad:"100g",calorias:34,proteina:3,carbos:7,grasas:0},{nombre:"Aceite de oliva",cantidad:"10ml",calorias:88,proteina:0,carbos:0,grasas:10} ]},
               { nombre:"Opción 2", dias:[1,3],       calorias_total:478, alimentos:[ {nombre:"Quinua cocida",cantidad:"150g",calorias:170,proteina:6,carbos:32,grasas:2},{nombre:"Filete de pescado",cantidad:"180g",calorias:190,proteina:38,carbos:0,grasas:3},{nombre:"Ensalada mixta",cantidad:"120g",calorias:30,proteina:2,carbos:5,grasas:0},{nombre:"Aceite de oliva",cantidad:"10ml",calorias:88,proteina:0,carbos:0,grasas:10} ]}
             ]},
-          { nombre:"Post-entreno", hora:"18:30", descripcion:"Proteína de suero + plátano.",
-            opciones:[ { nombre:"Opción 1", calorias_total:248, alimentos:[ {nombre:"Proteína de suero",cantidad:"35g",calorias:140,proteina:30,carbos:5,grasas:2},{nombre:"Plátano",cantidad:"120g",calorias:108,proteina:1,carbos:28,grasas:0} ]} ]},
-          { nombre:"Cena", hora:"20:00", descripcion:"Atún + papa + ensalada.",
-            opciones:[ { nombre:"Opción 1", calorias_total:334, alimentos:[ {nombre:"Atún en agua",cantidad:"150g",calorias:150,proteina:33,carbos:0,grasas:1},{nombre:"Papa cocida",cantidad:"200g",calorias:154,proteina:4,carbos:36,grasas:0},{nombre:"Ensalada mixta",cantidad:"150g",calorias:30,proteina:2,carbos:6,grasas:0} ]} ]}
+          { nombre:"Post-entreno", hora:"18:30", descripcion:"Proteína de suero + carbohidrato rápido.",
+            opciones:[
+              { nombre:"Opción 1", calorias_total:248, alimentos:[ {nombre:"Proteína de suero",cantidad:"35g",calorias:140,proteina:30,carbos:5,grasas:2},{nombre:"Plátano",cantidad:"120g",calorias:108,proteina:1,carbos:28,grasas:0} ]},
+              { nombre:"Opción 2", calorias_total:240, alimentos:[ {nombre:"Proteína de suero",cantidad:"35g",calorias:140,proteina:30,carbos:5,grasas:2},{nombre:"Pan integral",cantidad:"60g",calorias:150,proteina:6,carbos:28,grasas:2},{nombre:"Mermelada sin azúcar",cantidad:"15g",calorias:20,proteina:0,carbos:5,grasas:0} ]},
+              { nombre:"Opción 3 (sin proteína)", calorias_total:222, alimentos:[ {nombre:"Huevo cocido",cantidad:"100g",calorias:148,proteina:12,carbos:0,grasas:10},{nombre:"Plátano",cantidad:"80g",calorias:72,proteina:1,carbos:19,grasas:0} ]}
+            ]},
+          { nombre:"Cena", hora:"20:00", descripcion:"Proteína + carbohidrato complejo + verduras.",
+            opciones:[
+              { nombre:"Opción 1", calorias_total:334, alimentos:[ {nombre:"Atún en agua",cantidad:"150g",calorias:150,proteina:33,carbos:0,grasas:1},{nombre:"Papa cocida",cantidad:"200g",calorias:154,proteina:4,carbos:36,grasas:0},{nombre:"Ensalada mixta",cantidad:"150g",calorias:30,proteina:2,carbos:6,grasas:0} ]},
+              { nombre:"Opción 2", calorias_total:342, alimentos:[ {nombre:"Pechuga de pollo",cantidad:"140g",calorias:154,proteina:31,carbos:0,grasas:3},{nombre:"Arroz cocido",cantidad:"100g",calorias:130,proteina:3,carbos:29,grasas:0},{nombre:"Brócoli al vapor",cantidad:"100g",calorias:34,proteina:3,carbos:7,grasas:0},{nombre:"Aceite de oliva",cantidad:"5ml",calorias:44,proteina:0,carbos:0,grasas:5} ]},
+              { nombre:"Opción 3", calorias_total:320, alimentos:[ {nombre:"Huevo revuelto",cantidad:"150g",calorias:222,proteina:18,carbos:0,grasas:15},{nombre:"Avena cocida",cantidad:"100g",calorias:75,proteina:3,carbos:13,grasas:1},{nombre:"Manzana",cantidad:"120g",calorias:63,proteina:0,carbos:17,grasas:0} ]}
+            ]}
         ]
       };
 

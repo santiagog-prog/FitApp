@@ -7,7 +7,7 @@
   function $(sel){ return document.querySelector(sel); }
   function el(html){ var d = document.createElement("div"); d.innerHTML = html; return d.firstElementChild; }
 
-  var SECCIONES = ["dashboard","alumnos","rutinas","alimentacion","ejercicios","mensajes","gym","videos","intakes"];
+  var SECCIONES = ["dashboard","alumnos","rutinas","alimentacion","ejercicios","mensajes","gym","videos","intakes","ingresos"];
 
   function showSec(id){
     SECCIONES.forEach(function(s){
@@ -290,10 +290,14 @@
     function renderTab(){
       var box = $("#tab-content"); var html = "";
       if(tabActivo === "resumen"){
+        var rNombre = (function(){ var r = window.db.getRutinaPorId(a.rutina_id); return r ? r.nombre : (a.rutina_id || "Sin rutina"); })();
+        var pNombre = (function(){ var p = window.db.getPlanPorId(a.plan_alimentacion_id); return p ? p.nombre : (a.plan_alimentacion_id || "Sin plan"); })();
         html = "<div class='coach-card'>" +
-          "<p>Objetivo: " + a.objetivo.replace("_"," ") + " · Nivel: " + a.nivel + "</p>" +
+          "<p>Objetivo: " + a.objetivo.replace(/_/g," ") + " · Nivel: " + a.nivel + "</p>" +
           "<p>Peso inicial: " + a.peso_inicial + " kg · Peso actual: " + a.peso_actual + " kg</p>" +
-          "<p>Código de acceso: " + a.codigo + " · Inicio: " + a.fecha_inicio + "</p></div>";
+          "<p>Código de acceso: " + a.codigo + " · Inicio: " + a.fecha_inicio + "</p>" +
+          "<p style='margin-top:8px;'>Rutina: <strong style='color:#C8E000;'>" + rNombre + "</strong></p>" +
+          "<p>Plan de alimentación: <strong style='color:#C8E000;'>" + pNombre + "</strong></p></div>";
       } else if(tabActivo === "rutina"){
         var r = window.db.getRutinaPorId(a.rutina_id);
         html = "<div class='coach-card'>" + (r ? ("<p><strong>" + r.nombre + "</strong></p><p>" + r.mesociclo + "</p>") : "<p>Sin rutina asignada.</p>") +
@@ -304,9 +308,38 @@
           "<button class='btn-coach secondary' id='btn-cambiar-plan' style='margin-top:10px;'>Cambiar plan</button></div>";
       } else if(tabActivo === "progreso"){
         var pesos = window.db.getPesos(a.id), regs = window.db.getRegistros(a.id), medallas = window.db.getMedallas(a.id);
-        html = "<div class='coach-card'><p>" + regs.length + " entrenamientos registrados · racha actual " + window.db.calcularRacha(a.id) + " días</p>" +
-          "<p>Últimos pesos: " + pesos.slice(-5).map(function(p){return p.kg+"kg ("+p.fecha+")";}).join(", ") + "</p>" +
-          "<p>Medallas desbloqueadas: " + medallas.length + " / " + window.db.MEDALLAS_DEF.length + "</p></div>";
+        var ultPesos = pesos.slice(-8);
+        var pesoGrafico = "";
+        if(ultPesos.length >= 2){
+          var minP = Math.min.apply(null, ultPesos.map(function(p){ return parseFloat(p.kg); }));
+          var maxP = Math.max.apply(null, ultPesos.map(function(p){ return parseFloat(p.kg); }));
+          var rango = maxP - minP || 1;
+          var W = 480, H = 90, pad = 20;
+          var points = ultPesos.map(function(p, i){
+            var x = pad + (i / (ultPesos.length - 1)) * (W - pad*2);
+            var y = H - pad - ((parseFloat(p.kg) - minP) / rango) * (H - pad*2);
+            return x.toFixed(1) + "," + y.toFixed(1);
+          }).join(" ");
+          pesoGrafico = '<div style="background:#0F0F0F;border-radius:10px;padding:14px;margin-bottom:12px;">' +
+            '<div style="font-size:12px;color:#777;margin-bottom:8px;">Evolución de peso (kg)</div>' +
+            '<svg width="100%" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" style="display:block;">' +
+            '<polyline points="' + points + '" fill="none" stroke="#C8E000" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+            ultPesos.map(function(p, i){
+              var x = pad + (i / (ultPesos.length - 1)) * (W - pad*2);
+              var y = H - pad - ((parseFloat(p.kg) - minP) / rango) * (H - pad*2);
+              return '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="4" fill="#C8E000"/>' +
+                '<text x="' + x.toFixed(1) + '" y="' + (y - 8).toFixed(1) + '" text-anchor="middle" font-size="9" fill="#C8E000" font-family="Inter,sans-serif">' + p.kg + '</text>';
+            }).join("") +
+            '</svg>' +
+            '<div style="display:flex;justify-content:space-between;font-size:10px;color:#555;margin-top:4px;">' +
+            ultPesos.map(function(p){ return '<span>' + p.fecha.slice(5) + '</span>'; }).join("") +
+            '</div></div>';
+        }
+        html = "<div class='coach-card'>" + pesoGrafico +
+          "<p>" + regs.length + " entrenamientos · racha " + window.db.calcularRacha(a.id) + " días · " + medallas.length + "/" + window.db.MEDALLAS_DEF.length + " medallas</p>" +
+          "<div style='margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;'>" +
+          medallas.map(function(m){ return "<span style='background:#1C1C1C;border-radius:8px;padding:6px 10px;font-size:12px;'>" + m.icono + " " + m.nombre + "</span>"; }).join("") +
+          "</div></div>";
       } else if(tabActivo === "notas"){
         var notas = window.db.getNotas(a.id);
         html = "<div class='coach-card'>" + notas.map(function(n){ return "<p style='margin-bottom:8px;border-bottom:1px solid #242424;padding-bottom:8px;'>" + n.fecha + " — " + n.texto + "</p>"; }).join("") +
@@ -570,31 +603,53 @@
   };
 
   // ── MENSAJES ─────────────────────────────────────────────
+  // Usa clave separada de notas para no mezclar con las notas del coach
+  function getMensajesCoach(alumnoId){
+    try{ return JSON.parse(localStorage.getItem("fitapp_mensajes_coach_" + alumnoId)||"[]"); }catch(e){ return []; }
+  }
+  function saveMensajeCoach(alumnoId, msg){
+    var list = getMensajesCoach(alumnoId);
+    list.push(msg);
+    try{ localStorage.setItem("fitapp_mensajes_coach_" + alumnoId, JSON.stringify(list)); }catch(e){}
+  }
+
   window.render_mensajes = function(){
     var alumnos = window.db.getAlumnos();
-    var html = "<h1>Mensajes</h1><div style='display:flex;gap:20px;'>";
-    html += "<div style='width:240px;'>" + alumnos.map(function(a){
-      var sinLeer = window.db.getNotas(a.id).filter(function(n){ return false; }).length;
-      return "<div class='coach-card' style='cursor:pointer;padding:12px;' data-id='" + a.id + "'>" + a.nombre + " " + (a.apellido||"") + "</div>";
+    var html = "<h1>Mensajes</h1><div style='display:flex;gap:20px;flex-wrap:wrap;'>";
+    html += "<div style='width:220px;flex-shrink:0;'>" + alumnos.map(function(a){
+      var msgs = getMensajesCoach(a.id);
+      var badge = msgs.length ? "<span style='float:right;background:#C8E000;color:#1C1C1E;border-radius:99px;padding:1px 8px;font-size:11px;font-weight:700;'>" + msgs.length + "</span>" : "";
+      return "<div class='coach-card' style='cursor:pointer;padding:12px;margin-bottom:8px;' data-id='" + a.id + "'>" + a.nombre + " " + (a.apellido||"") + badge + "</div>";
     }).join("") + "</div>";
-    html += "<div style='flex:1;' id='hilo-mensajes'><p style='color:#999;'>Selecciona un alumno para ver sus notas.</p></div></div>";
+    html += "<div style='flex:1;min-width:260px;' id='hilo-mensajes'><p style='color:#999;padding:20px 0;'>Selecciona un alumno para ver el hilo de mensajes.</p></div></div>";
     $("#sec-mensajes").innerHTML = html;
 
     document.querySelectorAll("#sec-mensajes [data-id]").forEach(function(c){
       c.addEventListener("click", function(){ renderHilo(this.getAttribute("data-id")); });
     });
+
     function renderHilo(id){
       var a = window.db.getAlumnoPorId(id);
-      var notas = window.db.getNotas(id);
-      var html2 = "<div class='coach-card'>" + notas.map(function(n){ return "<p style='border-bottom:1px solid #242424;padding:8px 0;'>" + n.fecha + " — " + n.texto + "</p>"; }).join("") +
-        "<textarea id='msg-nuevo' style='width:100%;margin-top:10px;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;' placeholder='Nueva nota para " + a.nombre + "'></textarea>" +
-        "<button class='btn-coach' id='msg-enviar' style='margin-top:8px;'>Enviar nota</button></div>";
-      $("#hilo-mensajes").innerHTML = html2;
+      var msgs = getMensajesCoach(id);
+      var hiloHtml = "<div class='coach-card'>" +
+        "<h3 style='margin-bottom:12px;'>" + a.nombre + " " + (a.apellido||"") + "</h3>" +
+        "<div style='max-height:320px;overflow-y:auto;margin-bottom:12px;'>" +
+        (msgs.length ? msgs.map(function(m){
+          return "<div style='background:#0F0F0F;border-radius:8px;padding:10px;margin-bottom:8px;'>" +
+            "<div style='font-size:13px;'>" + m.texto + "</div>" +
+            "<div style='font-size:11px;color:#555;margin-top:4px;'>" + m.fecha + "</div>" +
+          "</div>";
+        }).join("") : "<p style='color:#555;font-size:13px;'>Sin mensajes todavía.</p>") +
+        "</div>" +
+        "<textarea id='msg-nuevo' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;min-height:70px;font-family:inherit;font-size:13px;' placeholder='Escribe un mensaje para " + a.nombre + "...'></textarea>" +
+        "<button class='btn-coach' id='msg-enviar' style='margin-top:8px;width:100%;'>Enviar mensaje</button></div>";
+      $("#hilo-mensajes").innerHTML = hiloHtml;
       $("#msg-enviar").addEventListener("click", function(){
-        var txt = $("#msg-nuevo").value.trim();
+        var txt = ($("#msg-nuevo").value||"").trim();
         if(!txt) return;
-        window.db.saveNota(id, { fecha: window.db.fechaHoy(), texto: txt, leida:false });
+        saveMensajeCoach(id, { fecha: window.db.fechaHoy(), texto: txt });
         renderHilo(id);
+        window.render_mensajes && setTimeout(function(){ renderHilo(id); }, 0);
       });
     }
   };
@@ -796,6 +851,201 @@
         var it = intakes[parseInt(this.getAttribute("data-i"),10)];
         var rows = Object.keys(it).map(function(k){ return "<tr><td><strong>" + k + "</strong></td><td>" + it[k] + "</td></tr>"; }).join("");
         coachModal("Intake: " + (it.nombre||""), "<table class='coach-table'>" + rows + "</table>", null);
+      });
+    });
+  };
+
+  // ── MULTI-GYM TOGGLE (PARTE 3) ───────────────────────────
+  window.render_modo_gym = function(){
+    var modos = JSON.parse(localStorage.getItem("fitapp_gyms_coach")||"[]");
+    var modoActivo = localStorage.getItem("fitapp_gym_activo") || "";
+    if(modos.length === 0) return "";
+    var html = "<div class='coach-card' style='margin-bottom:16px;'>" +
+      "<h3 style='margin-bottom:10px;'>🏢 Gimnasio activo</h3>" +
+      "<div style='display:flex;gap:8px;flex-wrap:wrap;'>" +
+      modos.map(function(g){
+        var activo = g.id === modoActivo;
+        return "<button class='btn-coach" + (activo ? "" : " secondary") + "' onclick='window.setGymActivo(\"" + g.id + "\")' style='font-size:13px;'>" +
+          (activo ? "✓ " : "") + g.nombre + "</button>";
+      }).join("") +
+      "</div></div>";
+    return html;
+  };
+  window.setGymActivo = function(id){
+    localStorage.setItem("fitapp_gym_activo", id);
+    window.render_gym();
+  };
+
+  // Extender render_gym para incluir gestión multi-gym
+  var _render_gym_orig = window.render_gym;
+  window.render_gym = function(){
+    _render_gym_orig();
+    // Agregar panel de gestión multi-gym arriba del contenido
+    var gymMgmt = "<div class='coach-card' style='margin-bottom:16px;'>" +
+      "<h3 style='margin-bottom:10px;'>🔀 Modo multi-gimnasio</h3>" +
+      "<p style='color:#999;font-size:13px;margin-bottom:12px;'>Si trabajas en varios gimnasios, puedes gestionar cada uno por separado y cambiar el gym activo con un toque.</p>" +
+      "<div id='multi-gym-list' style='margin-bottom:10px;'></div>" +
+      "<button class='btn-coach secondary' id='btn-add-gym' style='font-size:13px;'>+ Agregar gimnasio</button></div>";
+    var main = $("#sec-gym");
+    var h1 = main.querySelector("h1");
+    if(h1) h1.insertAdjacentHTML("afterend", gymMgmt);
+
+    var modos = JSON.parse(localStorage.getItem("fitapp_gyms_coach")||"[]");
+    var modoActivo = localStorage.getItem("fitapp_gym_activo") || "";
+    function renderMultiList(){
+      var listEl = document.getElementById("multi-gym-list");
+      if(!listEl) return;
+      var modos2 = JSON.parse(localStorage.getItem("fitapp_gyms_coach")||"[]");
+      if(!modos2.length){ listEl.innerHTML = "<p style='color:#555;font-size:13px;'>Sin gimnasios adicionales.</p>"; return; }
+      listEl.innerHTML = modos2.map(function(g){
+        var activo = g.id === (localStorage.getItem("fitapp_gym_activo")||"");
+        return "<div style='display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #242424;'>" +
+          "<span style='font-size:13px;" + (activo ? "color:#C8E000;font-weight:700;" : "") + "'>" + (activo ? "✓ " : "") + g.nombre + "</span>" +
+          "<div style='display:flex;gap:6px;'>" +
+          "<button class='btn-coach secondary' style='font-size:11px;padding:5px 10px;' onclick='localStorage.setItem(\"fitapp_gym_activo\",\"" + g.id + "\");window.render_gym();'>Activar</button>" +
+          "<button class='btn-coach danger' style='font-size:11px;padding:5px 10px;' onclick='(function(){var l=JSON.parse(localStorage.getItem(\"fitapp_gyms_coach\")||\"[]\");localStorage.setItem(\"fitapp_gyms_coach\",JSON.stringify(l.filter(function(x){return x.id!==\"" + g.id + "\";})));window.render_gym();})()'>✕</button>" +
+          "</div></div>";
+      }).join("");
+    }
+    renderMultiList();
+
+    var btnAddGym = document.getElementById("btn-add-gym");
+    if(btnAddGym) btnAddGym.addEventListener("click", function(){
+      coachModal("Nuevo gimnasio", "<div class='coach-form'>" +
+        "<label>Nombre del gimnasio</label><input id='ng-nombre' placeholder='Ej: FitZone Norte'>" +
+        "<button class='btn-coach' id='ng-guardar' style='margin-top:12px;'>Agregar</button></div>", function(){
+        $("#ng-guardar").addEventListener("click", function(){
+          var nombre = ($("#ng-nombre").value||"").trim();
+          if(!nombre) return;
+          var gyms = JSON.parse(localStorage.getItem("fitapp_gyms_coach")||"[]");
+          gyms.push({ id: window.db.generarId("gym"), nombre: nombre });
+          localStorage.setItem("fitapp_gyms_coach", JSON.stringify(gyms));
+          window.cerrarCoachModal();
+          window.render_gym();
+        });
+      });
+    });
+  };
+
+  // ── INGRESOS (PARTE 4) ───────────────────────────────────
+  window.render_ingresos = function(){
+    var alumnos = window.db.getAlumnos();
+    var hoy = new Date();
+    var totalMes = 0;
+    var vencenProx = [];
+    var pagadosMes = [];
+
+    alumnos.forEach(function(a){
+      var precio = parseFloat(a.precio_mensual) || 0;
+      var pagos = JSON.parse(localStorage.getItem("fitapp_pagos_" + a.id)||"[]");
+      var ultimoPago = pagos.length ? pagos[pagos.length-1] : null;
+      var proximoVence = a.fecha_pago_proximo || "";
+      var diasRestantes = 999;
+      if(proximoVence){
+        diasRestantes = Math.round((new Date(proximoVence) - hoy) / 86400000);
+      }
+      if(ultimoPago && ultimoPago.mes === (hoy.getFullYear() + "-" + String(hoy.getMonth()+1).padStart(2,"0"))){
+        totalMes += precio;
+        pagadosMes.push({ alumno: a, precio: precio, fecha: ultimoPago.fecha });
+      }
+      if(diasRestantes <= 7){
+        vencenProx.push({ alumno: a, precio: precio, diasRestantes: diasRestantes, proximoVence: proximoVence });
+      }
+    });
+
+    var html = "<h1>💰 Ingresos</h1>";
+
+    // KPIs
+    html += "<div class='coach-grid-stats'>" +
+      "<div class='cstat'><div class='cs-val'>$" + totalMes.toFixed(0) + "</div><div class='cs-label'>Recaudado este mes</div></div>" +
+      "<div class='cstat'><div class='cs-val'>" + alumnos.filter(function(a){ return parseFloat(a.precio_mensual) > 0; }).length + "</div><div class='cs-label'>Alumnos con tarifa</div></div>" +
+      "<div class='cstat'><div class='cs-val'>" + vencenProx.length + "</div><div class='cs-label'>Vencen en 7 días</div></div>" +
+      "<div class='cstat'><div class='cs-val'>$" + alumnos.reduce(function(s,a){ return s + (parseFloat(a.precio_mensual)||0); }, 0).toFixed(0) + "</div><div class='cs-label'>Potencial mensual</div></div>" +
+    "</div>";
+
+    // Alertas próximos vencimientos
+    if(vencenProx.length){
+      html += "<div class='coach-card'><h3 style='margin-bottom:12px;color:#FF9500;'>⚠️ Vencen pronto</h3>";
+      vencenProx.forEach(function(v){
+        var label = v.diasRestantes < 0 ? "Vencido hace " + Math.abs(v.diasRestantes) + " días" : (v.diasRestantes === 0 ? "Vence hoy" : "Vence en " + v.diasRestantes + " día" + (v.diasRestantes!==1?"s":""));
+        var color = v.diasRestantes < 0 ? "#FF453A" : (v.diasRestantes <= 2 ? "#FF9500" : "#C8E000");
+        html += "<div style='display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #242424;'>" +
+          "<div><div style='font-weight:600;'>" + v.alumno.nombre + " " + (v.alumno.apellido||"") + "</div>" +
+          "<div style='font-size:12px;color:" + color + ";margin-top:2px;'>" + label + " · $" + (v.precio||0) + "/mes</div></div>" +
+          "<button class='btn-coach' style='font-size:12px;padding:7px 14px;' onclick='window.marcarPagoRecibido(\"" + v.alumno.id + "\")'>✓ Marcar pagado</button>" +
+        "</div>";
+      });
+      html += "</div>";
+    }
+
+    // Tabla general de alumnos + tarifas
+    html += "<div class='coach-card'><h3 style='margin-bottom:12px;'>Tarifas y pagos</h3>" +
+      "<table class='coach-table'><tr><th>Alumno</th><th>Tarifa/mes</th><th>Próximo cobro</th><th>Estado</th><th></th></tr>";
+    alumnos.forEach(function(a){
+      var precio = parseFloat(a.precio_mensual) || 0;
+      var vence = a.fecha_pago_proximo || "—";
+      var pagos = JSON.parse(localStorage.getItem("fitapp_pagos_" + a.id)||"[]");
+      var mesPago = hoy.getFullYear() + "-" + String(hoy.getMonth()+1).padStart(2,"0");
+      var pagadoEsteMes = pagos.some(function(p){ return p.mes === mesPago; });
+      var estado = precio === 0 ? "<span style='color:#555;'>Sin tarifa</span>" :
+        (pagadoEsteMes ? "<span style='color:#34C759;'>✓ Pagado</span>" : "<span style='color:#FF453A;'>Pendiente</span>");
+      html += "<tr><td>" + a.nombre + " " + (a.apellido||"") + "</td>" +
+        "<td>$" + (precio||0) + "</td>" +
+        "<td>" + vence + "</td>" +
+        "<td>" + estado + "</td>" +
+        "<td><button class='btn-coach secondary' style='font-size:11px;padding:5px 10px;' onclick='window.abrirEditarTarifa(\"" + a.id + "\")'>Editar</button>" +
+        (precio > 0 && !pagadoEsteMes ? " <button class='btn-coach' style='font-size:11px;padding:5px 10px;' onclick='window.marcarPagoRecibido(\"" + a.id + "\")'>Cobrado</button>" : "") +
+        "</td></tr>";
+    });
+    html += "</table></div>";
+
+    // Historial de pagos
+    var todosPagos = [];
+    alumnos.forEach(function(a){
+      var pagos = JSON.parse(localStorage.getItem("fitapp_pagos_" + a.id)||"[]");
+      pagos.forEach(function(p){ todosPagos.push({ nombre: a.nombre + " " + (a.apellido||""), monto: p.monto, fecha: p.fecha, mes: p.mes }); });
+    });
+    todosPagos.sort(function(a,b){ return b.fecha > a.fecha ? 1 : -1; });
+    if(todosPagos.length){
+      html += "<div class='coach-card'><h3 style='margin-bottom:12px;'>Historial de cobros</h3>" +
+        "<table class='coach-table'><tr><th>Alumno</th><th>Monto</th><th>Fecha</th><th>Mes</th></tr>";
+      todosPagos.slice(0,20).forEach(function(p){
+        html += "<tr><td>" + p.nombre + "</td><td style='color:#C8E000;'>$" + p.monto + "</td><td>" + p.fecha + "</td><td>" + p.mes + "</td></tr>";
+      });
+      html += "</table></div>";
+    }
+
+    $("#sec-ingresos").innerHTML = html;
+  };
+
+  window.marcarPagoRecibido = function(alumnoId){
+    var a = window.db.getAlumnoPorId(alumnoId);
+    if(!a) return;
+    var hoy = new Date();
+    var mes = hoy.getFullYear() + "-" + String(hoy.getMonth()+1).padStart(2,"0");
+    var pagos = JSON.parse(localStorage.getItem("fitapp_pagos_" + alumnoId)||"[]");
+    pagos.push({ mes: mes, fecha: window.db.fechaHoy(), monto: parseFloat(a.precio_mensual)||0 });
+    localStorage.setItem("fitapp_pagos_" + alumnoId, JSON.stringify(pagos));
+    // Calcular próximo vencimiento (+1 mes)
+    var proxVence = new Date(hoy); proxVence.setMonth(proxVence.getMonth()+1);
+    a.fecha_pago_proximo = proxVence.toISOString().split("T")[0];
+    window.db.saveAlumno(a);
+    window.render_ingresos();
+  };
+
+  window.abrirEditarTarifa = function(alumnoId){
+    var a = window.db.getAlumnoPorId(alumnoId);
+    if(!a) return;
+    coachModal("Tarifa de " + a.nombre, "<div class='coach-form'>" +
+      "<label>Precio mensual ($)</label><input id='et-precio' type='number' value='" + (a.precio_mensual||0) + "'>" +
+      "<label>Fecha próximo pago (AAAA-MM-DD)</label><input id='et-vence' type='date' value='" + (a.fecha_pago_proximo||"") + "'>" +
+      "<button class='btn-coach' id='et-guardar' style='margin-top:14px;'>Guardar</button></div>", function(){
+      $("#et-guardar").addEventListener("click", function(){
+        a.precio_mensual = parseFloat($("#et-precio").value)||0;
+        a.fecha_pago_proximo = $("#et-vence").value;
+        window.db.saveAlumno(a);
+        window.cerrarCoachModal();
+        window.render_ingresos();
       });
     });
   };
