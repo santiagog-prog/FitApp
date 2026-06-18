@@ -39,12 +39,27 @@
     var hoy = window.db.fechaHoy();
     var entrenaronHoy = alumnos.filter(function(a){ return window.db.getRegistros(a.id).some(function(r){ return r.fecha === hoy; }); }).length;
 
-    var html = "<h1>Dashboard</h1><div class='coach-grid-stats'>" +
-      "<div class='cstat'><div class='cs-val'>" + alumnos.length + "</div><div class='cs-label'>Alumnos activos</div></div>" +
-      "<div class='cstat'><div class='cs-val'>" + rutinas.length + "</div><div class='cs-label'>Rutinas creadas</div></div>" +
-      "<div class='cstat'><div class='cs-val'>" + planes.length + "</div><div class='cs-label'>Planes activos</div></div>" +
-      "<div class='cstat'><div class='cs-val'>" + entrenaronHoy + "</div><div class='cs-label'>Entrenaron hoy</div></div>" +
-      "</div>";
+    var diasStr = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+    var mesesStr = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+    var ahora = new Date();
+    var fechaStr = diasStr[ahora.getDay()] + " " + ahora.getDate() + " " + mesesStr[ahora.getMonth()] + " " + ahora.getFullYear();
+
+    var html =
+      '<div style="background:linear-gradient(135deg,#141F00 0%,#0D0D0D 60%,#111900 100%);border:1px solid rgba(200,224,0,0.15);border-radius:20px;padding:24px 28px;margin-bottom:24px;position:relative;overflow:hidden;">' +
+        '<div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(200,224,0,0.12) 0%,transparent 70%);pointer-events:none;border-radius:50%;"></div>' +
+        '<div style="font-size:11px;font-weight:700;color:rgba(200,224,0,0.6);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;">Creator Studio</div>' +
+        '<div style="font-size:28px;font-weight:900;color:#FFF;letter-spacing:-1px;line-height:1.1;margin-bottom:4px;">Panel del Coach</div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,0.35);">' + fechaStr + '</div>' +
+        '<div style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">' +
+          '<div><div style="font-size:32px;font-weight:900;color:#C8E000;letter-spacing:-1px;">' + alumnos.length + '</div><div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Alumnos</div></div>' +
+          '<div style="width:1px;background:rgba(255,255,255,0.06);"></div>' +
+          '<div><div style="font-size:32px;font-weight:900;color:#C8E000;letter-spacing:-1px;">' + rutinas.length + '</div><div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Rutinas</div></div>' +
+          '<div style="width:1px;background:rgba(255,255,255,0.06);"></div>' +
+          '<div><div style="font-size:32px;font-weight:900;color:#C8E000;letter-spacing:-1px;">' + planes.length + '</div><div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Planes</div></div>' +
+          '<div style="width:1px;background:rgba(255,255,255,0.06);"></div>' +
+          '<div><div style="font-size:32px;font-weight:900;color:#C8E000;letter-spacing:-1px;">' + entrenaronHoy + '</div><div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Hoy</div></div>' +
+        '</div>' +
+      '</div>';
 
     html += "<div class='coach-card'><h3 style='margin-bottom:12px;'>Actividad reciente</h3><table class='coach-table'><tr><th>Alumno</th><th>Última sesión</th><th>Racha</th></tr>";
     alumnos.forEach(function(a){
@@ -673,8 +688,12 @@
       "<label>Instagram (usuario sin @)</label><input id='gy-ig' value='" + (gym.instagram||"") + "'>" +
       "<button class='btn-coach' id='gy-guardar' style='margin-top:16px;'>Guardar configuración del gym</button></div>";
 
-    html += "<div class='coach-card'><h3 style='margin-bottom:10px;'>🎁 Cupones</h3><div id='gy-cupones-list'></div>" +
+    html += "<div class='coach-card'><h3 style='margin-bottom:14px;'>🎁 Cupones</h3><div id='gy-cupones-list'></div>" +
       "<button class='btn-coach secondary' id='gy-add-cupon' style='margin-top:8px;'>+ Nuevo cupón</button></div>";
+
+    html += "<div class='coach-card'><h3 style='margin-bottom:14px;'>🗓️ Clases</h3>" +
+      "<div id='gy-clases-list'></div>" +
+      "<button class='btn-coach secondary' id='gy-add-clase' style='margin-top:8px;'>+ Agregar clase</button></div>";
 
     html += "<div class='coach-card'><h3 style='margin-bottom:10px;'>🔥 Promociones</h3><div id='gy-promos-list'></div>" +
       "<button class='btn-coach secondary' id='gy-add-promo' style='margin-top:8px;'>+ Nueva promoción</button></div>";
@@ -706,13 +725,53 @@
       window.mostrarToast("Configuración del gym guardada");
     });
 
+    var CUPON_COLORS = [
+      { bg:"linear-gradient(135deg,#141F00,#0D1500)", border:"rgba(200,224,0,0.3)", accent:"#C8E000" },
+      { bg:"linear-gradient(135deg,#001F14,#000D0A)", border:"rgba(52,199,89,0.3)",  accent:"#34C759" },
+      { bg:"linear-gradient(135deg,#1F0D00,#150900)", border:"rgba(255,159,10,0.3)",  accent:"#FF9F0A" },
+      { bg:"linear-gradient(135deg,#0D001F,#09000F)", border:"rgba(175,82,222,0.3)",  accent:"#AF52DE" },
+      { bg:"linear-gradient(135deg,#1F0014,#0F000A)", border:"rgba(255,55,95,0.3)",   accent:"#FF375F" }
+    ];
     function renderCupones(){
-      $("#gy-cupones-list").innerHTML = gym.cupones.map(function(c, i){
-        return "<div class='ejercicio-builder-row'><span>" + c.titulo + " — " + c.descuento + " — código " + c.codigo + " — vence " + c.vence + "</span>" +
-          "<button class='btn-quitar-cupon' data-i='" + i + "' style='background:none;border:none;color:#c0392b;cursor:pointer;'>✕</button></div>";
-      }).join("") || "<p style='color:#777;font-size:.85rem;'>Sin cupones todavía.</p>";
+      if(!gym.cupones.length){ $("#gy-cupones-list").innerHTML="<p style='color:#777;font-size:.85rem;'>Sin cupones todavía.</p>"; return; }
+      $("#gy-cupones-list").innerHTML = "<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;'>" +
+        gym.cupones.map(function(c, i){
+          var col = CUPON_COLORS[i % CUPON_COLORS.length];
+          var expires = c.vence ? "Vence " + c.vence : "";
+          return "<div style='background:" + col.bg + ";border:1px solid " + col.border + ";border-radius:18px;padding:20px;position:relative;overflow:hidden;'>" +
+            "<div style='position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:" + col.accent + ";opacity:.07;border-radius:50%;'></div>" +
+            "<div style='font-size:10px;font-weight:700;color:" + col.accent + ";text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;'>Cupón</div>" +
+            "<div style='font-size:17px;font-weight:800;color:#FFF;margin-bottom:4px;'>" + c.titulo + "</div>" +
+            "<div style='font-size:22px;font-weight:900;color:" + col.accent + ";letter-spacing:-1px;margin:8px 0;'>" + (c.descuento||"") + "</div>" +
+            "<div style='background:rgba(255,255,255,0.06);border-radius:8px;padding:6px 12px;display:inline-block;font-size:13px;font-weight:700;color:#FFF;letter-spacing:2px;margin-bottom:8px;'>" + (c.codigo||"") + "</div>" +
+            (expires ? "<div style='font-size:11px;color:rgba(255,255,255,0.35);'>" + expires + "</div>" : "") +
+            "<button class='btn-quitar-cupon' data-i='" + i + "' style='position:absolute;top:10px;right:10px;width:24px;height:24px;background:rgba(255,255,255,0.1);border:none;border-radius:50%;color:#FFF;cursor:pointer;font-size:14px;line-height:1;'>×</button>" +
+          "</div>";
+        }).join("") + "</div>";
       document.querySelectorAll(".btn-quitar-cupon").forEach(function(b){
         b.addEventListener("click", function(){ gym.cupones.splice(this.getAttribute("data-i"),1); window.db.saveGymInfo(gym); renderCupones(); });
+      });
+    }
+    function renderClases(){
+      if(!gym.clases) gym.clases = [];
+      var DIAS_SEMANA = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+      var waNum = (gym.whatsapp||"+593969067196").replace(/\D/g,"");
+      if(!gym.clases.length){ $("#gy-clases-list").innerHTML="<p style='color:#777;font-size:.85rem;'>Sin clases programadas.</p>"; return; }
+      $("#gy-clases-list").innerHTML = gym.clases.map(function(c, i){
+        var waMsg = encodeURIComponent("Hola! Quiero reservar la clase de " + c.nombre + " el " + c.dia + " a las " + c.hora);
+        return "<div style='background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;'>" +
+          "<div>" +
+            "<div style='font-size:14px;font-weight:700;color:#FFF;'>" + c.nombre + "</div>" +
+            "<div style='font-size:12px;color:rgba(255,255,255,0.4);margin-top:3px;'>" + c.dia + " · " + c.hora + (c.duracion?" · "+c.duracion+" min":"") + (c.instructor?" · "+c.instructor:"") + "</div>" +
+          "</div>" +
+          "<div style='display:flex;gap:8px;align-items:center;'>" +
+            "<a href='https://wa.me/" + waNum + "?text=" + waMsg + "' target='_blank' rel='noopener' style='font-size:12px;background:rgba(37,211,102,0.15);color:#25D166;border:1px solid rgba(37,211,102,0.3);border-radius:99px;padding:5px 12px;text-decoration:none;font-weight:600;'>WhatsApp</a>" +
+            "<button class='btn-del-clase' data-i='" + i + "' style='background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:18px;'>×</button>" +
+          "</div>" +
+        "</div>";
+      }).join("");
+      document.querySelectorAll(".btn-del-clase").forEach(function(b){
+        b.addEventListener("click", function(){ gym.clases.splice(parseInt(this.getAttribute("data-i"),10),1); window.db.saveGymInfo(gym); renderClases(); });
       });
     }
     function renderPromos(){
@@ -726,6 +785,7 @@
     }
     renderCupones();
     renderPromos();
+    renderClases();
 
     $("#gy-add-cupon").addEventListener("click", function(){
       coachModal("Nuevo cupón", "<div class='coach-form'>" +
@@ -741,6 +801,24 @@
           window.db.saveGymInfo(gym);
           window.cerrarCoachModal();
           renderCupones();
+        });
+      });
+    });
+
+    $("#gy-add-clase").addEventListener("click", function(){
+      coachModal("Nueva clase", "<div class='coach-form'>" +
+        "<label>Nombre de la clase</label><input id='cl-nombre' placeholder='Ej: CrossFit, Yoga, Spinning...'>" +
+        "<div class='row2'><div><label>Día</label><select id='cl-dia'><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select></div><div><label>Hora</label><input id='cl-hora' type='time'></div></div>" +
+        "<div class='row2'><div><label>Duración (min)</label><input id='cl-duracion' type='number' placeholder='60'></div><div><label>Instructor</label><input id='cl-instructor'></div></div>" +
+        "<button class='btn-coach' id='cl-guardar' style='margin-top:12px;'>Guardar clase</button></div>", function(){
+        $("#cl-guardar").addEventListener("click", function(){
+          var nombre = $("#cl-nombre").value.trim();
+          if(!nombre) return;
+          if(!gym.clases) gym.clases = [];
+          gym.clases.push({ nombre:nombre, dia:$("#cl-dia").value, hora:$("#cl-hora").value, duracion:$("#cl-duracion").value, instructor:$("#cl-instructor").value });
+          window.db.saveGymInfo(gym);
+          window.cerrarCoachModal();
+          renderClases();
         });
       });
     });
@@ -788,8 +866,18 @@
     var rec = gym.videos_recetas    || [];
 
     function videoRow(v, arr, tipo, i){
-      return "<div class='ejercicio-builder-row'><span>" + v.titulo + (v.url ? " — <a href='" + v.url + "' target='_blank' style='color:#C8E000;'>" + v.url.slice(0,40) + "…</a>" : " — sin enlace") + "</span>" +
-        "<button data-tipo='" + tipo + "' data-i='" + i + "' class='btn-del-video' style='background:none;border:none;color:#c0392b;cursor:pointer;'>✕</button></div>";
+      return "<div style='background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;margin-bottom:10px;display:flex;gap:0;'>" +
+        (v.thumbnail ? "<img src='" + v.thumbnail + "' style='width:100px;min-width:100px;object-fit:cover;'>" : "<div style='width:100px;min-width:100px;background:#1C1C1C;display:flex;align-items:center;justify-content:center;font-size:28px;'>▶</div>") +
+        "<div style='flex:1;padding:12px 14px;'>" +
+          "<div style='font-size:14px;font-weight:700;color:#FFF;margin-bottom:2px;'>" + v.titulo + "</div>" +
+          (v.subtitulo ? "<div style='font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;'>" + v.subtitulo + "</div>" : "") +
+          "<div style='display:flex;align-items:center;gap:8px;'>" +
+            (v.categoria ? "<span style='font-size:10px;background:rgba(200,224,0,0.12);color:#C8E000;border-radius:99px;padding:2px 10px;font-weight:600;'>" + v.categoria + "</span>" : "") +
+            (v.url ? "<a href='" + v.url + "' target='_blank' style='font-size:11px;color:rgba(255,255,255,0.35);text-decoration:none;'>Ver en YouTube ↗</a>" : "") +
+          "</div>" +
+        "</div>" +
+        "<button data-tipo='" + tipo + "' data-i='" + i + "' class='btn-del-video' style='background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;padding:0 14px;font-size:20px;'>×</button>" +
+      "</div>";
     }
     function secHTML(titulo, arr, tipo){
       return "<div class='coach-card' style='margin-bottom:16px;'><h3 style='margin-bottom:10px;'>" + titulo + "</h3>" +
@@ -803,14 +891,30 @@
         var tipo = this.getAttribute("data-tipo");
         coachModal("Nuevo video", "<div class='coach-form'>" +
           "<label>Título</label><input id='vd-titulo'>" +
-          "<label>URL de YouTube</label><input id='vd-url' placeholder='https://youtu.be/...'>" +
+          "<label>Categoría</label><select id='vd-cat'><option value='tecnica'>Técnica / Forma</option><option value='calentamiento'>Calentamiento</option><option value='estiramiento'>Estiramiento</option><option value='nutricion'>Nutrición</option><option value='motivacion'>Motivación</option><option value='receta'>Receta fit</option><option value='otro'>Otro</option></select>" +
+          "<label>URL de YouTube</label><input id='vd-url' placeholder='https://youtu.be/...' style='margin-bottom:8px;'>" +
+          "<div id='vd-thumb-preview' style='display:none;margin-bottom:10px;border-radius:10px;overflow:hidden;'><img id='vd-thumb-img' src='' style='width:100%;max-height:160px;object-fit:cover;display:block;'></div>" +
           "<label>Subtítulo / descripción</label><input id='vd-sub'>" +
           "<button class='btn-coach' id='vd-guardar' style='margin-top:12px;'>Guardar video</button></div>", function(){
+          function ytVideoId(url){
+            var m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^?&\s]{11})/);
+            return m ? m[1] : null;
+          }
+          document.getElementById("vd-url").addEventListener("input", function(){
+            var vid = ytVideoId(this.value.trim());
+            var preview = document.getElementById("vd-thumb-preview");
+            var img = document.getElementById("vd-thumb-img");
+            if(vid){ img.src="https://img.youtube.com/vi/"+vid+"/hqdefault.jpg"; preview.style.display="block"; }
+            else { preview.style.display="none"; }
+          });
           $("#vd-guardar").addEventListener("click", function(){
             var t = $("#vd-titulo").value.trim();
             if(!t) return;
+            var urlVal = (document.getElementById("vd-url").value||"").trim();
+            var vid = ytVideoId(urlVal);
+            var thumb = vid ? "https://img.youtube.com/vi/"+vid+"/hqdefault.jpg" : "";
             var arr2 = tipo==="edu" ? (gym.videos_educativos||(gym.videos_educativos=[])) : (gym.videos_recetas||(gym.videos_recetas=[]));
-            arr2.push({ titulo:t, url:$("#vd-url").value.trim(), subtitulo:$("#vd-sub").value.trim() });
+            arr2.push({ titulo:t, url:urlVal, subtitulo:(document.getElementById("vd-sub").value||"").trim(), categoria:(document.getElementById("vd-cat").value||"otro"), thumbnail:thumb });
             window.db.saveGymInfo(gym);
             window.cerrarCoachModal();
             window.render_videos();

@@ -146,12 +146,7 @@
     document.querySelectorAll("[data-tab]").forEach(function(btn){
       btn.addEventListener("click", function(){ showPage(this.getAttribute("data-tab")); });
     });
-    var alumno = window.db.getAlumnoPorId(window.ALUMNO_ID);
-    // Mostrar splash SIEMPRE al entrar (cada vez que se abre la app)
-    if(alumno){
-      mostrarSplashAlumno(alumno, function(){ showPage("inicio"); });
-    } else {
-      showPage("inicio");
-    }
+    // Ir directo al Home — sin pantalla intermedia de "Bienvenido / Empezar"
+    showPage("inicio");
   });
 })();

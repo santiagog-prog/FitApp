@@ -27,7 +27,7 @@
     // Avatar + info
     html +=
       "<div class='perfil-header-grad'>" +
-        "<div class='perfil-avatar' id='perfil-avatar-wrap' onclick='document.getElementById(\"perfil-foto-input\").click()' style='cursor:pointer;position:relative;overflow:hidden;'>" +
+        "<div class='perfil-avatar' id='perfil-avatar-wrap' style='cursor:pointer;position:relative;overflow:hidden;'>" +
         "<span id='perfil-avatar-initials'>" + initials + "</span>" +
         "<img id='perfil-avatar-img' src='' style='display:none;position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:50%;'>" +
         "<div style='position:absolute;bottom:0;right:0;width:22px;height:22px;background:#C8E000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;'>✏️</div>" +
@@ -139,7 +139,7 @@
 
     _renderComparativaCard(alumno.id);
 
-    // Avatar foto editable
+    // Avatar foto editable + full-screen view
     var savedPhoto = localStorage.getItem("fitapp_avatar_" + alumno.id);
     if(savedPhoto){
       document.getElementById("perfil-avatar-initials").style.display = "none";
@@ -147,6 +147,29 @@
       imgEl.src = savedPhoto;
       imgEl.style.display = "block";
     }
+
+    document.getElementById("perfil-avatar-wrap").addEventListener("click", function(){
+      var photo = localStorage.getItem("fitapp_avatar_" + alumno.id);
+      if(photo){
+        // Full-screen TikTok-style modal
+        var modal = document.createElement("div");
+        modal.id = "avatar-fullscreen-modal";
+        modal.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:lsIn .2s ease both;";
+        modal.innerHTML =
+          '<img src="' + photo + '" style="max-width:100%;max-height:80vh;object-fit:contain;border-radius:12px;">' +
+          '<div style="position:absolute;top:env(safe-area-inset-top,16px);right:16px;display:flex;gap:12px;">' +
+            '<button id="avatar-fs-cambiar" style="height:40px;padding:0 20px;background:rgba(255,255,255,0.12);color:#FFF;border:none;border-radius:99px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">Cambiar foto</button>' +
+            '<button id="avatar-fs-cerrar" style="width:40px;height:40px;background:rgba(255,255,255,0.12);color:#FFF;border:none;border-radius:50%;font-size:20px;font-family:inherit;cursor:pointer;">×</button>' +
+          '</div>';
+        document.body.appendChild(modal);
+        document.getElementById("avatar-fs-cerrar").addEventListener("click", function(){ modal.remove(); });
+        document.getElementById("avatar-fs-cambiar").addEventListener("click", function(){ modal.remove(); document.getElementById("perfil-foto-input").click(); });
+        modal.addEventListener("click", function(e){ if(e.target===modal) modal.remove(); });
+      } else {
+        document.getElementById("perfil-foto-input").click();
+      }
+    });
+
     document.getElementById("perfil-foto-input").addEventListener("change", function(e){
       var file = e.target.files[0];
       if(!file) return;

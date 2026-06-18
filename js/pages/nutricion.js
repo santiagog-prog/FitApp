@@ -238,6 +238,37 @@
       '<div style="flex-shrink:0;">' + anilloKcal(totKcal, obj) + '</div>' +
     '</div>';
 
+    // ── Anillo 3 colores macros (PARTE 2B) ──
+    var macTotal = totProt + totCarb + totGrasa;
+    if(macTotal > 0){
+      var cProt = "#0A84FF", cCarbs = "#FF9F0A", cGras = "#BF5AF2";
+      var R2 = 46, CX2 = 60, CY2 = 60, stroke2 = 10;
+      var circ2 = 2 * Math.PI * R2;
+      var arcProt  = (totProt  / macTotal) * circ2;
+      var arcCarbs = (totCarb  / macTotal) * circ2;
+      var arcGras  = (totGrasa / macTotal) * circ2;
+      var offProt  = circ2 - arcProt;
+      var offCarbs = circ2 - arcCarbs;
+      var offGras  = circ2 - arcGras;
+      var rotProt  = -90;
+      var rotCarbs = -90 + (totProt  / macTotal) * 360;
+      var rotGras  = rotCarbs + (totCarb / macTotal) * 360;
+      html += '<div style="background:#141414;border-radius:18px;margin:0 16px 16px;padding:18px;display:flex;align-items:center;gap:20px;border:1px solid rgba(255,255,255,0.05);">' +
+        '<svg width="120" height="120" viewBox="0 0 120 120" style="flex-shrink:0;">' +
+          '<circle cx="'+CX2+'" cy="'+CY2+'" r="'+R2+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="'+stroke2+'"/>' +
+          '<circle cx="'+CX2+'" cy="'+CY2+'" r="'+R2+'" fill="none" stroke="'+cProt+'" stroke-width="'+stroke2+'" stroke-dasharray="'+circ2.toFixed(1)+'" stroke-dashoffset="'+offProt.toFixed(1)+'" transform="rotate('+rotProt+' '+CX2+' '+CY2+')" stroke-linecap="butt"/>' +
+          '<circle cx="'+CX2+'" cy="'+CY2+'" r="'+R2+'" fill="none" stroke="'+cCarbs+'" stroke-width="'+stroke2+'" stroke-dasharray="'+circ2.toFixed(1)+'" stroke-dashoffset="'+offCarbs.toFixed(1)+'" transform="rotate('+rotCarbs+' '+CX2+' '+CY2+')" stroke-linecap="butt"/>' +
+          '<circle cx="'+CX2+'" cy="'+CY2+'" r="'+R2+'" fill="none" stroke="'+cGras+'" stroke-width="'+stroke2+'" stroke-dasharray="'+circ2.toFixed(1)+'" stroke-dashoffset="'+offGras.toFixed(1)+'" transform="rotate('+rotGras+' '+CX2+' '+CY2+')" stroke-linecap="butt"/>' +
+          '<text x="'+CX2+'" y="'+CY2+'" text-anchor="middle" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="13" font-weight="800" fill="#FFF">' + Math.round(macTotal) + 'g</text>' +
+        '</svg>' +
+        '<div style="display:flex;flex-direction:column;gap:8px;">' +
+          '<div style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:'+cProt+';display:block;flex-shrink:0;"></span><span style="font-size:13px;color:rgba(255,255,255,0.7);">Proteína <strong style="color:#FFF;">' + totProt.toFixed(0) + 'g</strong></span></div>' +
+          '<div style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:'+cCarbs+';display:block;flex-shrink:0;"></span><span style="font-size:13px;color:rgba(255,255,255,0.7);">Carbos <strong style="color:#FFF;">' + totCarb.toFixed(0) + 'g</strong></span></div>' +
+          '<div style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:'+cGras+';display:block;flex-shrink:0;"></span><span style="font-size:13px;color:rgba(255,255,255,0.7);">Grasas <strong style="color:#FFF;">' + totGrasa.toFixed(0) + 'g</strong></span></div>' +
+        '</div>' +
+      '</div>';
+    }
+
     // ── Comidas del día ──
     _plan.comidas.forEach(function(comida, ci){
       var opIdx = _estado.opciones[ci] || 0;

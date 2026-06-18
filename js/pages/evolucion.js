@@ -55,14 +55,16 @@
     var puntos = "", labels = "";
     var step = Math.ceil(pesos.length/5);
     pesos.forEach(function(p,i){
-      puntos += '<circle cx="' + rX(i).toFixed(1) + '" cy="' + rY(p.kg).toFixed(1) + '" r="4" fill="#C8E000" stroke="#0A0A0A" stroke-width="2"/>';
+      var cx = rX(i).toFixed(1), cy = rY(p.kg).toFixed(1);
+      puntos += '<circle class="gpeso-dot" cx="' + cx + '" cy="' + cy + '" r="5" fill="#C8E000" stroke="#0A0A0A" stroke-width="2" data-kg="' + p.kg + '" data-fecha="' + p.fecha + '" style="cursor:pointer;"/>';
       if(i%step===0 || i===pesos.length-1){
         var f = p.fecha.split("-");
-        labels += '<text x="' + rX(i).toFixed(1) + '" y="' + (H-4) + '" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.25)" font-family="Inter,sans-serif">' + f[2] + "/" + f[1] + '</text>';
+        labels += '<text x="' + cx + '" y="' + (H-4) + '" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.25)" font-family="Inter,sans-serif">' + f[2] + "/" + f[1] + '</text>';
       }
     });
 
     container.innerHTML =
+      '<div style="position:relative;">' +
       '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
         '<defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">' +
           '<stop offset="0%" stop-color="#C8E000" stop-opacity="0.2"/>' +
@@ -72,7 +74,34 @@
         '<path d="' + area + '" fill="url(#pg)"/>' +
         '<path d="' + line + '" fill="none" stroke="#C8E000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' +
         puntos + labels +
-      '</svg>';
+      '</svg>' +
+      '<div id="gpeso-tooltip" style="display:none;position:absolute;background:#1C1C1C;border:1px solid rgba(200,224,0,0.4);border-radius:10px;padding:8px 14px;pointer-events:none;z-index:10;">' +
+        '<div id="gpeso-tt-kg" style="font-size:18px;font-weight:800;color:#C8E000;"></div>' +
+        '<div id="gpeso-tt-fecha" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;"></div>' +
+      '</div>' +
+      '</div>';
+
+    // Tooltip click handler
+    container.querySelectorAll(".gpeso-dot").forEach(function(dot){
+      dot.addEventListener("click", function(e){
+        var tt = document.getElementById("gpeso-tooltip");
+        var svgRect = dot.closest("svg").getBoundingClientRect();
+        var contRect = container.getBoundingClientRect();
+        var cx = parseFloat(dot.getAttribute("cx"));
+        var cy = parseFloat(dot.getAttribute("cy"));
+        document.getElementById("gpeso-tt-kg").textContent = dot.getAttribute("data-kg") + " kg";
+        var f = dot.getAttribute("data-fecha").split("-");
+        document.getElementById("gpeso-tt-fecha").textContent = f[2] + "/" + f[1] + "/" + f[0];
+        var left = cx - 50;
+        var top = cy - 68;
+        if(left < 0) left = 0;
+        tt.style.left = left + "px";
+        tt.style.top = top + "px";
+        tt.style.display = "block";
+        e.stopPropagation();
+      });
+    });
+    document.addEventListener("click", function(){ var tt = document.getElementById("gpeso-tooltip"); if(tt) tt.style.display="none"; }, { once:false });
   }
 
   // ── MEDALLAS ─────────────────────────────────────────────
@@ -184,6 +213,40 @@
     // Historial
     html += "<div style='padding:0 20px 10px;'><div style='font-size:18px;font-weight:700;color:#FFF;margin-bottom:12px;'>Mis entrenamientos</div></div>";
     html += renderHistorial(registros);
+
+    // Entrenos por tipo (PARTE 3B)
+    var tiposMap = {};
+    var TIPOS_CONOCIDOS = ["Push","Pull","Legs","Upper","Lower","Full Body","Cardio","Core","HIIT"];
+    registros.forEach(function(r){
+      var nombre = r.sesion_nombre || r.nombre_sesion || "Sesión";
+      var tipo = "Otros";
+      TIPOS_CONOCIDOS.forEach(function(t){ if(nombre.toLowerCase().indexOf(t.toLowerCase()) !== -1) tipo = t; });
+      if(!tiposMap[tipo]) tiposMap[tipo] = 0;
+      tiposMap[tipo]++;
+    });
+    var tipos = Object.keys(tiposMap);
+    if(tipos.length > 1){
+      var totalRegs = registros.length || 1;
+      var TIPO_COLORS = { Push:"#C8E000", Pull:"#34C759", Legs:"#FF9F0A", Upper:"#5AC8FA", Lower:"#AF52DE", "Full Body":"#FF375F", Cardio:"#FF6B35", Core:"#30D158", HIIT:"#FF453A", Otros:"rgba(255,255,255,0.3)" };
+      html += "<div style='padding:0 20px 20px;'>" +
+        "<div style='font-size:18px;font-weight:700;color:#FFF;margin-bottom:14px;'>Entrenos por tipo</div>" +
+        "<div style='display:flex;flex-direction:column;gap:10px;'>";
+      tipos.sort(function(a,b){ return tiposMap[b]-tiposMap[a]; }).forEach(function(tipo){
+        var count = tiposMap[tipo];
+        var pct = Math.round(count/totalRegs*100);
+        var color = TIPO_COLORS[tipo] || "#C8E000";
+        html += "<div>" +
+          "<div style='display:flex;justify-content:space-between;margin-bottom:5px;'>" +
+            "<span style='font-size:14px;font-weight:600;color:#FFF;'>" + tipo + "</span>" +
+            "<span style='font-size:13px;color:rgba(255,255,255,0.4);'>" + count + " sesiones · " + pct + "%</span>" +
+          "</div>" +
+          "<div style='height:6px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;'>" +
+            "<div style='height:100%;width:" + pct + "%;background:" + color + ";border-radius:99px;transition:width .6s ease;'></div>" +
+          "</div>" +
+        "</div>";
+      });
+      html += "</div></div>";
+    }
 
     // Medidas
     html += "<div style='padding:16px 20px 10px;'><div style='font-size:18px;font-weight:700;color:#FFF;margin-bottom:10px;'>Medidas corporales</div>" +

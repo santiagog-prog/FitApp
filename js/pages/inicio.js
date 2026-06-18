@@ -254,13 +254,13 @@
           "<svg viewBox='0 0 24 24' fill='#1C1C1E'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>" +
         "</div>" +
         "<div class='ah-icons'>" +
-          "<button class='ah-icon-btn' onclick=\"window.irAPagina('videos')\" style='position:relative;'>" +
+          "<button class='ah-icon-btn' id='ah-btn-videos' style='position:relative;'>" +
             "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round'><polygon points='23 7 16 12 23 17 23 7'/><rect x='1' y='5' width='15' height='14' rx='2'/></svg>" +
           "</button>" +
-          "<button class='ah-icon-btn' onclick='window.abrirBusqueda()' style='position:relative;'>" +
+          "<button class='ah-icon-btn' id='ah-btn-busqueda' style='position:relative;'>" +
             "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='8'/><path d='M21 21l-4.35-4.35'/></svg>" +
           "</button>" +
-          "<button class='ah-icon-btn' onclick='window.abrirNotificaciones()' style='position:relative;'>" +
+          "<button class='ah-icon-btn' id='ah-btn-notif' style='position:relative;'>" +
             "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round'><path d='M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 01-3.46 0'/></svg>" +
             "<span class='badge-dot'></span>" +
           "</button>" +
@@ -317,9 +317,9 @@
         var dayNum   = d.getDate();
         var isHoy    = f === hoyStr;
         var tieneEnt = registros.some(function(r){ return r.fecha === f; });
-        html += "<div style='flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;'>" +
+        html += "<div class='dia-strip-item' data-fecha='" + f + "' style='flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;'>" +
           "<div style='font-size:10px;font-weight:600;color:" + (isHoy ? "#C8E000" : "rgba(255,255,255,0.35)") + ";text-transform:uppercase;letter-spacing:0.5px;'>" + labels[wi] + "</div>" +
-          "<div style='width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;" +
+          "<div class='dia-strip-circulo' style='width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;" +
             (isHoy
               ? "background:#C8E000;color:#1C1C1E;font-weight:900;"
               : tieneEnt
@@ -357,7 +357,7 @@
       var fechaMacros = window.db.fechaHoy();
       var nutM = window.db.getNutricion(alumno.id, fechaMacros);
       var protM=0, carbsM=0, grasM=0;
-      var sumarAlimentos = function(lista){ if(!lista) return; lista.forEach(function(a){ protM+=(a.proteina||0); carbsM+=(a.carbohidratos||0); grasM+=(a.grasas||0); }); };
+      var sumarAlimentos = function(lista){ if(!lista) return; lista.forEach(function(a){ protM+=(a.proteina||0); carbsM+=(a.carbos||a.carbohidratos||0); grasM+=(a.grasas||0); }); };
       sumarAlimentos(nutM.alimentos); sumarAlimentos(nutM.extras);
       var scansM = window.db.getFoodScans(alumno.id, fechaMacros);
       scansM.forEach(function(s){ protM+=(s.proteinas||0); carbsM+=(s.carbohidratos||0); grasM+=(s.grasas||0); });
@@ -395,7 +395,7 @@
             '<text x="'+CX+'" y="'+CY+'" text-anchor="middle" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="11" fill="rgba(255,255,255,0.3)">Sin datos</text>' +
           '</svg>';
 
-      html += '<div style="background:#141414;border-radius:20px;margin:0 20px 14px;padding:20px;">' +
+      html += '<div id="macros-home-card" style="background:#141414;border-radius:20px;margin:0 20px 14px;padding:20px;cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Macros de hoy</div>' +
         '<div style="display:flex;align-items:center;gap:20px;">' +
           svgDonut +
@@ -557,12 +557,12 @@
     // ── Stats row compacto ──────────────────────────────
     html += "<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 20px 14px;'>";
     // Racha
-    html += "<div style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;text-align:center;'>" +
+    html += "<div id='stat-racha-card' style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;text-align:center;cursor:pointer;'>" +
       "<div style='font-size:24px;font-weight:900;color:#FF9F0A;letter-spacing:-1px;'>" + racha2 + "</div>" +
       "<div style='font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;'>🔥 Racha</div>" +
     "</div>";
     // Kcal hoy
-    html += "<div style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;text-align:center;'>" +
+    html += "<div id='stat-kcal-card' style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;text-align:center;cursor:pointer;'>" +
       "<div style='font-size:24px;font-weight:900;color:#C8E000;letter-spacing:-1px;'>" + kcalHoy2 + "</div>" +
       "<div style='font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;'>🍽️ Kcal</div>" +
     "</div>";
@@ -589,13 +589,73 @@
 
     page.innerHTML = html;
 
-    // Animar FitScore
+    // ── FitScore animado ────────────────────────────────
     var fscEl = document.getElementById("fsc-num");
     if(fscEl && fsObj) animarNumero(fscEl, fsObj.total, 1000, "");
 
+    // ── Header: botones videos, búsqueda, notificaciones ─
+    var ahVideos = document.getElementById("ah-btn-videos");
+    if(ahVideos) ahVideos.addEventListener("click", function(){ window.irAPagina("videos"); });
+    var ahBusq = document.getElementById("ah-btn-busqueda");
+    if(ahBusq) ahBusq.addEventListener("click", function(){ window.abrirBusqueda(); });
+    var ahNotif = document.getElementById("ah-btn-notif");
+    if(ahNotif) ahNotif.addEventListener("click", function(){ window.abrirNotificaciones(); });
+
+    // ── Avatar en header ─────────────────────────────────
+    var ahAvatar = document.getElementById("ah-avatar-btn");
+    if(ahAvatar) ahAvatar.addEventListener("click", function(){ window.irAPagina("perfil"); });
+
+    // ── Ir a rutina ──────────────────────────────────────
     var btnRutina = document.getElementById("btn-ir-rutina");
     if(btnRutina) btnRutina.addEventListener("click", function(){ window.irAPagina("agenda"); });
+
+    // ── Stats clickeables ────────────────────────────────
+    var statRacha = document.getElementById("stat-racha-card");
+    if(statRacha) statRacha.addEventListener("click", function(){ window.irAPagina("evolucion"); });
+    var statKcal = document.getElementById("stat-kcal-card");
+    if(statKcal) statKcal.addEventListener("click", function(){ window.irAPagina("nutricion"); });
     var statPasos = document.getElementById("stat-pasos-card");
     if(statPasos) statPasos.addEventListener("click", function(){ window.irAPagina("cardio"); });
+
+    // ── Macros donut → Nutrición ─────────────────────────
+    var macrosCard = document.getElementById("macros-home-card");
+    if(macrosCard) macrosCard.addEventListener("click", function(){ window.irAPagina("nutricion"); });
+
+    // ── Días de la semana: clic muestra detalle ──────────
+    document.querySelectorAll(".dia-strip-item").forEach(function(el){
+      el.addEventListener("click", function(){
+        var fecha = this.getAttribute("data-fecha");
+        // Resetear todos los círculos
+        document.querySelectorAll(".dia-strip-item .dia-strip-circulo").forEach(function(c){
+          c.style.outline = "none";
+        });
+        // Resaltar el seleccionado
+        var circulo = this.querySelector(".dia-strip-circulo");
+        if(circulo) circulo.style.outline = "2px solid #C8E000";
+        // Mostrar detalle del día
+        var detalle = document.getElementById("detalle-dia-home");
+        if(!detalle){
+          var cont = document.createElement("div");
+          cont.id = "detalle-dia-home";
+          cont.style.cssText = "margin:0 20px 14px;background:#141414;border-radius:14px;padding:14px;";
+          var statsGrid = document.querySelector("#page-inicio > div > div[style*='grid-template-columns:1fr 1fr 1fr']");
+          if(statsGrid) statsGrid.before(cont);
+          detalle = cont;
+        }
+        var regsDelDia = window.db.getRegistros(window.ALUMNO_ID).filter(function(r){ return r.fecha === fecha; });
+        var nutDelDia  = window.db.getNutricion(window.ALUMNO_ID, fecha);
+        var kcalDia = 0;
+        if(nutDelDia && nutDelDia.extras) nutDelDia.extras.forEach(function(a){ kcalDia += (a.calorias||0); });
+        if(nutDelDia && nutDelDia.alimentos) nutDelDia.alimentos.forEach(function(a){ kcalDia += (a.calorias||0); });
+        var contenido = "";
+        if(regsDelDia.length){
+          contenido += regsDelDia.map(function(r){ return '<div style="font-size:13px;font-weight:600;color:#FFF;">✅ ' + r.sesion_nombre + (r.duracion_min ? ' · ' + r.duracion_min + ' min' : '') + '</div>'; }).join("");
+        } else {
+          contenido += '<div style="font-size:13px;color:rgba(255,255,255,0.3);">Sin entrenamiento este día</div>';
+        }
+        if(kcalDia > 0) contenido += '<div style="font-size:12px;color:#C8E000;margin-top:6px;">' + kcalDia + ' kcal registradas</div>';
+        detalle.innerHTML = '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">' + fecha + '</div>' + contenido;
+      });
+    });
   };
 })();
