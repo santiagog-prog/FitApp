@@ -1158,6 +1158,33 @@
     document.querySelectorAll("#coach-sidebar [data-sec]").forEach(function(b){
       b.addEventListener("click", function(){ showSec(this.getAttribute("data-sec")); });
     });
-    showSec("dashboard");
+
+    var mainEl = document.querySelector("#coach-app main") || document.getElementById("coach-app");
+    var loadEl = document.createElement("div");
+    loadEl.id = "coach-db-loading";
+    loadEl.style.cssText = "position:fixed;inset:0;z-index:999;background:#0A0A0A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;";
+    loadEl.innerHTML =
+      '<div style="font-size:40px;">🏋️</div>' +
+      '<div style="color:#C8E000;font-weight:800;font-size:16px;">Cargando panel...</div>' +
+      '<div style="width:160px;height:3px;background:#1a1a1a;border-radius:99px;overflow:hidden;">' +
+        '<div id="coach-load-bar" style="height:100%;width:0;background:#C8E000;border-radius:99px;transition:width 2s ease;"></div>' +
+      '</div>';
+    document.body.appendChild(loadEl);
+    setTimeout(function(){ var b = document.getElementById("coach-load-bar"); if(b) b.style.width = "80%"; }, 50);
+
+    window.db.initCoach()
+      .then(function(){
+        loadEl.remove();
+        showSec("dashboard");
+      })
+      .catch(function(err){
+        console.error("[coach] db.initCoach error:", err);
+        loadEl.innerHTML =
+          '<div style="text-align:center;color:#ff6b6b;padding:32px;">' +
+            '<div style="font-size:36px;margin-bottom:12px;">⚠️</div>' +
+            '<div style="font-weight:700;">Sin conexión a Supabase</div>' +
+            '<div style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:8px;">Verifica SB_URL y SB_KEY en db.js</div>' +
+          '</div>';
+      });
   });
 })();

@@ -146,7 +146,41 @@
     document.querySelectorAll("[data-tab]").forEach(function(btn){
       btn.addEventListener("click", function(){ showPage(this.getAttribute("data-tab")); });
     });
-    // Ir directo al Home — sin pantalla intermedia de "Bienvenido / Empezar"
-    showPage("inicio");
+
+    // Pantalla de carga mientras se obtienen los datos de Supabase
+    var loadEl = document.createElement("div");
+    loadEl.id = "db-loading-screen";
+    loadEl.style.cssText = "position:fixed;inset:0;z-index:99999;background:#0A0A0A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;";
+    loadEl.innerHTML =
+      '<svg width="56" height="56" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">' +
+        '<rect width="96" height="96" rx="22" fill="#0F1500"/>' +
+        '<rect x="30" y="44" width="36" height="8" rx="4" fill="#C8E000"/>' +
+        '<rect x="19" y="38" width="12" height="20" rx="4" fill="#C8E000"/>' +
+        '<rect x="11" y="42" width="9" height="12" rx="3" fill="#C8E000" opacity=".55"/>' +
+        '<rect x="65" y="38" width="12" height="20" rx="4" fill="#C8E000"/>' +
+        '<rect x="76" y="42" width="9" height="12" rx="3" fill="#C8E000" opacity=".55"/>' +
+      '</svg>' +
+      '<div style="color:#C8E000;font-weight:800;font-size:15px;letter-spacing:.5px;">Cargando tu perfil...</div>' +
+      '<div style="width:120px;height:3px;background:#1a1a1a;border-radius:99px;overflow:hidden;">' +
+        '<div id="db-load-bar" style="height:100%;width:0;background:#C8E000;border-radius:99px;transition:width 2s ease;"></div>' +
+      '</div>';
+    document.body.appendChild(loadEl);
+    setTimeout(function(){ var b = document.getElementById("db-load-bar"); if(b) b.style.width = "80%"; }, 50);
+
+    window.db.init(window.ALUMNO_ID)
+      .then(function(){
+        loadEl.remove();
+        showPage("inicio");
+      })
+      .catch(function(err){
+        console.error("[alumno] db.init error:", err);
+        loadEl.innerHTML =
+          '<div style="text-align:center;color:#ff6b6b;padding:32px;">' +
+            '<div style="font-size:36px;margin-bottom:12px;">⚠️</div>' +
+            '<div style="font-weight:700;font-size:16px;margin-bottom:8px;">Sin conexión</div>' +
+            '<div style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:24px;">Verifica tu conexión a internet.<br>Reintentando en 3 segundos...</div>' +
+          '</div>';
+        setTimeout(function(){ location.reload(); }, 3000);
+      });
   });
 })();
