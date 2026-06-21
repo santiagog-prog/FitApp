@@ -331,10 +331,29 @@
   </div>
 </div>
 
-<script src="js/db.js?v=20260619b"></script>
+<script src="js/db.js?v=20260621a"></script>
 <script>
 (function(){
   "use strict";
+
+  // ── CARGA DE ALUMNOS (backend) ───────────────────────────
+  // El login por código de 4 dígitos necesita la lista de
+  // alumnos en caché antes de poder validar nada. Deshabilitamos
+  // las cajitas hasta que la carga termine.
+  var _loginReady = false;
+  document.querySelectorAll(".digit-box, #btn-entrar-alumno").forEach(function(el){ el.disabled = true; });
+  window.db.initLogin()
+    .then(function(){
+      _loginReady = true;
+      document.querySelectorAll(".digit-box, #btn-entrar-alumno").forEach(function(el){ el.disabled = false; });
+      checkContinuarSesion();
+    })
+    .catch(function(err){
+      console.error("[index] initLogin error:", err);
+      var errEl = document.getElementById("error-codigo");
+      if(errEl){ errEl.textContent = "Sin conexión con el servidor. Reintentando..."; errEl.style.display = "block"; }
+      setTimeout(function(){ location.reload(); }, 3000);
+    });
 
   // ── QUOTES CAROUSEL ──────────────────────────────────────
   var QUOTES = [
@@ -364,18 +383,21 @@
   setInterval(nextQuote, 4000);
 
   // ── CONTINUAR SESIÓN ─────────────────────────────────────
-  try {
-    var actualId = window.db.getAlumnoActual();
-    if(actualId){
-      var a = window.db.getAlumnoPorId(actualId);
-      if(a){
-        var box = document.getElementById("continuar-sesion");
-        document.getElementById("continuar-nombre").textContent = "Continuar como " + a.nombre;
-        box.style.display = "flex";
-        box.addEventListener("click", function(){ location.href = "alumno/index.html"; });
+  // Se llama después de que initLogin() carga la lista de alumnos.
+  function checkContinuarSesion(){
+    try {
+      var actualId = window.db.getAlumnoActual();
+      if(actualId){
+        var a = window.db.getAlumnoPorId(actualId);
+        if(a){
+          var box = document.getElementById("continuar-sesion");
+          document.getElementById("continuar-nombre").textContent = "Continuar como " + a.nombre;
+          box.style.display = "flex";
+          box.addEventListener("click", function(){ location.href = "alumno/index.html"; });
+        }
       }
-    }
-  } catch(e){}
+    } catch(e){}
+  }
 
   // ── CARD EXPANSIÓN ───────────────────────────────────────
   var cardE   = document.getElementById("card-entrenador");
@@ -462,6 +484,7 @@
   });
 
   function intentarLogin(){
+    if(!_loginReady) return;
     var codigo = digits.map(function(d){ return d.value; }).join("");
     if(codigo.length < 4) return;
     var a = window.db.getAlumnoPorCodigo(codigo);

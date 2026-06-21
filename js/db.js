@@ -147,6 +147,18 @@
     fechaHoy:          fechaHoy,
     ytEmbed:           ytEmbed,
 
+    // ── INIT (LOGIN) ──────────────────────────────────────────
+    // Carga solo la lista de alumnos — usado en la pantalla de
+    // login (index.html) antes de poder validar el código de 4
+    // dígitos. Sin esto, getAlumnoPorCodigo() siempre devuelve
+    // null porque el caché empieza vacío.
+    initLogin: function(){
+      return apiGet("alumnos").then(function(r){
+        C.alumnos = r || [];
+        if(C.alumnos.length === 0) return window.db.seedDemo();
+      });
+    },
+
     // ── INIT (ALUMNO) ─────────────────────────────────────────
     init: function(alumnoId){
       C._aid = alumnoId;
