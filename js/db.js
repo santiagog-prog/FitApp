@@ -1,16 +1,48 @@
 // ════════════════════════════════════════════════════════════
-// db.js v2 — Supabase backend con capa de caché síncrona
+// db.js v3 — Backend en Railway (Express + Postgres + Bucket)
+// con capa de caché síncrona.
 //
-// SETUP: reemplaza SB_URL y SB_KEY con los valores de tu
-// proyecto en https://supabase.com/dashboard → Settings → API
+// API_BASE apunta al servicio fitapp-api desplegado en Railway.
 // ════════════════════════════════════════════════════════════
 (function(){
   "use strict";
 
-  // ── CREDENCIALES SUPABASE ────────────────────────────────
-  var SB_URL = "SUPABASE_URL_AQUI";       // ej: https://xxxx.supabase.co
-  var SB_KEY = "SUPABASE_ANON_KEY_AQUI";  // clave anon/public
-  var sb = window.supabase.createClient(SB_URL, SB_KEY);
+  // ── API BACKEND (Railway) ───────────────────────────────────
+  var API_BASE = "https://fitapp-api-production-390d.up.railway.app/api";
+
+  function qs(params){
+    var p = new URLSearchParams();
+    Object.keys(params||{}).forEach(function(k){ if(params[k] !== undefined && params[k] !== null) p.append(k, params[k]); });
+    var s = p.toString();
+    return s ? ("?"+s) : "";
+  }
+  function apiGet(table, params){
+    return fetch(API_BASE+"/"+table+qs(params)).then(function(r){ return r.json(); });
+  }
+  function apiPost(table, body){
+    return fetch(API_BASE+"/"+table, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) })
+      .then(function(r){ return r.json(); });
+  }
+  function apiPatch(table, params, body){
+    return fetch(API_BASE+"/"+table+qs(params), { method:"PATCH", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) })
+      .then(function(r){ return r.json(); });
+  }
+  function apiDelete(table, params){
+    return fetch(API_BASE+"/"+table+qs(params), { method:"DELETE" }).then(function(r){ return r.json(); });
+  }
+  function apiUploadFile(file, prefix){
+    var fd = new FormData();
+    fd.append("file", file);
+    fd.append("prefix", prefix||"uploads");
+    return fetch(API_BASE+"/upload", { method:"POST", body:fd }).then(function(r){ return r.json(); });
+  }
+  function apiDeleteUpload(path){
+    return fetch(API_BASE+"/upload"+qs({ path:path }), { method:"DELETE" }).then(function(r){ return r.json(); });
+  }
+  // Escritura en background — nunca bloquea la UI
+  function apiWrite(fn){
+    fn().then(function(r){ if(r && r.error) console.warn("[db:write]", r.error); }).catch(function(e){ console.warn("[db:write]", e.message); });
+  }
 
   // ── SESIÓN en localStorage (no son datos, son estado de UI) ─
   var LS = "fitapp_";
@@ -18,9 +50,6 @@
   function lsSet(k,v){ try{ localStorage.setItem(LS+k,JSON.stringify(v)); return true; }catch(e){ return false; } }
 
   // ── CACHÉ EN MEMORIA ────────────────────────────────────────
-  // Después de init() todos los getters leen desde aquí (síncronos).
-  // Los setters actualizan el caché inmediatamente y disparan una
-  // escritura async a Supabase en background.
   var C = {
     alumnos:       [],
     rutinas:       [],
@@ -28,7 +57,6 @@
     ejercicios:    [],
     vinculos:      [],
     gym_info:      null,
-    // Por alumno (rellenado en init)
     _aid:          null,
     registros:     [],
     pesos:         [],
@@ -36,11 +64,11 @@
     medallas:      [],
     notas:         [],
     habitos:       [],
-    habito_checks: {},   // { "YYYY-MM-DD": { habitoId: bool } }
-    nutricion:     {},   // { "YYYY-MM-DD": { opciones, comidos, agua, alimentos, extras } }
-    progreso:      {},   // { "YYYY-MM-DD": { pasos, agua_ml, sueno_h, calorias_activas } }
-    fitscore:      {},   // { "YYYY-MM-DD": scoreObj }
-    food_scans:    {},   // { "YYYY-MM-DD": [scan, ...] }
+    habito_checks: {},
+    nutricion:     {},
+    progreso:      {},
+    fitscore:      {},
+    food_scans:    {},
     objetivos:     [],
     fotos:         []
   };
@@ -98,13 +126,6 @@
     if(m) return "https://www.youtube.com/embed/" + m[1];
     return null;
   }
-
-  // Escribe a Supabase en background — nunca bloquea la UI
-  function sbWrite(fn){
-    fn().then(function(r){ if(r && r.error) console.warn("[db:write]", r.error.message); });
-  }
-
-  // Mapea una fila de nutricion_diaria al formato que usa el resto de la app
   function rowToNutricion(row){
     return {
       opciones:  row.opciones  || {},
@@ -119,137 +140,96 @@
   // window.db — API pública
   // ════════════════════════════════════════════════════════════
   window.db = {
-    MEDALLAS_DEF:     MEDALLAS_DEF,
-    ALIMENTOS_COMUNES:ALIMENTOS_COMUNES,
-    HABITOS_ICONOS:   HABITOS_ICONOS,
-    generarId:        generarId,
-    fechaHoy:         fechaHoy,
-    ytEmbed:          ytEmbed,
+    MEDALLAS_DEF:      MEDALLAS_DEF,
+    ALIMENTOS_COMUNES: ALIMENTOS_COMUNES,
+    HABITOS_ICONOS:    HABITOS_ICONOS,
+    generarId:         generarId,
+    fechaHoy:          fechaHoy,
+    ytEmbed:           ytEmbed,
 
     // ── INIT (ALUMNO) ─────────────────────────────────────────
-    // Carga TODOS los datos del alumno en el caché.
-    // Llamar antes de renderizar cualquier página.
     init: function(alumnoId){
       C._aid = alumnoId;
-      var minDate = dFecha(180);  // últimos 6 meses para datos diarios
+      var minDate = dFecha(180);
 
       return Promise.all([
-        // Globales
-        sb.from("alumnos").select("*")
-          .then(function(r){ C.alumnos = r.data || []; }),
-        sb.from("rutinas").select("*")
-          .then(function(r){ C.rutinas = r.data || []; }),
-        sb.from("planes").select("*")
-          .then(function(r){ C.planes = r.data || []; }),
-        sb.from("ejercicios").select("*")
-          .then(function(r){ C.ejercicios = (r.data && r.data.length) ? r.data : (window.EJERCICIOS_DEFAULT || []); }),
-        sb.from("vinculos").select("*")
-          .then(function(r){ C.vinculos = r.data || []; }),
-        sb.from("gym_info").select("*").eq("id","main").maybeSingle()
-          .then(function(r){ C.gym_info = (r.data && r.data.data) ? r.data.data : null; }),
+        apiGet("alumnos").then(function(r){ C.alumnos = r || []; }),
+        apiGet("rutinas").then(function(r){ C.rutinas = r || []; }),
+        apiGet("planes").then(function(r){ C.planes = r || []; }),
+        apiGet("ejercicios").then(function(r){ C.ejercicios = (r && r.length) ? r : (window.EJERCICIOS_DEFAULT || []); }),
+        apiGet("vinculos").then(function(r){ C.vinculos = r || []; }),
+        apiGet("gym_info", { id:"main" }).then(function(r){ C.gym_info = (r && r[0] && r[0].data) ? r[0].data : null; }),
 
-        // Por alumno
-        sb.from("registros").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.registros = r.data || []; }),
-        sb.from("pesos").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.pesos = r.data || []; }),
-        sb.from("medidas").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.medidas = r.data || []; }),
-        sb.from("medallas_alumno").select("medalla_id").eq("alumno_id", alumnoId)
-          .then(function(r){ C.medallas = (r.data || []).map(function(x){ return x.medalla_id; }); }),
-        sb.from("notas").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.notas = r.data || []; }),
-        sb.from("habitos").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.habitos = r.data || []; }),
-        sb.from("habito_checks").select("*").eq("alumno_id", alumnoId).gte("fecha", minDate)
-          .then(function(r){
-            C.habito_checks = {};
-            (r.data || []).forEach(function(row){ C.habito_checks[row.fecha] = row.checks || {}; });
-          }),
-        sb.from("nutricion_diaria").select("*").eq("alumno_id", alumnoId).gte("fecha", minDate)
-          .then(function(r){
-            C.nutricion = {};
-            (r.data || []).forEach(function(row){ C.nutricion[row.fecha] = rowToNutricion(row); });
-          }),
-        sb.from("progreso_diario").select("*").eq("alumno_id", alumnoId).gte("fecha", minDate)
-          .then(function(r){
-            C.progreso = {};
-            (r.data || []).forEach(function(row){
-              C.progreso[row.fecha] = { pasos:row.pasos||0, agua_ml:row.agua_ml||0, sueno_h:row.sueno_h||0, calorias_activas:row.calorias_activas||0 };
-            });
-          }),
-        sb.from("fitscore").select("*").eq("alumno_id", alumnoId).gte("fecha", minDate)
-          .then(function(r){
-            C.fitscore = {};
-            (r.data || []).forEach(function(row){ C.fitscore[row.fecha] = row.score_data; });
-          }),
-        sb.from("food_scans").select("*").eq("alumno_id", alumnoId).gte("fecha", minDate)
-          .then(function(r){
-            C.food_scans = {};
-            (r.data || []).forEach(function(row){
-              if(!C.food_scans[row.fecha]) C.food_scans[row.fecha] = [];
-              C.food_scans[row.fecha].push(row.scan_data);
-            });
-          }),
-        sb.from("objetivos").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.objetivos = (r.data || []).map(function(row){ return row.data; }); }),
-        sb.from("fotos").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.fotos = r.data || []; })
+        apiGet("registros", { alumno_id:alumnoId }).then(function(r){ C.registros = r || []; }),
+        apiGet("pesos", { alumno_id:alumnoId }).then(function(r){ C.pesos = r || []; }),
+        apiGet("medidas", { alumno_id:alumnoId }).then(function(r){ C.medidas = r || []; }),
+        apiGet("medallas_alumno", { alumno_id:alumnoId }).then(function(r){ C.medallas = (r||[]).map(function(x){ return x.medalla_id; }); }),
+        apiGet("notas", { alumno_id:alumnoId }).then(function(r){ C.notas = r || []; }),
+        apiGet("habitos", { alumno_id:alumnoId }).then(function(r){ C.habitos = r || []; }),
+        apiGet("habito_checks", { alumno_id:alumnoId, fecha_gte:minDate }).then(function(r){
+          C.habito_checks = {};
+          (r||[]).forEach(function(row){ C.habito_checks[row.fecha] = row.checks || {}; });
+        }),
+        apiGet("nutricion_diaria", { alumno_id:alumnoId, fecha_gte:minDate }).then(function(r){
+          C.nutricion = {};
+          (r||[]).forEach(function(row){ C.nutricion[row.fecha] = rowToNutricion(row); });
+        }),
+        apiGet("progreso_diario", { alumno_id:alumnoId, fecha_gte:minDate }).then(function(r){
+          C.progreso = {};
+          (r||[]).forEach(function(row){
+            C.progreso[row.fecha] = { pasos:row.pasos||0, agua_ml:row.agua_ml||0, sueno_h:row.sueno_h||0, calorias_activas:row.calorias_activas||0 };
+          });
+        }),
+        apiGet("fitscore", { alumno_id:alumnoId, fecha_gte:minDate }).then(function(r){
+          C.fitscore = {};
+          (r||[]).forEach(function(row){ C.fitscore[row.fecha] = row.score_data; });
+        }),
+        apiGet("food_scans", { alumno_id:alumnoId, fecha_gte:minDate }).then(function(r){
+          C.food_scans = {};
+          (r||[]).forEach(function(row){
+            if(!C.food_scans[row.fecha]) C.food_scans[row.fecha] = [];
+            C.food_scans[row.fecha].push(row.scan_data);
+          });
+        }),
+        apiGet("objetivos", { alumno_id:alumnoId }).then(function(r){ C.objetivos = (r||[]).map(function(row){ return row.data; }); }),
+        apiGet("fotos", { alumno_id:alumnoId }).then(function(r){ C.fotos = r || []; })
       ]).then(function(){
         if(C.alumnos.length === 0) return window.db.seedDemo();
       });
     },
 
     // ── INIT (COACH) ──────────────────────────────────────────
-    // Carga datos globales. Llama a initAlumnoParaCoach(id) cuando
-    // el coach abre el panel de un alumno específico.
     initCoach: function(){
       return Promise.all([
-        sb.from("alumnos").select("*")
-          .then(function(r){ C.alumnos = r.data || []; }),
-        sb.from("rutinas").select("*")
-          .then(function(r){ C.rutinas = r.data || []; }),
-        sb.from("planes").select("*")
-          .then(function(r){ C.planes = r.data || []; }),
-        sb.from("ejercicios").select("*")
-          .then(function(r){ C.ejercicios = (r.data && r.data.length) ? r.data : (window.EJERCICIOS_DEFAULT || []); }),
-        sb.from("gym_info").select("*").eq("id","main").maybeSingle()
-          .then(function(r){ C.gym_info = (r.data && r.data.data) ? r.data.data : null; })
+        apiGet("alumnos").then(function(r){ C.alumnos = r || []; }),
+        apiGet("rutinas").then(function(r){ C.rutinas = r || []; }),
+        apiGet("planes").then(function(r){ C.planes = r || []; }),
+        apiGet("ejercicios").then(function(r){ C.ejercicios = (r && r.length) ? r : (window.EJERCICIOS_DEFAULT || []); }),
+        apiGet("gym_info", { id:"main" }).then(function(r){ C.gym_info = (r && r[0] && r[0].data) ? r[0].data : null; })
       ]).then(function(){
         if(C.alumnos.length === 0) return window.db.seedDemo();
       });
     },
 
-    // Carga datos de un alumno específico para el coach (lazy)
     initAlumnoParaCoach: function(alumnoId){
       C._aid = alumnoId;
       return Promise.all([
-        sb.from("registros").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.registros = r.data || []; }),
-        sb.from("pesos").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.pesos = r.data || []; }),
-        sb.from("medidas").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.medidas = r.data || []; }),
-        sb.from("notas").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.notas = r.data || []; }),
-        sb.from("medallas_alumno").select("medalla_id").eq("alumno_id", alumnoId)
-          .then(function(r){ C.medallas = (r.data || []).map(function(x){ return x.medalla_id; }); }),
-        sb.from("habitos").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.habitos = r.data || []; }),
-        sb.from("habito_checks").select("*").eq("alumno_id", alumnoId).gte("fecha", dFecha(90))
-          .then(function(r){
-            C.habito_checks = {};
-            (r.data || []).forEach(function(row){ C.habito_checks[row.fecha] = row.checks || {}; });
-          }),
-        sb.from("nutricion_diaria").select("*").eq("alumno_id", alumnoId).gte("fecha", dFecha(90))
-          .then(function(r){
-            C.nutricion = {};
-            (r.data || []).forEach(function(row){ C.nutricion[row.fecha] = rowToNutricion(row); });
-          }),
-        sb.from("objetivos").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.objetivos = (r.data || []).map(function(row){ return row.data; }); }),
-        sb.from("fotos").select("*").eq("alumno_id", alumnoId)
-          .then(function(r){ C.fotos = r.data || []; })
+        apiGet("registros", { alumno_id:alumnoId }).then(function(r){ C.registros = r || []; }),
+        apiGet("pesos", { alumno_id:alumnoId }).then(function(r){ C.pesos = r || []; }),
+        apiGet("medidas", { alumno_id:alumnoId }).then(function(r){ C.medidas = r || []; }),
+        apiGet("notas", { alumno_id:alumnoId }).then(function(r){ C.notas = r || []; }),
+        apiGet("medallas_alumno", { alumno_id:alumnoId }).then(function(r){ C.medallas = (r||[]).map(function(x){ return x.medalla_id; }); }),
+        apiGet("habitos", { alumno_id:alumnoId }).then(function(r){ C.habitos = r || []; }),
+        apiGet("habito_checks", { alumno_id:alumnoId, fecha_gte:dFecha(90) }).then(function(r){
+          C.habito_checks = {};
+          (r||[]).forEach(function(row){ C.habito_checks[row.fecha] = row.checks || {}; });
+        }),
+        apiGet("nutricion_diaria", { alumno_id:alumnoId, fecha_gte:dFecha(90) }).then(function(r){
+          C.nutricion = {};
+          (r||[]).forEach(function(row){ C.nutricion[row.fecha] = rowToNutricion(row); });
+        }),
+        apiGet("objetivos", { alumno_id:alumnoId }).then(function(r){ C.objetivos = (r||[]).map(function(row){ return row.data; }); }),
+        apiGet("fotos", { alumno_id:alumnoId }).then(function(r){ C.fotos = r || []; })
       ]);
     },
 
@@ -260,11 +240,11 @@
     saveAlumno: function(a){
       var idx = C.alumnos.findIndex(function(x){ return x.id === a.id; });
       if(idx >= 0) C.alumnos[idx] = a; else C.alumnos.push(a);
-      sbWrite(function(){ return sb.from("alumnos").upsert(a); });
+      apiWrite(function(){ return apiPost("alumnos", a); });
     },
     deleteAlumno: function(id){
       C.alumnos = C.alumnos.filter(function(a){ return a.id !== id; });
-      sbWrite(function(){ return sb.from("alumnos").delete().eq("id", id); });
+      apiWrite(function(){ return apiDelete("alumnos", { id:id }); });
     },
 
     // ── RUTINAS ──────────────────────────────────────────────
@@ -273,11 +253,11 @@
     saveRutina: function(r){
       var idx = C.rutinas.findIndex(function(x){ return x.id === r.id; });
       if(idx >= 0) C.rutinas[idx] = r; else C.rutinas.push(r);
-      sbWrite(function(){ return sb.from("rutinas").upsert(r); });
+      apiWrite(function(){ return apiPost("rutinas", r); });
     },
     deleteRutina: function(id){
       C.rutinas = C.rutinas.filter(function(r){ return r.id !== id; });
-      sbWrite(function(){ return sb.from("rutinas").delete().eq("id", id); });
+      apiWrite(function(){ return apiDelete("rutinas", { id:id }); });
     },
 
     // ── PLANES ───────────────────────────────────────────────
@@ -286,11 +266,11 @@
     savePlan: function(p){
       var idx = C.planes.findIndex(function(x){ return x.id === p.id; });
       if(idx >= 0) C.planes[idx] = p; else C.planes.push(p);
-      sbWrite(function(){ return sb.from("planes").upsert(p); });
+      apiWrite(function(){ return apiPost("planes", p); });
     },
     deletePlan: function(id){
       C.planes = C.planes.filter(function(p){ return p.id !== id; });
-      sbWrite(function(){ return sb.from("planes").delete().eq("id", id); });
+      apiWrite(function(){ return apiDelete("planes", { id:id }); });
     },
 
     // ── EJERCICIOS ───────────────────────────────────────────
@@ -301,7 +281,7 @@
     saveEjercicio: function(e){
       var idx = C.ejercicios.findIndex(function(x){ return x.id === e.id; });
       if(idx >= 0) C.ejercicios[idx] = e; else C.ejercicios.push(e);
-      sbWrite(function(){ return sb.from("ejercicios").upsert(e); });
+      apiWrite(function(){ return apiPost("ejercicios", e); });
     },
 
     // ── REGISTROS ────────────────────────────────────────────
@@ -310,8 +290,9 @@
     },
     saveRegistro: function(alumnoId, reg){
       reg.alumno_id = alumnoId;
+      if(!reg.id) reg.id = generarId("reg");
       C.registros.push(reg);
-      sbWrite(function(){ return sb.from("registros").insert(reg); });
+      apiWrite(function(){ return apiPost("registros", reg); });
       return this.checkMedallas(alumnoId);
     },
 
@@ -322,7 +303,7 @@
     savePeso: function(alumnoId, peso){
       peso.alumno_id = alumnoId;
       C.pesos.push(peso);
-      sbWrite(function(){ return sb.from("pesos").insert({ alumno_id:alumnoId, fecha:peso.fecha, kg:peso.kg }); });
+      apiWrite(function(){ return apiPost("pesos", { alumno_id:alumnoId, fecha:peso.fecha, kg:peso.kg }); });
     },
 
     // ── MEDIDAS ──────────────────────────────────────────────
@@ -332,7 +313,7 @@
     saveMedidas: function(alumnoId, m){
       m.alumno_id = alumnoId;
       C.medidas.push(m);
-      sbWrite(function(){ return sb.from("medidas").insert(Object.assign({ alumno_id:alumnoId }, m)); });
+      apiWrite(function(){ return apiPost("medidas", Object.assign({ alumno_id:alumnoId }, m)); });
     },
 
     // ── NUTRICIÓN ────────────────────────────────────────────
@@ -343,8 +324,8 @@
     },
     saveNutricion: function(alumnoId, fecha, datos){
       C.nutricion[fecha] = JSON.parse(JSON.stringify(datos));
-      sbWrite(function(){
-        return sb.from("nutricion_diaria").upsert({
+      apiWrite(function(){
+        return apiPost("nutricion_diaria", {
           alumno_id: alumnoId, fecha: fecha,
           opciones:  datos.opciones  || {},
           comidos:   datos.comidos   || {},
@@ -370,7 +351,7 @@
     desbloquearMedalla: function(alumnoId, medallaId){
       if(C.medallas.indexOf(medallaId) === -1){
         C.medallas.push(medallaId);
-        sbWrite(function(){ return sb.from("medallas_alumno").upsert({ alumno_id:alumnoId, medalla_id:medallaId }); });
+        apiWrite(function(){ return apiPost("medallas_alumno", { alumno_id:alumnoId, medalla_id:medallaId }); });
         return true;
       }
       return false;
@@ -396,18 +377,18 @@
     saveNota: function(alumnoId, nota){
       nota.alumno_id = alumnoId;
       C.notas.push(nota);
-      sbWrite(function(){ return sb.from("notas").insert(nota); });
+      apiWrite(function(){ return apiPost("notas", nota); });
     },
     marcarNotasLeidas: function(alumnoId){
       C.notas = C.notas.map(function(n){ n.leida = true; return n; });
-      sbWrite(function(){ return sb.from("notas").update({ leida:true }).eq("alumno_id", alumnoId); });
+      apiWrite(function(){ return apiPatch("notas", { alumno_id:alumnoId }, { leida:true }); });
     },
 
     // ── GYM INFO ─────────────────────────────────────────────
     getGymInfo:  function(){ return C.gym_info || { activo:false }; },
     saveGymInfo: function(info){
       C.gym_info = info;
-      sbWrite(function(){ return sb.from("gym_info").upsert({ id:"main", data:info, updated_at: new Date().toISOString() }); });
+      apiWrite(function(){ return apiPost("gym_info", { id:"main", data:info, updated_at:new Date().toISOString() }); });
     },
 
     // ── FOTOS ────────────────────────────────────────────────
@@ -415,31 +396,23 @@
     saveFoto: function(alumnoId, foto){
       foto.alumno_id = alumnoId;
       C.fotos.push(foto);
-      sbWrite(function(){ return sb.from("fotos").upsert(foto); });
+      apiWrite(function(){ return apiPost("fotos", foto); });
     },
     deleteFoto: function(alumnoId, id){
       var foto = C.fotos.find(function(f){ return f.id === id; });
       C.fotos = C.fotos.filter(function(f){ return f.id !== id; });
-      sbWrite(function(){ return sb.from("fotos").delete().eq("id", id); });
-      if(foto && foto.storage_path) sb.storage.from("fitapp-media").remove([foto.storage_path]);
+      apiWrite(function(){ return apiDelete("fotos", { id:id }); });
+      if(foto && foto.storage_path) apiDeleteUpload(foto.storage_path);
     },
-    // Sube un File al Storage y guarda el registro.
-    // Devuelve Promise<fotoObj>  (usado en fotos.js)
+    // Sube un File al bucket de Railway y guarda el registro.
     uploadFoto: function(alumnoId, file, metadata){
       var self = this;
-      var ext  = (file.name || "foto.jpg").split(".").pop().toLowerCase();
-      var path = "fotos/" + alumnoId + "/" + Date.now() + "." + ext;
-      return sb.storage.from("fitapp-media").upload(path, file, { contentType: file.type||"image/jpeg", upsert:true })
-        .then(function(r){
-          if(r.error) throw new Error(r.error.message);
-          return sb.storage.from("fitapp-media").createSignedUrl(path, 60*60*24*365);
-        })
-        .then(function(r){
-          if(r.error) throw new Error(r.error.message);
-          var foto = Object.assign({ id:generarId("foto"), alumno_id:alumnoId, storage_path:path, url:r.data.signedUrl }, metadata||{});
-          self.saveFoto(alumnoId, foto);
-          return foto;
-        });
+      return apiUploadFile(file, "fotos/"+alumnoId).then(function(r){
+        if(r.error) throw new Error(r.error);
+        var foto = Object.assign({ id:generarId("foto"), alumno_id:alumnoId, storage_path:r.path, url:r.url }, metadata||{});
+        self.saveFoto(alumnoId, foto);
+        return foto;
+      });
     },
 
     // ── HÁBITOS ──────────────────────────────────────────────
@@ -448,18 +421,18 @@
       habito.alumno_id = alumnoId;
       var idx = C.habitos.findIndex(function(h){ return h.id === habito.id; });
       if(idx >= 0) C.habitos[idx] = habito; else C.habitos.push(habito);
-      sbWrite(function(){ return sb.from("habitos").upsert(habito); });
+      apiWrite(function(){ return apiPost("habitos", habito); });
     },
     deleteHabito: function(alumnoId, id){
       C.habitos = C.habitos.filter(function(h){ return h.id !== id; });
-      sbWrite(function(){ return sb.from("habitos").delete().eq("id", id); });
+      apiWrite(function(){ return apiDelete("habitos", { id:id }); });
     },
     getHabitoChecks: function(alumnoId){ return JSON.parse(JSON.stringify(C.habito_checks)); },
     toggleHabitoCheck: function(alumnoId, habitoId, fecha){
       if(!C.habito_checks[fecha]) C.habito_checks[fecha] = {};
       C.habito_checks[fecha][habitoId] = !C.habito_checks[fecha][habitoId];
       var checks = JSON.parse(JSON.stringify(C.habito_checks[fecha]));
-      sbWrite(function(){ return sb.from("habito_checks").upsert({ alumno_id:alumnoId, fecha:fecha, checks:checks }); });
+      apiWrite(function(){ return apiPost("habito_checks", { alumno_id:alumnoId, fecha:fecha, checks:checks }); });
       return C.habito_checks[fecha][habitoId];
     },
     getHabitosCompletadosHoy: function(alumnoId, fecha){
@@ -477,7 +450,7 @@
       return racha;
     },
 
-    // ── SESIÓN (localStorage — no va a Supabase) ─────────────
+    // ── SESIÓN (localStorage — no va al backend) ─────────────
     getAlumnoActual: function(){ return lsGet("alumno_actual"); },
     setAlumnoActual: function(id){ return lsSet("alumno_actual", id); },
     clearSesion:     function(){ localStorage.removeItem(LS+"alumno_actual"); },
@@ -494,7 +467,7 @@
       var fecha = scan.fecha || fechaHoy();
       if(!C.food_scans[fecha]) C.food_scans[fecha] = [];
       C.food_scans[fecha].push(scan);
-      sbWrite(function(){ return sb.from("food_scans").insert({ alumno_id:alumnoId, fecha:fecha, scan_data:scan }); });
+      apiWrite(function(){ return apiPost("food_scans", { alumno_id:alumnoId, fecha:fecha, scan_data:scan }); });
     },
     getFoodScansHistorial: function(alumnoId, dias){
       var result = [];
@@ -512,11 +485,11 @@
     saveObjetivo: function(alumnoId, obj){
       var idx = C.objetivos.findIndex(function(x){ return x.id === obj.id; });
       if(idx >= 0) C.objetivos[idx] = obj; else C.objetivos.push(obj);
-      sbWrite(function(){ return sb.from("objetivos").upsert({ id:obj.id, alumno_id:alumnoId, data:obj }); });
+      apiWrite(function(){ return apiPost("objetivos", { id:obj.id||generarId("obj"), alumno_id:alumnoId, data:obj }); });
     },
     deleteObjetivo: function(alumnoId, id){
       C.objetivos = C.objetivos.filter(function(o){ return o.id !== id; });
-      sbWrite(function(){ return sb.from("objetivos").delete().eq("id", id); });
+      apiWrite(function(){ return apiDelete("objetivos", { id:id }); });
     },
 
     // ── PROGRESO DIARIO ──────────────────────────────────────
@@ -527,7 +500,7 @@
     saveProgresoDiario: function(alumnoId, fecha, datos){
       var f = fecha || fechaHoy();
       C.progreso[f] = Object.assign({}, datos);
-      sbWrite(function(){ return sb.from("progreso_diario").upsert(Object.assign({ alumno_id:alumnoId, fecha:f }, datos)); });
+      apiWrite(function(){ return apiPost("progreso_diario", Object.assign({ alumno_id:alumnoId, fecha:f }, datos)); });
     },
     patchProgresoDiario: function(alumnoId, fecha, patch){
       var d = this.getProgresoDiario(alumnoId, fecha);
@@ -540,7 +513,7 @@
     saveFitScore: function(alumnoId, fecha, scoreObj){
       var f = fecha || fechaHoy();
       C.fitscore[f] = scoreObj;
-      sbWrite(function(){ return sb.from("fitscore").upsert({ alumno_id:alumnoId, fecha:f, score_data:scoreObj }); });
+      apiWrite(function(){ return apiPost("fitscore", { alumno_id:alumnoId, fecha:f, score_data:scoreObj }); });
     },
     getFitScoreHistorial: function(alumnoId, dias){
       var result = [];
@@ -580,20 +553,20 @@
       if(yaExiste) return yaExiste;
       var v = { id:"vinc_"+Date.now(), alumno1:alumnoId1, alumno2:alumnoId2, fecha:fechaHoy(), confirmado_por:[alumnoId1] };
       C.vinculos.push(v);
-      sbWrite(function(){ return sb.from("vinculos").insert(v); });
+      apiWrite(function(){ return apiPost("vinculos", v); });
       return v;
     },
     confirmarVinculo: function(vinculoId, alumnoId){
       var v = C.vinculos.find(function(x){ return x.id===vinculoId; });
       if(v && v.confirmado_por.indexOf(alumnoId)===-1){
         v.confirmado_por.push(alumnoId);
-        sbWrite(function(){ return sb.from("vinculos").update({ confirmado_por:v.confirmado_por }).eq("id", vinculoId); });
+        apiWrite(function(){ return apiPatch("vinculos", { id:vinculoId }, { confirmado_por:v.confirmado_por }); });
       }
       return v;
     },
     rechazarVinculo: function(vinculoId){
       C.vinculos = C.vinculos.filter(function(v){ return v.id!==vinculoId; });
-      sbWrite(function(){ return sb.from("vinculos").delete().eq("id", vinculoId); });
+      apiWrite(function(){ return apiDelete("vinculos", { id:vinculoId }); });
     },
     getVinculoDe: function(alumnoId){
       return C.vinculos.find(function(v){ return v.alumno1===alumnoId||v.alumno2===alumnoId; })||null;
@@ -603,8 +576,6 @@
     // ── MIGRACIÓN DESDE localStorage ─────────────────────────
     // Corre UNA SOLA VEZ desde la consola del navegador:
     //   await db.migrarDesdeLocalStorage()
-    // Mueve todos los datos existentes de localStorage a Supabase.
-    // Las fotos no se migran (eran base64, re-sube desde la app).
     migrarDesdeLocalStorage: function(){
       var LS2 = "fitapp_";
       function lg(k){ try{ return JSON.parse(localStorage.getItem(LS2+k)); }catch(e){ return null; } }
@@ -616,78 +587,71 @@
       var vinculos = lg("vinculos") || [];
 
       var ops = [];
-      if(alumnos.length)  ops.push(sb.from("alumnos").upsert(alumnos));
-      if(rutinas.length)  ops.push(sb.from("rutinas").upsert(rutinas));
-      if(planes.length)   ops.push(sb.from("planes").upsert(planes));
-      if(gymInfo)         ops.push(sb.from("gym_info").upsert({ id:"main", data:gymInfo }));
-      if(vinculos.length) ops.push(sb.from("vinculos").upsert(vinculos));
+      if(alumnos.length)  ops.push(apiPost("alumnos", alumnos));
+      if(rutinas.length)  ops.push(apiPost("rutinas", rutinas));
+      if(planes.length)   ops.push(apiPost("planes", planes));
+      if(gymInfo)         ops.push(apiPost("gym_info", { id:"main", data:gymInfo }));
+      if(vinculos.length) ops.push(apiPost("vinculos", vinculos));
 
       alumnos.forEach(function(a){
         var aid = a.id;
         var regs = lg("registros_"+aid)||[];
-        if(regs.length){ regs.forEach(function(r){ r.alumno_id=aid; }); ops.push(sb.from("registros").upsert(regs)); }
+        if(regs.length){ regs.forEach(function(r){ r.alumno_id=aid; if(!r.id) r.id=generarId("reg"); }); ops.push(apiPost("registros", regs)); }
 
         var pesos = lg("pesos_"+aid)||[];
-        if(pesos.length){ pesos.forEach(function(p){ p.alumno_id=aid; }); ops.push(sb.from("pesos").upsert(pesos)); }
+        if(pesos.length){ pesos.forEach(function(p){ p.alumno_id=aid; }); ops.push(apiPost("pesos", pesos)); }
 
         var medidas = lg("medidas_"+aid)||[];
-        if(medidas.length){ medidas.forEach(function(m){ m.alumno_id=aid; }); ops.push(sb.from("medidas").upsert(medidas)); }
+        if(medidas.length){ medidas.forEach(function(m){ m.alumno_id=aid; }); ops.push(apiPost("medidas", medidas)); }
 
         var medallas = lg("medallas_"+aid)||[];
         if(medallas.length){
-          ops.push(sb.from("medallas_alumno").upsert(medallas.map(function(m){ return { alumno_id:aid, medalla_id:m }; })));
+          ops.push(apiPost("medallas_alumno", medallas.map(function(m){ return { alumno_id:aid, medalla_id:m }; })));
         }
 
         var notas = lg("notas_"+aid)||[];
-        if(notas.length){ notas.forEach(function(n){ n.alumno_id=aid; }); ops.push(sb.from("notas").upsert(notas)); }
+        if(notas.length){ notas.forEach(function(n){ n.alumno_id=aid; }); ops.push(apiPost("notas", notas)); }
 
         var habitos = lg("habitos_"+aid)||[];
-        if(habitos.length){ habitos.forEach(function(h){ h.alumno_id=aid; }); ops.push(sb.from("habitos").upsert(habitos)); }
+        if(habitos.length){ habitos.forEach(function(h){ h.alumno_id=aid; }); ops.push(apiPost("habitos", habitos)); }
 
         var checksRaw = lg("habito_checks_"+aid)||{};
         var checksRows = Object.keys(checksRaw).map(function(f){ return { alumno_id:aid, fecha:f, checks:checksRaw[f] }; });
-        if(checksRows.length) ops.push(sb.from("habito_checks").upsert(checksRows));
+        if(checksRows.length) ops.push(apiPost("habito_checks", checksRows));
 
         var objetivos = lg("objetivos_"+aid)||[];
         if(objetivos.length){
-          ops.push(sb.from("objetivos").upsert(objetivos.map(function(o){ return { id:o.id||generarId("obj"), alumno_id:aid, data:o }; })));
+          ops.push(apiPost("objetivos", objetivos.map(function(o){ return { id:o.id||generarId("obj"), alumno_id:aid, data:o }; })));
         }
 
-        // Iterar keys dinámicas de localStorage (nutricion, progreso, fitscore)
         var nutRows=[], proRows=[], fsRows=[];
         for(var i=0; i<localStorage.length; i++){
           var k = localStorage.key(i);
           if(!k) continue;
           var val; try{ val = JSON.parse(localStorage.getItem(k)); }catch(e){ continue; }
           var pfx = LS2+"nutricion_"+aid+"_";
-          if(k.startsWith(pfx)){
+          if(k.indexOf(pfx) === 0){
             var f = k.slice(pfx.length);
             nutRows.push({ alumno_id:aid, fecha:f, opciones:val.opciones||{}, comidos:val.comidos||{}, agua:val.agua||0, alimentos:val.alimentos||[], extras:val.extras||[] });
           }
           pfx = LS2+"progreso_"+aid+"_";
-          if(k.startsWith(pfx)){
-            proRows.push(Object.assign({ alumno_id:aid, fecha:k.slice(pfx.length) }, val));
-          }
+          if(k.indexOf(pfx) === 0) proRows.push(Object.assign({ alumno_id:aid, fecha:k.slice(pfx.length) }, val));
           pfx = LS2+"fitscore_"+aid+"_";
-          if(k.startsWith(pfx)){
-            fsRows.push({ alumno_id:aid, fecha:k.slice(pfx.length), score_data:val });
-          }
+          if(k.indexOf(pfx) === 0) fsRows.push({ alumno_id:aid, fecha:k.slice(pfx.length), score_data:val });
         }
-        if(nutRows.length) ops.push(sb.from("nutricion_diaria").upsert(nutRows));
-        if(proRows.length) ops.push(sb.from("progreso_diario").upsert(proRows));
-        if(fsRows.length)  ops.push(sb.from("fitscore").upsert(fsRows));
+        if(nutRows.length) ops.push(apiPost("nutricion_diaria", nutRows));
+        if(proRows.length) ops.push(apiPost("progreso_diario", proRows));
+        if(fsRows.length)  ops.push(apiPost("fitscore", fsRows));
 
         console.log("[migración] " + a.nombre + " — " + regs.length + " registros, " + nutRows.length + " días de nutrición");
-        console.log("[migración] FOTOS de " + a.nombre + ": eran base64, deben re-subirse desde el apartado Fotos.");
       });
 
       return Promise.all(ops)
-        .then(function(){ console.log("[migración] ✅ Todo migrado a Supabase. Alumnos:", alumnos.length); })
+        .then(function(){ console.log("[migración] ✅ Todo migrado a Railway. Alumnos:", alumnos.length); })
         .catch(function(err){ console.error("[migración] ❌", err); throw err; });
     },
 
     // ── SEED DEMO ────────────────────────────────────────────
-    // Se llama automáticamente en init()/initCoach() si Supabase está vacío
     seedDemo: function(){
       var self = this;
       var rutina = {
@@ -768,7 +732,7 @@
         if(i % 2 === 0) self.savePeso("a_demo1", { fecha:fecha, kg:parseFloat((68.5+(9-i)*0.19).toFixed(1)) });
       }
       regs.forEach(function(r){ C.registros.push(r); });
-      sbWrite(function(){ return sb.from("registros").upsert(regs); });
+      apiWrite(function(){ return apiPost("registros", regs); });
 
       self.saveMedidas("a_demo1", { fecha:"2026-05-01", cuello:38, pecho:96, cintura:80, cadera:94, brazo_izq:32, brazo_der:32.5, muslo_izq:54, muslo_der:54, pantorrilla:36 });
       self.saveNota("a_demo1", { fecha:fechaHoy(), texto:"Buena semana Santi, sigue así con la técnica del press militar.", leida:false });
@@ -784,13 +748,15 @@
       habitos.forEach(function(h){ self.saveHabito("a_demo1", h); });
 
       var hoyDate = new Date();
+      var checkRows = [];
       for(var hi=6; hi>=0; hi--){
         var dh = new Date(hoyDate); dh.setDate(dh.getDate()-hi);
         var fh = dh.toISOString().split("T")[0];
         var checks = { h_1:hi%2===0, h_2:hi%2===0, h_3:hi%3!==0, h_4:hi<4, h_5:hi<5 };
         C.habito_checks[fh] = checks;
-        sbWrite((function(f2, ch){ return function(){ return sb.from("habito_checks").upsert({ alumno_id:"a_demo1", fecha:f2, checks:ch }); }; })(fh, checks));
+        checkRows.push({ alumno_id:"a_demo1", fecha:fh, checks:checks });
       }
+      apiWrite(function(){ return apiPost("habito_checks", checkRows); });
 
       self.saveGymInfo({
         activo:true, nombre:"TK Fitness Gym", tagline:"Tu mejor versión empieza aquí",
