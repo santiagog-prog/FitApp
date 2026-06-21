@@ -152,10 +152,37 @@
   "use strict";
 
   // ── Init ─────────────────────────────────────────────
-  window.db.seedDemo();
+  // El caché de db.js empieza vacío: hay que esperar a db.init()
+  // antes de poder leer al alumno real. Sin esto, alumno siempre
+  // sale null y la página queda en blanco o redirige en bucle.
   var alumnoId = window.db.getAlumnoActual();
-  var alumno = alumnoId ? window.db.getAlumnoPorId(alumnoId) : null;
-  var nombre = alumno ? alumno.nombre : "Miembro";
+  if(!alumnoId){ location.href = "../index.html"; return; }
+
+  var loadEl = document.createElement("div");
+  loadEl.id = "gx-db-loading";
+  loadEl.style.cssText = "position:fixed;inset:0;z-index:99999;background:#060A14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;";
+  loadEl.innerHTML =
+    '<div style="font-size:36px;">🏋️</div>' +
+    '<div style="color:#3B82F6;font-weight:800;font-size:15px;">Cargando...</div>';
+  document.body.appendChild(loadEl);
+
+  window.db.init(alumnoId).then(function(){
+    var alumno = window.db.getAlumnoPorId(alumnoId);
+    if(!alumno){
+      window.db.clearSesion();
+      location.href = "../index.html";
+      return;
+    }
+    loadEl.remove();
+    boot(alumnoId, alumno);
+  }).catch(function(err){
+    console.error("[gym/alumno] db.init error:", err);
+    loadEl.innerHTML = '<div style="text-align:center;color:#ff6b6b;padding:24px;"><div style="font-size:32px;margin-bottom:10px;">⚠️</div><div style="font-weight:700;">Sin conexión</div><div style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:6px;">Reintentando...</div></div>';
+    setTimeout(function(){ location.reload(); }, 3000);
+  });
+
+  function boot(alumnoId, alumno){
+  var nombre = alumno.nombre;
   var inicial = nombre[0].toUpperCase();
 
   document.getElementById("gx-header-avatar").textContent = inicial;
@@ -588,6 +615,7 @@
     mostrarToast("🔔 2 nuevas notificaciones");
   });
 
+  } // fin boot()
 })();
 </script>
 </body>

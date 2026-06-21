@@ -12,8 +12,12 @@
   window.ALUMNO_ID = null;
 
   function ensureSesion(){
+    // Solo valida que exista un id de sesión guardado (localStorage).
+    // NO se puede validar contra getAlumnoPorId aquí todavía porque el
+    // caché de db.js está vacío hasta que termine db.init() — esa
+    // validación real ocurre en el .then() de db.init() más abajo.
     var id = window.db.getAlumnoActual();
-    if(!id || !window.db.getAlumnoPorId(id)){
+    if(!id){
       location.href = "../index.html";
       return false;
     }
@@ -169,6 +173,12 @@
 
     window.db.init(window.ALUMNO_ID)
       .then(function(){
+        // Ahora sí el caché está poblado: validar que la sesión sea real
+        if(!window.db.getAlumnoPorId(window.ALUMNO_ID)){
+          window.db.clearSesion();
+          location.href = "../index.html";
+          return;
+        }
         loadEl.remove();
         showPage("inicio");
       })
