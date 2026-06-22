@@ -93,6 +93,69 @@
     return svgBase + '</svg>';
   }
 
+  // Suma kcal/macros del día a partir del plan + estado (comidos/extras).
+  // Misma lógica usada en Nutrición y en el resumen de Inicio — una sola
+  // fuente de verdad para que ambas pantallas marquen exactamente lo mismo.
+  function calcularTotalesDia(plan, estado){
+    var totKcal=0, totProt=0, totCarb=0, totGrasa=0;
+    if(plan && plan.comidas) plan.comidas.forEach(function(comida, ci){
+      var opIdx = (estado.opciones && estado.opciones[ci]) || 0;
+      var op = comida.opciones[opIdx];
+      if(op) op.alimentos.forEach(function(a, ai){
+        var key = ci + "_" + ai;
+        if(!estado.comidos || estado.comidos[key] !== true) return;
+        if(estado.reemplazos && estado.reemplazos[key]) return;
+        totKcal  += (a.calorias  || 0);
+        totProt  += (a.proteina  || 0);
+        totCarb  += (a.carbos    || 0);
+        totGrasa += (a.grasas    || 0);
+      });
+    });
+    (estado.extras||[]).forEach(function(ex){
+      totKcal  += (ex.calorias  || 0);
+      totProt  += (ex.proteina  || 0);
+      totCarb  += (ex.carbos    || 0);
+      totGrasa += (ex.grasas    || 0);
+    });
+    (estado.scans||[]).forEach(function(s){
+      totKcal  += (s.calorias  || 0);
+      totProt  += (s.proteinas || 0);
+      totCarb  += (s.carbos    || 0);
+      totGrasa += (s.grasas    || 0);
+    });
+    return { kcal:totKcal, prot:totProt, carb:totCarb, grasa:totGrasa };
+  }
+
+  // Tarjeta de resumen (anillo + barras) — idéntica en Nutrición e Inicio
+  function renderResumenCard(plan, estado){
+    if(!plan) return "";
+    var obj = plan.calorias_objetivo || 2000;
+    var mac = plan.macros || { proteina:150, carbohidratos:200, grasas:65 };
+    var tot = calcularTotalesDia(plan, estado);
+    return '<div class="nutri-resumen-card">' +
+      '<div>' +
+        '<div class="nutri-kcal-big">' + Math.round(tot.kcal) + '</div>' +
+        '<div class="nutri-kcal-obj">/ ' + obj + ' kcal</div>' +
+        '<div class="nutri-macros-bars">' +
+          macroBar("Proteína",      tot.prot,  mac.proteina,      COLOR_PROT) +
+          macroBar("Carbohidratos", tot.carb,  mac.carbohidratos, COLOR_CARB) +
+          macroBar("Grasas",        tot.grasa, mac.grasas,        COLOR_GRAS) +
+        '</div>' +
+      '</div>' +
+      '<div style="flex-shrink:0;">' + anilloKcal(tot.kcal, obj, tot.prot, tot.carb, tot.grasa) + '</div>' +
+    '</div>';
+  }
+
+  // Módulo compartido: usado también desde inicio.js para que la tarjeta
+  // de macros de Inicio sea exactamente la misma que la de Nutrición.
+  window.NutriUI = {
+    macroBar: macroBar,
+    anilloKcal: anilloKcal,
+    calcularTotalesDia: calcularTotalesDia,
+    renderResumenCard: renderResumenCard,
+    COLOR_PROT: COLOR_PROT, COLOR_CARB: COLOR_CARB, COLOR_GRAS: COLOR_GRAS
+  };
+
   // ── COMIDA BLOQUE ───────────────────────────────────────
   function comidaHTML(comida, ci, opcionElegida, estado, alumnoId, hoyKey){
     var elegida = opcionElegida;
@@ -112,17 +175,67 @@
       '</div>';
 
     if(comida.opciones && comida.opciones.length > 1){
-      html += '<div class="opciones-scroll" style="display:flex;gap:10px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none;">';
+      html += '<div class="opciones-scroll" style="display:flex;gap:10px;overflow-x:auto;padding:6px 2px 12px;scrollbar-width:none;">';
       comida.opciones.forEach(function(op, oi){
         var sel = estado.opciones[ci] === oi;
         var ingredientes = (op.alimentos||[]).slice(0,3).map(function(a){ return a.cantidad + ' ' + a.nombre; }).join(' · ');
         html += '<div class="opcion-card' + (sel ? " sel" : "") + '" onclick="window._elegirOpcion(' + ci + ',' + oi + ')" ' +
-          'style="flex-shrink:0;width:160px;padding:10px 12px;border-radius:14px;cursor:pointer;' +
-          'background:' + (sel ? 'rgba(200,224,0,0.1)' : 'rgba(255,255,255,0.04)') + ';' +
-          'border:1.5px solid ' + (sel ? '#C8E000' : 'rgba(255,255,255,0.08)') + ';">' +
+          'style="position:relative;flex-shrink:0;width:168px;padding:12px 13px;border-radius:16px;cursor:pointer;transition:transform .15s;' +
+          (sel ? 'transform:scale(1.02);' : '') +
+          'background:' + (sel ? 'linear-gradient(150deg,rgba(200,224,0,0.16),rgba(200,224,0,0.04))' : 'rgba(255,255,255,0.04)') + ';' +
+          'border:1.5px solid ' + (sel ? '#C8E000' : 'rgba(255,255,255,0.08)') + ';' +
+          (sel ? 'box-shadow:0 4px 18px rgba(200,224,0,0.18);' : '') + '">' +
+          (sel ? '<div style="position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:#C8E000;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.4);">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
+          '</div>' : '') +
           '<div style="font-size:12px;font-weight:800;color:' + (sel?'#C8E000':'#FFF') + ';margin-bottom:4px;">' + op.nombre + '</div>' +
           '<div style="font-size:10px;color:rgba(255,255,255,0.4);line-height:1.4;margin-bottom:6px;height:28px;overflow:hidden;">' + ingredientes + '</div>' +
-          '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);">' + (op.calorias_total||0) + ' kcal</div>' +
+          '<div style="font-size:11px;font-weight:700;color:' + (sel?'rgba(255,255,255,0.85)':'rgba(255,255,255,0.6)') + ';">' + (op.calorias_total||0) + ' kcal</div>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+
+    // ── Identificar con cámara (por comida) ──
+    html += '<button class="food-scan-btn" data-ci="' + ci + '" onclick="window._abrirCamaraComida(' + ci + ')" style="width:100%;margin:4px 0 10px;">' +
+      '<span style="font-size:20px;">📸</span>' +
+      '<span>Identificar con cámara</span>' +
+      '<span style="font-size:11px;background:rgba(200,224,0,0.15);color:var(--accent);border-radius:99px;padding:3px 8px;font-weight:700;">IA</span>' +
+    '</button>';
+
+    // ── Resultados de escaneo asociados a esta comida ──
+    var scansComida = (estado.scans||[]).filter(function(s){ return s.comida_idx === ci; });
+    if(scansComida.length){
+      html += '<div style="margin:4px 0 10px;">';
+      scansComida.forEach(function(sc){
+        var idxGlobal = (estado.scans||[]).indexOf(sc);
+        html += '<div class="scan-result-card" style="margin-bottom:10px;">' +
+          '<div class="scan-result-hero">' +
+            (sc.foto_preview ? '<img src="' + sc.foto_preview + '" class="scan-img-preview">' : '') +
+            '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+              '<div class="scan-ns-badge">' +
+                '<div class="scan-ns-num">' + (sc.nutrition_score||0) + '</div>' +
+                '<div class="scan-ns-txt">Nutrition<br>Score</div>' +
+              '</div>' +
+              '<div style="text-align:right;">' +
+                '<div style="font-size:22px;font-weight:900;color:var(--text);">' + (sc.calorias||0) + '</div>' +
+                '<div style="font-size:11px;color:var(--text-muted);">kcal</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="scan-macro-grid">' +
+            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--blue);">' + (sc.proteinas||0) + 'g</div><div class="scan-macro-name">Prot.</div></div>' +
+            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--orange);">' + (sc.carbos||0) + 'g</div><div class="scan-macro-name">Carbos</div></div>' +
+            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--purple);">' + (sc.grasas||0) + 'g</div><div class="scan-macro-name">Grasas</div></div>' +
+            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--green);">' + (sc.fibra||0) + 'g</div><div class="scan-macro-name">Fibra</div></div>' +
+          '</div>' +
+          (sc.match_opcion !== undefined && sc.match_opcion !== null && sc.match_opcion >= 0 ?
+            '<div style="font-size:11px;color:#34C759;font-weight:700;padding:0 14px 6px;">✓ Coincide con ' + (comida.opciones[sc.match_opcion]?comida.opciones[sc.match_opcion].nombre:'') + ' — marcada automáticamente</div>' : '') +
+          '<div class="scan-analysis-text">' + (sc.analisis||"") + '</div>' +
+          '<div class="scan-alimentos-list">' +
+            (sc.alimentos||[]).map(function(a){ return '<span class="scan-alimento-chip">' + a + '</span>'; }).join('') +
+            '<button onclick="window._eliminarScan(\'' + hoyKey + '\',' + idxGlobal + ')" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;margin-left:8px;">✕ quitar</button>' +
+          '</div>' +
         '</div>';
       });
       html += '</div>';
@@ -234,30 +347,9 @@
       return;
     }
 
-    // Calcular totales del día seleccionado
-    var totKcal=0, totProt=0, totCarb=0, totGrasa=0;
-    _plan.comidas.forEach(function(comida, ci){
-      var opIdx = _estado.opciones[ci] || 0;
-      var op = comida.opciones[opIdx];
-      if(op) op.alimentos.forEach(function(a, ai){
-        var key = ci + "_" + ai;
-        if(_estado.comidos[key] !== true) return;
-        if(_estado.reemplazos[key]) return;
-        totKcal  += (a.calorias  || 0);
-        totProt  += (a.proteina  || 0);
-        totCarb  += (a.carbos    || 0);
-        totGrasa += (a.grasas    || 0);
-      });
-    });
-    _estado.extras.forEach(function(ex){
-      totKcal  += (ex.calorias  || 0);
-      totProt  += (ex.proteina  || 0);
-      totCarb  += (ex.carbos    || 0);
-      totGrasa += (ex.grasas    || 0);
-    });
-
-    var obj = _plan.calorias_objetivo || 2000;
-    var mac = _plan.macros || { proteina:150, carbohidratos:200, grasas:65 };
+    // Escaneos del día — se incluyen en el total (igual que en Inicio)
+    var scansSel = window.db.getFoodScans(_alumno.id, fechaSel);
+    _estado.scans = scansSel;
 
     var html = '<div style="padding-top:4px;">';
 
@@ -274,19 +366,8 @@
     });
     html += '</div>';
 
-    // ── Resumen de calorías ──
-    html += '<div class="nutri-resumen-card">' +
-      '<div>' +
-        '<div class="nutri-kcal-big">' + Math.round(totKcal) + '</div>' +
-        '<div class="nutri-kcal-obj">/ ' + obj + ' kcal</div>' +
-        '<div class="nutri-macros-bars">' +
-          macroBar("Proteína",      totProt,  mac.proteina,        COLOR_PROT) +
-          macroBar("Carbohidratos", totCarb,  mac.carbohidratos,   COLOR_CARB) +
-          macroBar("Grasas",        totGrasa, mac.grasas,          COLOR_GRAS) +
-        '</div>' +
-      '</div>' +
-      '<div style="flex-shrink:0;">' + anilloKcal(totKcal, obj, totProt, totCarb, totGrasa) + '</div>' +
-    '</div>';
+    // ── Resumen de calorías (idéntico al de Inicio) ──
+    html += renderResumenCard(_plan, _estado);
 
     // ── Comidas del día ──
     _plan.comidas.forEach(function(comida, ci){
@@ -349,51 +430,7 @@
     html += '</div>';
     html += '<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:6px;">' + _estado.agua + '/8 vasos completados</div></div>';
 
-    // ── Food Vision AI ──
-    html += '<div style="padding:12px 16px 4px;">';
-    html += '<button class="food-scan-btn" id="btn-scan-ia">' +
-      '<span style="font-size:22px;">🤖</span>' +
-      '<span>Escanear comida con IA</span>' +
-      '<span style="font-size:11px;background:rgba(200,224,0,0.15);color:var(--accent);border-radius:99px;padding:3px 8px;font-weight:700;">IA</span>' +
-    '</button>';
-
-    // Scans del día
-    var scansHoy = window.db.getFoodScans(_alumno.id, fechaSel);
-    if(scansHoy.length){
-      html += '<div style="margin-top:12px;">';
-      scansHoy.forEach(function(sc, si){
-        html += '<div class="scan-result-card" style="margin-bottom:10px;">' +
-          '<div class="scan-result-hero">' +
-            (sc.foto_preview ? '<img src="' + sc.foto_preview + '" class="scan-img-preview">' : '') +
-            '<div style="display:flex;align-items:center;justify-content:space-between;">' +
-              '<div class="scan-ns-badge">' +
-                '<div class="scan-ns-num">' + (sc.nutrition_score||0) + '</div>' +
-                '<div class="scan-ns-txt">Nutrition<br>Score</div>' +
-              '</div>' +
-              '<div style="text-align:right;">' +
-                '<div style="font-size:22px;font-weight:900;color:var(--text);">' + (sc.calorias||0) + '</div>' +
-                '<div style="font-size:11px;color:var(--text-muted);">kcal</div>' +
-              '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="scan-macro-grid">' +
-            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--blue);">' + (sc.proteinas||0) + 'g</div><div class="scan-macro-name">Prot.</div></div>' +
-            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--orange);">' + (sc.carbos||0) + 'g</div><div class="scan-macro-name">Carbos</div></div>' +
-            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--purple);">' + (sc.grasas||0) + 'g</div><div class="scan-macro-name">Grasas</div></div>' +
-            '<div class="scan-macro-item"><div class="scan-macro-val" style="color:var(--green);">' + (sc.fibra||0) + 'g</div><div class="scan-macro-name">Fibra</div></div>' +
-          '</div>' +
-          '<div class="scan-analysis-text">' + (sc.analisis||"") + '</div>' +
-          '<div class="scan-alimentos-list">' +
-            (sc.alimentos||[]).map(function(a){ return '<span class="scan-alimento-chip">' + a + '</span>'; }).join('') +
-            '<button onclick="window._eliminarScan(\'' + fechaSel + '\',' + si + ')" style="background:none;border:none;color:var(--text-muted);font-size:11px;cursor:pointer;margin-left:8px;">✕ quitar</button>' +
-          '</div>' +
-        '</div>';
-      });
-      html += '</div>';
-    }
-    html += '</div>';
-
-    // ── Registrar con foto ──
+    // ── Registrar con foto (manual, sin IA) ──
     html += '<div style="padding:8px 16px 4px;">' +
       '<button id="btn-foto-comida" style="width:100%;height:46px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:50px;color:rgba(255,255,255,.6);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">📷 Registrar comida manual con foto</button>' +
       '<input type="file" accept="image/*" capture="environment" id="comida-foto-input" style="display:none;">' +
@@ -429,29 +466,34 @@
     });
 
     // AI scan: la API Key vive en el backend, el navegador solo sube la foto
-    var btnScanIA = document.getElementById("btn-scan-ia");
-    if(btnScanIA){
-      btnScanIA.addEventListener("click", function(){
-        document.getElementById("ia-foto-input").click();
-      });
-    }
     var iaFotoInput = document.getElementById("ia-foto-input");
     if(iaFotoInput){
       iaFotoInput.addEventListener("change", function(e){
         var file = e.target.files[0];
         if(!file) return;
-        _procesarFoodScanIA(file);
+        _procesarFoodScanIA(file, _iaTargetCi);
+        e.target.value = "";
       });
     }
+  };
+
+  // Guarda a qué comida (índice) corresponde la próxima foto tomada
+  var _iaTargetCi = 0;
+  window._abrirCamaraComida = function(ci){
+    _iaTargetCi = ci;
+    document.getElementById("ia-foto-input").click();
   };
 
   // ── FOOD VISION AI ───────────────────────────────────────
   // La API Key de OpenAI vive solo en el backend (Railway).
   // Aquí solo se sube la foto a db.escanearComidaIA() y se recibe
   // el resultado ya validado.
-  function _procesarFoodScanIA(file){
-    var btnIA = document.getElementById("btn-scan-ia");
-    if(btnIA){ btnIA.innerHTML = '<span class="ai-scanning">🤖</span> Analizando con IA...'; btnIA.disabled = true; }
+  //
+  // ci: índice de la comida (Desayuno/Comida/Cena) a la que pertenece la
+  // foto — viene del botón "Identificar con cámara" que el usuario tocó,
+  // así que ya sabemos exactamente en qué apartado debe aparecer.
+  function _procesarFoodScanIA(file, ci){
+    _mostrarOverlayEscaneo(file);
 
     var reader = new FileReader();
     reader.onload = function(ev){
@@ -462,18 +504,83 @@
           result.fecha = _diasFecha[_diaSelIdx];
           result.foto_preview = previewUrl;
           result.id = "scan_" + Date.now();
+          result.comida_idx = ci;
+
+          // Auto-match: ¿coincide con alguna de las opciones de esta comida?
+          var comida = _plan.comidas[ci];
+          var matchIdx = comida ? _matchOpcionPorAlimentos(comida, result.alimentos||[]) : -1;
+          result.match_opcion = matchIdx;
+          if(matchIdx >= 0){
+            _estado.opciones[ci] = matchIdx;
+            var opMatch = comida.opciones[matchIdx];
+            opMatch.alimentos.forEach(function(a, ai){ _estado.comidos[ci + "_" + ai] = true; });
+          }
+
           window.db.saveFoodScan(_alumno.id, result);
+          window.db.saveNutricion(_alumno.id, _diasFecha[_diaSelIdx], _estado);
           window.checkLogros && window.checkLogros(_alumno.id);
-          window.mostrarToast("✅ Comida analizada · " + (result.calorias||0) + " kcal");
+          _ocultarOverlayEscaneo();
+          window.mostrarToast(matchIdx >= 0
+            ? "✅ Identificado como " + comida.opciones[matchIdx].nombre + " · " + (result.calorias||0) + " kcal"
+            : "✅ Comida analizada · " + (result.calorias||0) + " kcal");
           window.init_nutricion();
         })
         .catch(function(err){
           console.error("Food Vision AI error:", err);
+          _ocultarOverlayEscaneo();
           window.mostrarToast("❌ " + (err.message || "Error al analizar la foto"));
-          if(btnIA){ btnIA.innerHTML = '<span>🤖</span> Escanear comida con IA'; btnIA.disabled = false; }
         });
     };
     reader.readAsDataURL(file);
+  }
+
+  // Compara los nombres detectados por la IA contra los ingredientes de
+  // cada opción de la comida; devuelve el índice de la opción con más
+  // coincidencias, o -1 si ninguna tiene al menos una coincidencia clara.
+  function _matchOpcionPorAlimentos(comida, detectados){
+    if(!comida.opciones || !detectados.length) return -1;
+    var detLower = detectados.map(function(d){ return (d||"").toLowerCase(); });
+    var mejorIdx = -1, mejorScore = 0;
+    comida.opciones.forEach(function(op, oi){
+      var score = 0;
+      (op.alimentos||[]).forEach(function(a){
+        var primerToken = (a.nombre||"").toLowerCase().split(" ")[0];
+        if(primerToken.length < 3) return;
+        if(detLower.some(function(d){ return d.indexOf(primerToken) >= 0 || primerToken.indexOf(d) >= 0; })) score++;
+      });
+      if(score > mejorScore){ mejorScore = score; mejorIdx = oi; }
+    });
+    return mejorScore >= 1 ? mejorIdx : -1;
+  }
+
+  // ── Animación de escaneo ─────────────────────────────────
+  function _mostrarOverlayEscaneo(file){
+    if(!document.getElementById("scan-anim-style")){
+      var s = document.createElement("style");
+      s.id = "scan-anim-style";
+      s.textContent =
+        "@keyframes scanLine{0%{top:6%}50%{top:92%}100%{top:6%}}" +
+        "@keyframes scanPulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.15);opacity:1}}";
+      document.head.appendChild(s);
+    }
+    var overlay = document.createElement("div");
+    overlay.id = "scan-overlay";
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(5,5,5,0.94);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;";
+    var previewSrc = "";
+    try{ previewSrc = URL.createObjectURL(file); }catch(e){}
+    overlay.innerHTML =
+      '<div style="position:relative;width:220px;height:220px;border-radius:24px;overflow:hidden;border:1px solid rgba(200,224,0,0.25);background:#111;">' +
+        (previewSrc ? '<img src="' + previewSrc + '" style="width:100%;height:100%;object-fit:cover;opacity:.8;">' : '') +
+        '<div style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#C8E000,transparent);box-shadow:0 0 12px #C8E000;animation:scanLine 1.6s ease-in-out infinite;"></div>' +
+      '</div>' +
+      '<div style="font-size:30px;animation:scanPulse 1.2s ease-in-out infinite;">🤖</div>' +
+      '<div style="font-size:14px;font-weight:700;color:#FFF;">Identificando tu comida...</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);">Esto toma unos segundos</div>';
+    document.body.appendChild(overlay);
+  }
+  function _ocultarOverlayEscaneo(){
+    var ov = document.getElementById("scan-overlay");
+    if(ov) ov.remove();
   }
 
   window._eliminarScan = function(fecha, idx){
