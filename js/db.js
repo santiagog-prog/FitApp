@@ -680,29 +680,44 @@
     seedDemo: function(){
       var self = this;
       var rutina = {
-        id:"r_demo1", nombre:"PPL-TP 1 - Santiago",
-        descripcion:"Push Pull Legs + Torso Pierna para principiante",
+        id:"r_demo1", nombre:"PPL-TP 2 - Santiago",
+        descripcion:"Push Pull Legs + Torso Pierna — Mesociclo 2",
         objetivo:"ganancia_muscular", nivel:"principiante", duracion_semanas:4,
-        mesociclo:"Mesociclo 1 – Push Pull Legs + Torso Pierna – Principiante – 4 semanas",
+        mesociclo:"Mesociclo 2 – Push Pull Legs + Torso – Principiante – 4 semanas",
         dias:[
-          { numero:1, nombre:"PUSH - Pecho y Hombros", tipo:"fuerza", ejercicios:[
-            { id:"ej_1", nombre:"Press militar en máquina",         grupo:"Hombros", series:3, repeticiones:"12/RIR 2", descanso_seg:120, nota_tecnica:"Postura firme, sin balanceo", como_hacer:"1. Ajusta el asiento para que el agarre quede a la altura de los hombros.\n2. Espalda pegada al respaldo, pies firmes.\n3. Empuja hacia arriba sin bloquear los codos.\n4. Baja controlado.", video_url:"https://www.youtube.com/watch?v=Wqbal_-Rrmk", foto:"https://img.youtube.com/vi/Wqbal_-Rrmk/mqdefault.jpg", sets:[{reps:12,peso:30},{reps:12,peso:25},{reps:10,peso:25}] },
-            { id:"ej_2", nombre:"Press inclinado con mancuerna",    grupo:"Pecho",   series:2, repeticiones:"12/RIR 1-2", descanso_seg:120, nota_tecnica:"Movimiento limpio, sin rebote", como_hacer:"1. Banco inclinado 15-30°.\n2. Mancuernas a la altura del pecho.\n3. Empuja sin chocar.\n4. Baja controlado.", video_url:"https://www.youtube.com/watch?v=8iPEnn-ltC8", foto:"https://img.youtube.com/vi/8iPEnn-ltC8/mqdefault.jpg", sets:[{reps:10,peso:25},{reps:10,peso:25}] },
-            { id:"ej_3", nombre:"Peck Deck",                        grupo:"Pecho",   series:2, repeticiones:"12-15/RIR 1", descanso_seg:90,  nota_tecnica:"Rango completo, contracción en el pico", como_hacer:"1. Espalda pegada, codos ligeramente flexionados.\n2. Junta los brazos apretando el pecho.\n3. Aguanta 1 segundo.\n4. Vuelve controlado.", video_url:"https://www.youtube.com/watch?v=xUm0BiZCWlQ", foto:"https://img.youtube.com/vi/xUm0BiZCWlQ/mqdefault.jpg", sets:[{reps:13,peso:20},{reps:12,peso:18}] },
-            { id:"ej_4", nombre:"Elevaciones laterales con mancuerna de pie", grupo:"Hombros", series:3, repeticiones:"15/RIR 1", descanso_seg:90,  nota_tecnica:"Codos ligeramente flexionados", como_hacer:"1. Codo apoyado en el cojín.\n2. Eleva lateralmente hasta el hombro.\n3. Sin impulso.\n4. Baja controlado.", video_url:"https://www.youtube.com/watch?v=3VcKaXpzqRo", foto:"https://img.youtube.com/vi/3VcKaXpzqRo/mqdefault.jpg", sets:[{reps:15,peso:8},{reps:15,peso:8},{reps:12,peso:6}], superserie:"A", superserie_rondas:3 },
-            { id:"ej_4b", nombre:"Extensión de tríceps en polea con barra recta", grupo:"Tríceps", series:3, repeticiones:"12/RIR 2", descanso_seg:60, nota_tecnica:"Codos fijos pegados al torso", como_hacer:"1. Agarre prono en la barra recta.\n2. Codos pegados al cuerpo.\n3. Extiende sin mover el hombro.\n4. Vuelve controlado.", video_url:"https://www.youtube.com/watch?v=2-LAMcpzODU", foto:"https://img.youtube.com/vi/2-LAMcpzODU/mqdefault.jpg", sets:[{reps:12,peso:15},{reps:12,peso:15},{reps:10,peso:12}], superserie:"A", superserie_rondas:3 }
+          { numero:1, nombre:"PUSH", tipo:"fuerza", ejercicios:[
+            { id:"ej2_1", nombre:"Peck Deck", grupo:"Pecho", series:3, repeticiones:"8-10/RIR 1", descanso_seg:90, nota_tecnica:"Rango completo, contracción en el pico", sets:[{reps:9,peso:20},{reps:9,peso:20},{reps:8,peso:20}] },
+            { id:"ej2_2", nombre:"Press horizontal en máquina", grupo:"Pecho", series:3, repeticiones:"10/RIR 1", descanso_seg:90, nota_tecnica:"Codos a 45°, controla el descenso", sets:[{reps:10,peso:30},{reps:10,peso:30},{reps:10,peso:30}] },
+            { id:"ej2_3", nombre:"Press militar con mancuerna sentado", grupo:"Hombros", series:3, repeticiones:"10/RIR 2", descanso_seg:90, nota_tecnica:"Espalda apoyada, sin arquear lumbar", sets:[{reps:10,peso:12},{reps:10,peso:12},{reps:10,peso:12}] },
+            { id:"ej2_4", nombre:"Elevaciones laterales con mancuerna de pie", grupo:"Hombros", series:3, repeticiones:"15/RIR 2", descanso_seg:60, nota_tecnica:"Codos ligeramente flexionados, sin impulso", video_url:"https://www.youtube.com/watch?v=3VcKaXpzqRo", foto:"https://img.youtube.com/vi/3VcKaXpzqRo/mqdefault.jpg", superserie:"A", superserie_rondas:3, sets:[{reps:15,peso:8},{reps:15,peso:8},{reps:15,peso:8}] },
+            { id:"ej2_5", nombre:"Extensión de tríceps en polea con barra recta", grupo:"Tríceps", series:3, repeticiones:"12/RIR 2", descanso_seg:60, nota_tecnica:"Codos fijos pegados al torso", video_url:"https://www.youtube.com/watch?v=2-LAMcpzODU", foto:"https://img.youtube.com/vi/2-LAMcpzODU/mqdefault.jpg", superserie:"A", superserie_rondas:3, sets:[{reps:12,peso:15},{reps:12,peso:15},{reps:12,peso:15}] },
+            { id:"ej2_6", nombre:"Fondos en máquina agarre neutro", grupo:"Tríceps", series:2, repeticiones:"12/RIR 2", descanso_seg:90, nota_tecnica:"Torso ligeramente inclinado adelante", sets:[{reps:12,peso:0},{reps:12,peso:0}] }
           ]},
-          { numero:2, nombre:"PULL - Espalda y Bíceps", tipo:"fuerza", ejercicios:[
-            { id:"ej_5", nombre:"Jalón al pecho agarre prono",  grupo:"Espalda", series:3, repeticiones:"10-12/RIR 2", descanso_seg:120, nota_tecnica:"Pecho arriba, omóplatos juntos al bajar", como_hacer:"1. Agarre ancho.\n2. Pecho arriba, ligera inclinación.\n3. Lleva la barra al pecho.\n4. Sube controlado.", video_url:"https://www.youtube.com/watch?v=lueI5PJaGL0", foto:"https://img.youtube.com/vi/lueI5PJaGL0/mqdefault.jpg", sets:[{reps:12,peso:40},{reps:11,peso:40},{reps:10,peso:35}] },
-            { id:"ej_6", nombre:"Remo con mancuerna",           grupo:"Espalda", series:3, repeticiones:"10/RIR 2",    descanso_seg:90,  nota_tecnica:"Espalda paralela al suelo, sin rotar el torso", como_hacer:"1. Apoya una mano en el banco.\n2. Espalda recta.\n3. Lleva el codo hacia atrás.\n4. Baja controlado.", video_url:"https://www.youtube.com/watch?v=pYcpY20QaE8", foto:"https://img.youtube.com/vi/pYcpY20QaE8/mqdefault.jpg", sets:[{reps:10,peso:18},{reps:10,peso:18},{reps:10,peso:16}] },
-            { id:"ej_7", nombre:"Curl con barra",               grupo:"Bíceps",  series:3, repeticiones:"12/RIR 1",    descanso_seg:90,  nota_tecnica:"Sin balanceo, codos fijos", como_hacer:"1. Agarre supino.\n2. Codos pegados al torso.\n3. Sube contrayendo el bíceps.\n4. Baja controlado.", video_url:"https://www.youtube.com/watch?v=kwG2ipFRgfo", foto:"https://img.youtube.com/vi/kwG2ipFRgfo/mqdefault.jpg", sets:[{reps:12,peso:15},{reps:12,peso:15},{reps:10,peso:12}] }
+          { numero:2, nombre:"PULL", tipo:"fuerza", ejercicios:[
+            { id:"ej2_7", nombre:"Jalón neutro en polea", grupo:"Espalda", series:3, repeticiones:"10-12/RIR 1", descanso_seg:90, nota_tecnica:"Estira los brazos al máximo arriba", sets:[{reps:11,peso:40},{reps:11,peso:40},{reps:10,peso:40}] },
+            { id:"ej2_8", nombre:"Remo prono con barra", grupo:"Espalda", series:3, repeticiones:"10/RIR 1", descanso_seg:90, nota_tecnica:"Espalda recta, lleva la barra al abdomen", sets:[{reps:10,peso:35},{reps:10,peso:35},{reps:10,peso:35}] },
+            { id:"ej2_9", nombre:"Face Pull", grupo:"Espalda", series:3, repeticiones:"12/RIR 2", descanso_seg:60, nota_tecnica:"Tira hacia la cara, codos altos", sets:[{reps:12,peso:15},{reps:12,peso:15},{reps:12,peso:15}] },
+            { id:"ej2_10", nombre:"Curl de bíceps con barra Z de pie", grupo:"Bíceps", series:3, repeticiones:"10/RIR 2", descanso_seg:60, nota_tecnica:"Sin balanceo, codos fijos", superserie:"B", superserie_rondas:3, sets:[{reps:10,peso:15},{reps:10,peso:15},{reps:10,peso:15}] },
+            { id:"ej2_11", nombre:"Curl martillo con mancuerna bilateral de pie", grupo:"Bíceps", series:3, repeticiones:"10/RIR 2", descanso_seg:60, nota_tecnica:"Agarre neutro, sube ambos brazos a la vez", superserie:"B", superserie_rondas:3, sets:[{reps:10,peso:10},{reps:10,peso:10},{reps:10,peso:10}] },
+            { id:"ej2_12", nombre:"Encogimiento de hombros en polea", grupo:"Trapecio", series:3, repeticiones:"12/RIR 2", descanso_seg:60, nota_tecnica:"Sube los hombros sin rotar", sets:[{reps:12,peso:30},{reps:12,peso:30},{reps:12,peso:30}] }
           ]},
-          { numero:3, nombre:"LEGS - Piernas", tipo:"fuerza", ejercicios:[
-            { id:"ej_8",  nombre:"Sentadilla con barra", grupo:"Cuádriceps", series:4, repeticiones:"8-10/RIR 2", descanso_seg:150, nota_tecnica:"Rodillas alineadas con pies, descenso controlado", como_hacer:"1. Barra en el trapecio.\n2. Pies a la anchura de los hombros.\n3. Baja manteniendo el pecho arriba.\n4. Sube empujando con los talones.", video_url:"https://www.youtube.com/watch?v=Dy58u-N5fQ0", foto:"https://img.youtube.com/vi/Dy58u-N5fQ0/mqdefault.jpg", sets:[{reps:10,peso:50},{reps:9,peso:50},{reps:8,peso:55},{reps:8,peso:55}] },
-            { id:"ej_9",  nombre:"Prensa de piernas",    grupo:"Cuádriceps", series:3, repeticiones:"12/RIR 1",   descanso_seg:120, nota_tecnica:"No bloquear rodillas al extender", como_hacer:"1. Pies a la anchura de los hombros en la plataforma.\n2. Baja hasta 90°.\n3. Empuja sin bloquear las rodillas.\n4. Mantén la zona lumbar pegada.", video_url:"https://www.youtube.com/watch?v=IZxyjW7MPJQ", foto:"https://img.youtube.com/vi/IZxyjW7MPJQ/mqdefault.jpg", sets:[{reps:12,peso:80},{reps:12,peso:80},{reps:10,peso:90}] },
-            { id:"ej_10", nombre:"Hip thrust con barra", grupo:"Glúteos",    series:3, repeticiones:"12-15/RIR 1", descanso_seg:90, nota_tecnica:"Cadera completa arriba, contracción en el pico", como_hacer:"1. Espalda en el banco, barra sobre la cadera.\n2. Pies firmes, rodillas a 90°.\n3. Empuja la cadera apretando el glúteo.\n4. Baja controlado.", video_url:"https://www.youtube.com/watch?v=SEdqd1n0cvg", foto:"https://img.youtube.com/vi/SEdqd1n0cvg/mqdefault.jpg", sets:[{reps:15,peso:40},{reps:14,peso:40},{reps:12,peso:45}] }
+          { numero:3, nombre:"LEG 1", tipo:"fuerza", ejercicios:[
+            { id:"ej2_13", nombre:"Zancadas estáticas", grupo:"Cuádriceps", series:3, repeticiones:"8/RIR 1", descanso_seg:120, nota_tecnica:"Rodilla de atrás casi toca el suelo", sets:[{reps:8,peso:14},{reps:8,peso:14},{reps:8,peso:14}] },
+            { id:"ej2_14", nombre:"Prensa inclinada", grupo:"Cuádriceps", series:3, repeticiones:"10/RIR 1", descanso_seg:120, nota_tecnica:"Pies a la anchura de hombros", sets:[{reps:10,peso:90},{reps:10,peso:90},{reps:10,peso:90}] },
+            { id:"ej2_15", nombre:"Patada de glúteos en polea", grupo:"Glúteos", series:3, repeticiones:"10/RIR 1", descanso_seg:90, nota_tecnica:"Contracción en el pico, sin balanceo", sets:[{reps:10,peso:15},{reps:10,peso:15},{reps:10,peso:15}] },
+            { id:"ej2_16", nombre:"Extensiones de cuádriceps", grupo:"Cuádriceps", series:3, repeticiones:"12/RIR 2", descanso_seg:60, nota_tecnica:"No bloquear la rodilla al extender", superserie:"C", superserie_rondas:3, sets:[{reps:12,peso:35},{reps:12,peso:35},{reps:12,peso:35}] },
+            { id:"ej2_17", nombre:"Curl femoral acostado en máquina", grupo:"Isquiotibiales", series:3, repeticiones:"12/RIR 2", descanso_seg:60, nota_tecnica:"Contrae al final del recorrido", superserie:"C", superserie_rondas:3, sets:[{reps:12,peso:30},{reps:12,peso:30},{reps:12,peso:30}] },
+            { id:"ej2_18", nombre:"Gemelos en prensa", grupo:"Pantorrillas", series:3, repeticiones:"15/RIR 1", descanso_seg:60, nota_tecnica:"Rango completo, pausa arriba", sets:[{reps:15,peso:60},{reps:15,peso:60},{reps:15,peso:60}] }
           ]},
-          { numero:4, nombre:"Descanso activo", tipo:"descanso", ejercicios:[] }
+          { numero:4, nombre:"TORSO", tipo:"fuerza", ejercicios:[
+            { id:"ej2_19", nombre:"Aperturas en máquina", grupo:"Pecho", series:3, repeticiones:"10/RIR 1", descanso_seg:90, nota_tecnica:"Codos ligeramente flexionados", sets:[{reps:10,peso:18},{reps:10,peso:18},{reps:10,peso:18}] },
+            { id:"ej2_20", nombre:"Remo bajo neutro", grupo:"Espalda", series:3, repeticiones:"12/RIR 1", descanso_seg:90, nota_tecnica:"Espalda recta, aprieta los omóplatos", sets:[{reps:12,peso:30},{reps:12,peso:30},{reps:12,peso:30}] },
+            { id:"ej2_21", nombre:"Press militar con barra (Military Press)", grupo:"Hombros", series:3, repeticiones:"8/RIR 2", descanso_seg:120, nota_tecnica:"Sin arquear la espalda baja", sets:[{reps:8,peso:25},{reps:8,peso:25},{reps:8,peso:25}] },
+            { id:"ej2_22", nombre:"Elevaciones laterales con mancuerna de pie", grupo:"Hombros", series:3, repeticiones:"12/RIR 2", descanso_seg:60, nota_tecnica:"Codos ligeramente flexionados, sin impulso", video_url:"https://www.youtube.com/watch?v=3VcKaXpzqRo", foto:"https://img.youtube.com/vi/3VcKaXpzqRo/mqdefault.jpg", superserie:"D", superserie_rondas:3, sets:[{reps:12,peso:8},{reps:12,peso:8},{reps:12,peso:8}] },
+            { id:"ej2_23", nombre:"Jalón supino en polea", grupo:"Espalda", series:3, repeticiones:"10/RIR 1", descanso_seg:60, nota_tecnica:"Agarre supino, lleva la barra al pecho", superserie:"D", superserie_rondas:3, sets:[{reps:10,peso:35},{reps:10,peso:35},{reps:10,peso:35}] },
+            { id:"ej2_24", nombre:"Fondos en máquina agarre neutro", grupo:"Tríceps", series:2, repeticiones:"10/RIR 2", descanso_seg:90, nota_tecnica:"Torso ligeramente inclinado adelante", sets:[{reps:10,peso:0},{reps:10,peso:0}] }
+          ]},
+          { numero:5, nombre:"Descanso activo", tipo:"descanso", ejercicios:[] }
         ]
       };
 
@@ -755,8 +770,8 @@
       for(var i=9; i>=0; i--){
         var d = new Date(hoy); d.setDate(d.getDate()-i);
         var fecha = d.toISOString().split("T")[0];
-        if(i % 3 !== 0){
-          var diaIdx = i % 3;
+        if(i % 4 !== 0){
+          var diaIdx = i % 4;
           regs.push({ id:generarId("reg"), alumno_id:"a_demo1", fecha:fecha, dia_numero:diaIdx+1, sesion_nombre:rutina.dias[diaIdx].nombre, duracion_min:45+(i%4)*5, sensacion:3+(i%3), nota:"", ejercicios_completados:rutina.dias[diaIdx].ejercicios.length, ejercicios_total:rutina.dias[diaIdx].ejercicios.length });
         }
         if(i % 2 === 0) self.savePeso("a_demo1", { fecha:fecha, kg:parseFloat((68.5+(9-i)*0.19).toFixed(1)) });
