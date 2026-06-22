@@ -283,6 +283,53 @@
     });
   }
 
+  // Edita TODOS los parámetros del alumno (corrige typos del coach: peso,
+  // nombre, código, edad, etc.) — separado de abrirModalAlumno (creación)
+  // porque aquí se pre-rellenan los valores actuales.
+  function abrirModalEditarAlumno(a, onGuardado){
+    var body = "<div class='coach-form'>" +
+      "<div class='row2'><div><label>Nombre</label><input id='ef-nombre' value='" + (a.nombre||"") + "'></div><div><label>Apellido</label><input id='ef-apellido' value='" + (a.apellido||"") + "'></div></div>" +
+      "<div class='row2'><div><label>Código de 4 dígitos</label><input id='ef-codigo' maxlength='4' value='" + (a.codigo||"") + "'></div><div><label>Edad</label><input id='ef-edad' type='number' value='" + (a.edad||"") + "'></div></div>" +
+      "<div class='row2'><div><label>Género</label><select id='ef-genero'>" +
+        ["", "masculino", "femenino", "otro"].map(function(g){ return "<option value='"+g+"'" + (a.genero===g?" selected":"") + ">" + (g||"— sin especificar —") + "</option>"; }).join("") +
+      "</select></div><div><label>Nivel</label><select id='ef-nivel'>" +
+        ["principiante","intermedio","avanzado"].map(function(n){ return "<option value='"+n+"'" + (a.nivel===n?" selected":"") + ">" + n.charAt(0).toUpperCase()+n.slice(1) + "</option>"; }).join("") +
+      "</select></div></div>" +
+      "<label>Objetivo</label><select id='ef-objetivo'>" +
+        [["ganancia_muscular","Ganancia muscular"],["perdida_grasa","Pérdida de grasa"],["mantenimiento","Mantenimiento"]].map(function(o){ return "<option value='"+o[0]+"'" + (a.objetivo===o[0]?" selected":"") + ">"+o[1]+"</option>"; }).join("") +
+      "</select>" +
+      "<div class='row2'><div><label>Peso inicial (kg)</label><input id='ef-peso-ini' type='number' step='0.1' value='" + (a.peso_inicial||"") + "'></div><div><label>Peso actual (kg)</label><input id='ef-peso-act' type='number' step='0.1' value='" + (a.peso_actual||"") + "'></div></div>" +
+      "<div class='row2'><div><label>Altura (cm)</label><input id='ef-altura' type='number' value='" + (a.altura||"") + "'></div><div><label>Fecha de inicio</label><input id='ef-fecha' type='date' value='" + (a.fecha_inicio||"") + "'></div></div>" +
+      "<button class='btn-coach' id='ef-guardar' style='margin-top:16px;'>Guardar cambios</button></div>";
+
+    coachModal("Editar perfil de " + a.nombre, body, function(){
+      $("#ef-guardar").addEventListener("click", function(){
+        var nombre = $("#ef-nombre").value.trim();
+        var codigo = $("#ef-codigo").value.trim();
+        if(!nombre || !codigo){ alert("Nombre y código son obligatorios"); return; }
+        var otro = window.db.getAlumnos().find(function(x){ return x.codigo === codigo && x.id !== a.id; });
+        if(otro){ alert("Ese código ya lo usa " + otro.nombre + ". Elige otro."); return; }
+
+        a.nombre = nombre;
+        a.apellido = $("#ef-apellido").value.trim();
+        a.codigo = codigo;
+        a.edad = parseInt($("#ef-edad").value,10) || 0;
+        a.genero = $("#ef-genero").value;
+        a.nivel = $("#ef-nivel").value;
+        a.objetivo = $("#ef-objetivo").value;
+        a.peso_inicial = parseFloat($("#ef-peso-ini").value) || 0;
+        a.peso_actual  = parseFloat($("#ef-peso-act").value) || 0;
+        a.altura = parseFloat($("#ef-altura").value) || 0;
+        a.fecha_inicio = $("#ef-fecha").value || a.fecha_inicio;
+
+        window.db.saveAlumno(a);
+        window.cerrarCoachModal();
+        window.mostrarToast ? window.mostrarToast("✓ Perfil actualizado") : null;
+        if(onGuardado) onGuardado(a);
+      });
+    });
+  }
+
   function renderAlumnoDetalle(id){
     var a = window.db.getAlumnoPorId(id);
     var tabs = ["resumen","rutina","alimentacion","progreso","notas"];
@@ -308,11 +355,15 @@
         var rNombre = (function(){ var r = window.db.getRutinaPorId(a.rutina_id); return r ? r.nombre : (a.rutina_id || "Sin rutina"); })();
         var pNombre = (function(){ var p = window.db.getPlanPorId(a.plan_alimentacion_id); return p ? p.nombre : (a.plan_alimentacion_id || "Sin plan"); })();
         html = "<div class='coach-card'>" +
+          "<p>Nombre: " + a.nombre + " " + (a.apellido||"") + " · Edad: " + (a.edad||"—") + (a.genero ? " · " + a.genero : "") + "</p>" +
           "<p>Objetivo: " + a.objetivo.replace(/_/g," ") + " · Nivel: " + a.nivel + "</p>" +
-          "<p>Peso inicial: " + a.peso_inicial + " kg · Peso actual: " + a.peso_actual + " kg</p>" +
+          "<p>Peso inicial: " + a.peso_inicial + " kg · Peso actual: " + a.peso_actual + " kg · Altura: " + (a.altura||"—") + " cm</p>" +
           "<p>Código de acceso: " + a.codigo + " · Inicio: " + a.fecha_inicio + "</p>" +
           "<p style='margin-top:8px;'>Rutina: <strong style='color:#C8E000;'>" + rNombre + "</strong></p>" +
-          "<p>Plan de alimentación: <strong style='color:#C8E000;'>" + pNombre + "</strong></p></div>";
+          "<p>Plan de alimentación: <strong style='color:#C8E000;'>" + pNombre + "</strong></p>" +
+          "<button class='btn-coach secondary' id='btn-editar-perfil' style='margin-top:14px;'>✏️ Editar perfil del alumno</button>" +
+          "<button class='btn-coach secondary' id='btn-eliminar-alumno' style='margin-top:8px;color:#FF6B5B;border-color:rgba(255,69,58,.3);'>🗑️ Eliminar alumno</button>" +
+        "</div>";
       } else if(tabActivo === "rutina"){
         var r = window.db.getRutinaPorId(a.rutina_id);
         html = "<div class='coach-card'>" + (r ? ("<p><strong>" + r.nombre + "</strong></p><p>" + r.mesociclo + "</p>") : "<p>Sin rutina asignada.</p>") +
@@ -363,6 +414,19 @@
       }
       box.innerHTML = html;
 
+      if(tabActivo === "resumen"){
+        $("#btn-editar-perfil").addEventListener("click", function(){
+          abrirModalEditarAlumno(a, function(actualizado){
+            a = actualizado;
+            render();
+          });
+        });
+        $("#btn-eliminar-alumno").addEventListener("click", function(){
+          if(!confirm("¿Eliminar a " + a.nombre + " " + (a.apellido||"") + "? Esta acción no se puede deshacer.")) return;
+          window.db.deleteAlumno(a.id);
+          render_alumnos();
+        });
+      }
       if(tabActivo === "rutina"){
         $("#btn-cambiar-rutina").addEventListener("click", function(){
           var rutinas = window.db.getRutinas();
