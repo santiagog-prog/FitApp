@@ -467,9 +467,20 @@
     setAlumnoActual: function(id){ return lsSet("alumno_actual", id); },
     clearSesion:     function(){ localStorage.removeItem(LS+"alumno_actual"); },
 
-    // ── OPENAI KEY (localStorage) ────────────────────────────
-    saveOpenAIKey: function(k){ return lsSet("openai_key", k); },
-    getOpenAIKey:  function(){ return lsGet("openai_key") || ""; },
+    // ── VISION AI: escaneo de comida ─────────────────────────
+    // La API Key de OpenAI vive solo en el backend (Railway).
+    // El navegador solo sube la foto al endpoint /api/vision/scan-food.
+    escanearComidaIA: function(file){
+      var fd = new FormData();
+      fd.append("file", file);
+      return fetch(API_BASE+"/vision/scan-food", { method:"POST", body:fd })
+        .then(function(r){
+          return r.json().then(function(data){
+            if(!r.ok) throw new Error(data.error || "Error al analizar la imagen");
+            return data;
+          });
+        });
+    },
 
     // ── FOOD SCANS ───────────────────────────────────────────
     getFoodScans: function(alumnoId, fecha){

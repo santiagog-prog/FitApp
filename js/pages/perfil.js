@@ -86,16 +86,6 @@
     html += sectionHead("🏆", "Reto con Amigos", "#FF9F0A");
     html += "<div id='comparativa-card' style='background:#111;border-radius:18px;padding:18px;margin:0 20px 16px;border:1px solid rgba(255,255,255,0.06);'></div>";
 
-    // ── Ajustes IA ──
-    var currentApiKey = window.db.getOpenAIKey();
-    html += sectionHead("🤖", "Ajustes IA", "#34D399");
-    html += "<div style='margin:0 20px 16px;background:#111;border-radius:18px;padding:18px;border:1px solid rgba(255,255,255,0.06);'>" +
-        "<div style='font-size:13px;font-weight:600;margin-bottom:8px;color:#FFF;'>OpenAI API Key</div>" +
-        "<input id='openai-key-input' class='api-key-field' type='password' placeholder='sk-...' autocomplete='off'>" +
-        "<div style='font-size:11px;color:rgba(255,255,255,.3);margin-top:6px;'>Para Escanear Comida con IA. Guardada solo en este dispositivo.</div>" +
-        "<button id='btn-save-api-key' style='margin-top:12px;width:100%;height:44px;background:#C8E000;border:none;border-radius:50px;color:#1C1C1E;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;'>Guardar API Key</button>" +
-    "</div>";
-
     // Logout
     html += "<div style='padding:20px 20px 32px;'>" +
       "<button id='btn-logout' style='width:100%;height:48px;background:rgba(255,69,58,0.1);border:1px solid rgba(255,69,58,0.3);border-radius:50px;color:#FF453A;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;'>Cerrar sesión</button>" +
@@ -103,17 +93,6 @@
 
     document.getElementById("page-perfil").innerHTML = html;
     window.db.marcarNotasLeidas(alumno.id);
-
-    // API Key input: poner valor actual después de renderizar
-    var akInput = document.getElementById("openai-key-input");
-    if(akInput && currentApiKey) akInput.value = currentApiKey;
-
-    document.getElementById("btn-save-api-key").addEventListener("click", function(){
-      var v = (document.getElementById("openai-key-input").value || "").trim();
-      if(!v){ window.mostrarToast("⚠️ Introduce tu API Key"); return; }
-      window.db.saveOpenAIKey(v);
-      window.mostrarToast("✅ API Key guardada");
-    });
 
     // Bind toggles
     function bindToggle(id, key){
