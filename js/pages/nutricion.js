@@ -112,10 +112,18 @@
       '</div>';
 
     if(comida.opciones && comida.opciones.length > 1){
-      html += '<div class="opciones-scroll">';
+      html += '<div class="opciones-scroll" style="display:flex;gap:10px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none;">';
       comida.opciones.forEach(function(op, oi){
         var sel = estado.opciones[ci] === oi;
-        html += '<div class="opcion-pill' + (sel ? " sel" : "") + '" onclick="window._elegirOpcion(' + ci + ',' + oi + ')">' + op.nombre + '</div>';
+        var ingredientes = (op.alimentos||[]).slice(0,3).map(function(a){ return a.cantidad + ' ' + a.nombre; }).join(' · ');
+        html += '<div class="opcion-card' + (sel ? " sel" : "") + '" onclick="window._elegirOpcion(' + ci + ',' + oi + ')" ' +
+          'style="flex-shrink:0;width:160px;padding:10px 12px;border-radius:14px;cursor:pointer;' +
+          'background:' + (sel ? 'rgba(200,224,0,0.1)' : 'rgba(255,255,255,0.04)') + ';' +
+          'border:1.5px solid ' + (sel ? '#C8E000' : 'rgba(255,255,255,0.08)') + ';">' +
+          '<div style="font-size:12px;font-weight:800;color:' + (sel?'#C8E000':'#FFF') + ';margin-bottom:4px;">' + op.nombre + '</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.4);line-height:1.4;margin-bottom:6px;height:28px;overflow:hidden;">' + ingredientes + '</div>' +
+          '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);">' + (op.calorias_total||0) + ' kcal</div>' +
+        '</div>';
       });
       html += '</div>';
     }
@@ -217,6 +225,7 @@
     if(!_estado.comidos)    _estado.comidos    = {};
     if(!_estado.reemplazos) _estado.reemplazos = {};
     if(!_estado.extras)     _estado.extras     = [];
+    if(!_estado.suplementos) _estado.suplementos = {};
     if(typeof _estado.agua !== "number") _estado.agua = 0;
 
     if(!_plan){
@@ -295,6 +304,30 @@
           '<div class="ali-body"><div class="ali-nombre">' + (ex.icono||"") + ' ' + ex.nombre + '</div></div>' +
           '<div class="ali-kcal">' + ex.calorias + '</div>' +
           '<button class="ali-swap-btn" onclick="window._quitarExtra(' + exi + ')" title="Quitar">✕</button>' +
+        '</div>';
+      });
+      html += '</div></div>';
+    }
+
+    // ── Suplementos ──
+    if(_plan.suplementos && _plan.suplementos.length){
+      html += '<div style="padding:0 16px 4px;">';
+      html += '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;">Suplementos 💊</div>';
+      html += '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">';
+      _plan.suplementos.forEach(function(sup){
+        var tomado = _estado.suplementos[sup.id] === true;
+        html += '<div onclick="window._toggleSuplemento(\'' + sup.id + '\')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;cursor:pointer;' +
+          'background:' + (tomado ? 'rgba(52,199,89,0.08)' : 'rgba(255,255,255,0.04)') + ';' +
+          'border:1px solid ' + (tomado ? 'rgba(52,199,89,0.3)' : 'rgba(255,255,255,0.08)') + ';">' +
+          '<span style="font-size:22px;">' + (sup.icono||'💊') + '</span>' +
+          '<div style="flex:1;">' +
+            '<div style="font-size:14px;font-weight:700;color:#FFF;">' + sup.nombre + '</div>' +
+            '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:1px;">' + (sup.instruccion||'') + '</div>' +
+          '</div>' +
+          '<div style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;' +
+            'background:' + (tomado ? '#34C759' : 'rgba(255,255,255,0.08)') + ';border:1px solid ' + (tomado ? '#34C759' : 'rgba(255,255,255,0.15)') + ';">' +
+            (tomado ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>' : '') +
+          '</div>' +
         '</div>';
       });
       html += '</div></div>';
@@ -452,6 +485,13 @@
 
   window._selDia = function(idx){
     _diaSelIdx = idx;
+    window.init_nutricion();
+  };
+
+  window._toggleSuplemento = function(supId){
+    if(!_estado.suplementos) _estado.suplementos = {};
+    _estado.suplementos[supId] = _estado.suplementos[supId] === true ? false : true;
+    window.db.saveNutricion(_alumno.id, _diasFecha[_diaSelIdx], _estado);
     window.init_nutricion();
   };
 

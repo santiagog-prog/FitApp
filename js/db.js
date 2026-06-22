@@ -128,11 +128,12 @@
   }
   function rowToNutricion(row){
     return {
-      opciones:  row.opciones  || {},
-      comidos:   row.comidos   || {},
-      agua:      row.agua      || 0,
-      alimentos: row.alimentos || [],
-      extras:    row.extras    || []
+      opciones:    row.opciones    || {},
+      comidos:     row.comidos     || {},
+      agua:        row.agua        || 0,
+      alimentos:   row.alimentos   || [],
+      extras:      row.extras      || [],
+      suplementos: row.suplementos || {}
     };
   }
 
@@ -332,18 +333,19 @@
     getNutricion: function(alumnoId, fecha){
       return C.nutricion[fecha]
         ? JSON.parse(JSON.stringify(C.nutricion[fecha]))
-        : { opciones:{}, comidos:{}, agua:0, alimentos:[], extras:[] };
+        : { opciones:{}, comidos:{}, agua:0, alimentos:[], extras:[], suplementos:{} };
     },
     saveNutricion: function(alumnoId, fecha, datos){
       C.nutricion[fecha] = JSON.parse(JSON.stringify(datos));
       apiWrite(function(){
         return apiPost("nutricion_diaria", {
-          alumno_id: alumnoId, fecha: fecha,
-          opciones:  datos.opciones  || {},
-          comidos:   datos.comidos   || {},
-          agua:      datos.agua      || 0,
-          alimentos: datos.alimentos || [],
-          extras:    datos.extras    || []
+          alumno_id:   alumnoId, fecha: fecha,
+          opciones:    datos.opciones    || {},
+          comidos:     datos.comidos     || {},
+          agua:        datos.agua        || 0,
+          alimentos:   datos.alimentos   || [],
+          extras:      datos.extras      || [],
+          suplementos: datos.suplementos || {}
         });
       });
     },
@@ -687,7 +689,8 @@
             { id:"ej_1", nombre:"Press militar en máquina",         grupo:"Hombros", series:3, repeticiones:"12/RIR 2", descanso_seg:120, nota_tecnica:"Postura firme, sin balanceo", como_hacer:"1. Ajusta el asiento para que el agarre quede a la altura de los hombros.\n2. Espalda pegada al respaldo, pies firmes.\n3. Empuja hacia arriba sin bloquear los codos.\n4. Baja controlado.", video_url:"https://www.youtube.com/watch?v=Wqbal_-Rrmk", foto:"https://img.youtube.com/vi/Wqbal_-Rrmk/mqdefault.jpg", sets:[{reps:12,peso:30},{reps:12,peso:25},{reps:10,peso:25}] },
             { id:"ej_2", nombre:"Press inclinado con mancuerna",    grupo:"Pecho",   series:2, repeticiones:"12/RIR 1-2", descanso_seg:120, nota_tecnica:"Movimiento limpio, sin rebote", como_hacer:"1. Banco inclinado 15-30°.\n2. Mancuernas a la altura del pecho.\n3. Empuja sin chocar.\n4. Baja controlado.", video_url:"https://www.youtube.com/watch?v=8iPEnn-ltC8", foto:"https://img.youtube.com/vi/8iPEnn-ltC8/mqdefault.jpg", sets:[{reps:10,peso:25},{reps:10,peso:25}] },
             { id:"ej_3", nombre:"Peck Deck",                        grupo:"Pecho",   series:2, repeticiones:"12-15/RIR 1", descanso_seg:90,  nota_tecnica:"Rango completo, contracción en el pico", como_hacer:"1. Espalda pegada, codos ligeramente flexionados.\n2. Junta los brazos apretando el pecho.\n3. Aguanta 1 segundo.\n4. Vuelve controlado.", video_url:"https://www.youtube.com/watch?v=xUm0BiZCWlQ", foto:"https://img.youtube.com/vi/xUm0BiZCWlQ/mqdefault.jpg", sets:[{reps:13,peso:20},{reps:12,peso:18}] },
-            { id:"ej_4", nombre:"Elevaciones laterales en máquina", grupo:"Hombros", series:3, repeticiones:"15/RIR 1", descanso_seg:90,  nota_tecnica:"Codos ligeramente flexionados", como_hacer:"1. Codo apoyado en el cojín.\n2. Eleva lateralmente hasta el hombro.\n3. Sin impulso.\n4. Baja controlado.", video_url:"https://www.youtube.com/watch?v=3VcKaXpzqRo", foto:"https://img.youtube.com/vi/3VcKaXpzqRo/mqdefault.jpg", sets:[{reps:15,peso:8},{reps:15,peso:8},{reps:12,peso:6}] }
+            { id:"ej_4", nombre:"Elevaciones laterales con mancuerna de pie", grupo:"Hombros", series:3, repeticiones:"15/RIR 1", descanso_seg:90,  nota_tecnica:"Codos ligeramente flexionados", como_hacer:"1. Codo apoyado en el cojín.\n2. Eleva lateralmente hasta el hombro.\n3. Sin impulso.\n4. Baja controlado.", video_url:"https://www.youtube.com/watch?v=3VcKaXpzqRo", foto:"https://img.youtube.com/vi/3VcKaXpzqRo/mqdefault.jpg", sets:[{reps:15,peso:8},{reps:15,peso:8},{reps:12,peso:6}], superserie:"A", superserie_rondas:3 },
+            { id:"ej_4b", nombre:"Extensión de tríceps en polea con barra recta", grupo:"Tríceps", series:3, repeticiones:"12/RIR 2", descanso_seg:60, nota_tecnica:"Codos fijos pegados al torso", como_hacer:"1. Agarre prono en la barra recta.\n2. Codos pegados al cuerpo.\n3. Extiende sin mover el hombro.\n4. Vuelve controlado.", video_url:"https://www.youtube.com/watch?v=2-LAMcpzODU", foto:"https://img.youtube.com/vi/2-LAMcpzODU/mqdefault.jpg", sets:[{reps:12,peso:15},{reps:12,peso:15},{reps:10,peso:12}], superserie:"A", superserie_rondas:3 }
           ]},
           { numero:2, nombre:"PULL - Espalda y Bíceps", tipo:"fuerza", ejercicios:[
             { id:"ej_5", nombre:"Jalón al pecho agarre prono",  grupo:"Espalda", series:3, repeticiones:"10-12/RIR 2", descanso_seg:120, nota_tecnica:"Pecho arriba, omóplatos juntos al bajar", como_hacer:"1. Agarre ancho.\n2. Pecho arriba, ligera inclinación.\n3. Lleva la barra al pecho.\n4. Sube controlado.", video_url:"https://www.youtube.com/watch?v=lueI5PJaGL0", foto:"https://img.youtube.com/vi/lueI5PJaGL0/mqdefault.jpg", sets:[{reps:12,peso:40},{reps:11,peso:40},{reps:10,peso:35}] },
@@ -708,6 +711,10 @@
         objetivo:"perdida_grasa", calorias_objetivo:1760,
         macros:{ proteina:141, carbohidratos:175, grasas:60 },
         descripcion:"Santi, este plan está diseñado para disminuir grasa corporal manteniendo la masa muscular. 3 comidas principales con 5 opciones cada una.",
+        suplementos:[
+          { id:"sup_creatina", nombre:"Creatina", instruccion:"En agua o té, sin azúcar", icono:"💊" },
+          { id:"sup_magnesio", nombre:"Magnesio (Citrato)", instruccion:"Lo que indique el envase", icono:"🌙" }
+        ],
         comidas:[
           { nombre:"Desayuno", hora:"07:00", descripcion:"Elige una opción. Cada una aporta entre 500-600 kcal.", opciones:[
             { nombre:"Opción 1", calorias_total:602, alimentos:[{nombre:"Humita",cantidad:"140g",calorias:215,proteina:6.3,carbos:21.4,grasas:12.6},{nombre:"Queso fresco bajo en grasa",cantidad:"15g",calorias:30,proteina:3.5,carbos:0,grasas:2},{nombre:"Huevo de gallina fresco",cantidad:"50g",calorias:74,proteina:6.3,carbos:0.4,grasas:5},{nombre:"Jamón de pechuga de pavo",cantidad:"70g",calorias:140,proteina:14,carbos:3.5,grasas:0},{nombre:"Piña",cantidad:"150g",calorias:72,proteina:0.8,carbos:18.9,grasas:0.2},{nombre:"Granola crocante",cantidad:"15g",calorias:72,proteina:1.2,carbos:10.5,grasas:2.7}]},

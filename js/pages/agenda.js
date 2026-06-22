@@ -39,6 +39,32 @@
     }
   }
 
+  var META_PASOS_DEFAULT = 10000;
+
+  // Resuelve las "tareas" de un día específico (entreno, nutrición, pasos)
+  // Usado tanto para los puntos de color del calendario como para la
+  // lista de actividades del día seleccionado.
+  function tareasDelDia(alumno, rutina, registros, key){
+    var tareas = [];
+    var dIdx = (new Date(key).getDay()+6) % 7;
+    var diaRutina = rutina ? rutina.dias[dIdx % rutina.dias.length] : null;
+    var hechoEntreno = registros.some(function(r){ return r.fecha === key; });
+
+    if(diaRutina && diaRutina.tipo !== "descanso"){
+      tareas.push({ tipo:"entreno", color:"#FF9500", done:hechoEntreno, diaRutina:diaRutina });
+    }
+
+    var nut = window.db.getNutricion(alumno.id, key);
+    var algoComido = nut.comidos && Object.keys(nut.comidos).some(function(k){ return nut.comidos[k] === true; });
+    tareas.push({ tipo:"nutricion", color:"#34C759", done:!!algoComido });
+
+    var prog = window.db.getProgresoDiario(alumno.id, key);
+    var metaPasos = META_PASOS_DEFAULT;
+    tareas.push({ tipo:"pasos", color:"#FF2D55", done:(prog.pasos||0) >= metaPasos, pasos:prog.pasos||0, meta:metaPasos });
+
+    return tareas;
+  }
+
   // ── LISTA SEMANAL ────────────────────────────────────────
   function renderLista(){
     var alumno   = window.db.getAlumnoPorId(window.ALUMNO_ID);
@@ -66,14 +92,16 @@
       var sel   = key === state.selectedDate;
       var hecho = registros.some(function(r){ return r.fecha === key; });
 
-      // Dot color
-      var dotColor = hecho ? "#34C759" : "rgba(255,255,255,0.12)";
-
       diasInfo.push({ d:d, key:key });
+      var tareasDia = tareasDelDia(alumno, rutina, registros, key);
+      var dots = tareasDia.map(function(t){
+        return "<span class='dp-dot' style='background:" + (t.done ? t.color : "rgba(255,255,255,0.12)") + ";'></span>";
+      }).join("");
+
       html += "<div class='dia-pill" + (sel?" selected":"") + (esHoy?" today":"") + "' data-key='" + key + "'>" +
         "<span class='dp-letra'>" + DIAS_L[i] + "</span>" +
         "<span class='dp-num'>" + d.getDate() + "</span>" +
-        "<div class='dp-dots'><span class='dp-dot' style='background:" + dotColor + ";'></span></div>" +
+        "<div class='dp-dots'>" + dots + "</div>" +
       "</div>";
     }
     html += "</div>";
@@ -102,26 +130,56 @@
       "</div>" +
     "</div>";
 
-    // Actividad del día seleccionado
+    // Actividades del día seleccionado: entreno + nutrición + pasos
     var selDate   = new Date(state.selectedDate);
     var selDiaIdx = (selDate.getDay()+6) % 7;
     var diaRutina = rutina ? rutina.dias[selDiaIdx % rutina.dias.length] : null;
-    var hechoEseDia = registros.some(function(r){ return r.fecha === state.selectedDate; });
+    var tareasSel = tareasDelDia(alumno, rutina, registros, state.selectedDate);
 
-    if(diaRutina && diaRutina.tipo !== "descanso"){
-      html += "<div class='actividad-row" + (hechoEseDia ? " completada" : "") + "' id='ag-act-rutina'>" +
-        "<div class='act-icon " + (hechoEseDia ? "ok" : "pendiente") + "'>" +
-          (hechoEseDia
-            ? "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#34C759' stroke-width='2.5' stroke-linecap='round'><polyline points='20 6 9 17 4 12'/></svg>"
-            : "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#FF9500' stroke-width='2' stroke-linecap='round'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>") +
-        "</div>" +
-        "<div class='act-body'>" +
-          "<div class='act-nombre" + (hechoEseDia?" done":"") + "'>" + diaRutina.nombre + "</div>" +
-          "<div class='act-estado'>" + (hechoEseDia ? "Completado ✓" : diaRutina.ejercicios.length + " ejercicios · Toca para empezar") + "</div>" +
-        "</div>" +
-        "<span class='act-arrow'>›</span>" +
-      "</div>";
-    } else {
+    tareasSel.forEach(function(t){
+      if(t.tipo === "entreno"){
+        html += "<div class='actividad-row" + (t.done ? " completada" : "") + "' id='ag-act-rutina'>" +
+          "<div class='act-icon " + (t.done ? "ok" : "pendiente") + "'>" +
+            (t.done
+              ? "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#34C759' stroke-width='2.5' stroke-linecap='round'><polyline points='20 6 9 17 4 12'/></svg>"
+              : "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#FF9500' stroke-width='2' stroke-linecap='round'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>") +
+          "</div>" +
+          "<div class='act-body'>" +
+            "<div class='act-nombre" + (t.done?" done":"") + "'>" + t.diaRutina.nombre + "</div>" +
+            "<div class='act-estado'>" + (t.done ? "Completado ✓" : t.diaRutina.ejercicios.length + " ejercicios · Toca para empezar") + "</div>" +
+          "</div>" +
+          "<span class='act-arrow'>›</span>" +
+        "</div>";
+      } else if(t.tipo === "nutricion"){
+        html += "<div class='actividad-row" + (t.done ? " completada" : "") + "' id='ag-act-nutricion'>" +
+          "<div class='act-icon' style='background:rgba(52,199,89,0.12);'>" +
+            (t.done
+              ? "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#34C759' stroke-width='2.5' stroke-linecap='round'><polyline points='20 6 9 17 4 12'/></svg>"
+              : "<span style='font-size:18px;'>🍽️</span>") +
+          "</div>" +
+          "<div class='act-body'>" +
+            "<div class='act-nombre" + (t.done?" done":"") + "'>Plan de alimentación</div>" +
+            "<div class='act-estado'>" + (t.done ? "Registrado" : "Toca para registrar tus comidas") + "</div>" +
+          "</div>" +
+          "<span class='act-arrow'>›</span>" +
+        "</div>";
+      } else if(t.tipo === "pasos"){
+        html += "<div class='actividad-row" + (t.done ? " completada" : "") + "' id='ag-act-pasos'>" +
+          "<div class='act-icon' style='background:rgba(255,45,85,0.12);'>" +
+            (t.done
+              ? "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#FF2D55' stroke-width='2.5' stroke-linecap='round'><polyline points='20 6 9 17 4 12'/></svg>"
+              : "<span style='font-size:18px;'>🚶</span>") +
+          "</div>" +
+          "<div class='act-body'>" +
+            "<div class='act-nombre" + (t.done?" done":"") + "'>Caminar</div>" +
+            "<div class='act-estado'>" + t.pasos.toLocaleString("es") + " / " + t.meta.toLocaleString("es") + " pasos</div>" +
+          "</div>" +
+          "<span class='act-arrow'>›</span>" +
+        "</div>";
+      }
+    });
+
+    if(diaRutina && diaRutina.tipo === "descanso"){
       html += "<div class='actividad-row'>" +
         "<div class='act-icon nutri'>🌙</div>" +
         "<div class='act-body'><div class='act-nombre'>Día de descanso</div><div class='act-estado'>Sin sesión programada</div></div>" +
@@ -137,6 +195,64 @@
     });
     var actRutina = document.getElementById("ag-act-rutina");
     if(actRutina && rutina) actRutina.addEventListener("click", function(){ abrirVistaPrevia(diaRutina, rutina); });
+    var actNutricion = document.getElementById("ag-act-nutricion");
+    if(actNutricion) actNutricion.addEventListener("click", function(){ window.irAPagina("nutricion"); });
+    var actPasos = document.getElementById("ag-act-pasos");
+    if(actPasos) actPasos.addEventListener("click", function(){ abrirEditarPasos(state.selectedDate); });
+  }
+
+  // ── EDITAR PASOS DEL DÍA ──────────────────────────────────
+  function abrirEditarPasos(fecha){
+    var alumno = window.db.getAlumnoPorId(window.ALUMNO_ID);
+    var prog = window.db.getProgresoDiario(alumno.id, fecha);
+    var modal = document.createElement("div");
+    modal.className = "modal-celebracion";
+    modal.innerHTML =
+      "<div class='mc-card' style='text-align:center;'>" +
+        "<div style='font-size:40px;margin-bottom:8px;'>🚶</div>" +
+        "<h2 style='margin-bottom:4px;'>Caminar</h2>" +
+        "<div style='font-size:12px;color:rgba(255,255,255,.4);margin-bottom:18px;'>Meta: " + META_PASOS_DEFAULT.toLocaleString("es") + " pasos</div>" +
+        "<input id='input-pasos-dia' type='number' inputmode='numeric' value='" + (prog.pasos||0) + "' " +
+          "style='width:100%;height:54px;background:#1C1C1C;border:1px solid rgba(255,255,255,.1);border-radius:14px;text-align:center;color:#FFF;font-size:24px;font-weight:800;font-family:\"Space Mono\",monospace;margin-bottom:18px;'>" +
+        "<button class='pill-btn' id='btn-guardar-pasos'>Guardar</button>" +
+      "</div>";
+    document.body.appendChild(modal);
+    modal.addEventListener("click", function(e){ if(e.target===modal) modal.remove(); });
+    document.getElementById("btn-guardar-pasos").addEventListener("click", function(){
+      var val = parseInt(document.getElementById("input-pasos-dia").value, 10) || 0;
+      window.db.patchProgresoDiario(alumno.id, fecha, { pasos: val });
+      modal.remove();
+      window.mostrarToast("✓ " + val.toLocaleString("es") + " pasos guardados");
+      renderLista();
+    });
+  }
+
+  // Agrupa ejercicios consecutivos que comparten el mismo ej.superserie
+  // en bloques { superserie, rondas, items:[...] } para renderizar el
+  // encabezado "SUPERSERIE ×N RONDAS" igual que en la app del coach.
+  function agruparPorSuperserie(ejercicios){
+    var grupos = [];
+    ejercicios.forEach(function(ej){
+      var ultimo = grupos[grupos.length-1];
+      if(ej.superserie && ultimo && ultimo.superserie === ej.superserie){
+        ultimo.items.push(ej);
+      } else {
+        grupos.push({ superserie: ej.superserie||null, rondas: ej.superserie_rondas||3, items:[ej] });
+      }
+    });
+    return grupos;
+  }
+
+  // Texto de progresión: compara con la sesión anterior del mismo día
+  function notaProgresion(diaRutina, registros){
+    var prevReg = registros.slice().reverse().find(function(r){
+      return r.dia_numero === diaRutina.numero || r.sesion_nombre === diaRutina.nombre;
+    });
+    if(!prevReg) return "Primera vez con esta sesión — registra tus pesos para comparar la próxima semana.";
+    var fechaPrev = new Date(prevReg.fecha);
+    var dias = Math.round((new Date() - fechaPrev) / 86400000);
+    var cuando = dias <= 0 ? "hoy" : dias === 1 ? "ayer" : "hace " + dias + " días";
+    return "Última vez (" + cuando + "): mantén la misma carga y busca 1-2 repeticiones más, o sube ligeramente el peso si te sentiste cómodo.";
   }
 
   // ── VISTA PREVIA SESIÓN ──────────────────────────────────
@@ -175,29 +291,46 @@
         "</div>" +
       "</div>";
 
+    // Notas de progresión
+    var alumnoVP = window.db.getAlumnoPorId(window.ALUMNO_ID);
+    var registrosVP = window.db.getRegistros(alumnoVP.id);
+    html += "<div style='padding:0 20px;margin-bottom:18px;'>" +
+      "<div style='background:rgba(200,224,0,0.06);border-left:3px solid #C8E000;border-radius:0 12px 12px 0;padding:12px 14px;'>" +
+        "<div style='font-size:11px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;'>📈 Notas de progresión</div>" +
+        "<div style='font-size:13px;color:rgba(255,255,255,0.6);line-height:1.5;'>" + notaProgresion(diaRutina, registrosVP) + "</div>" +
+      "</div>" +
+    "</div>";
+
     // Botón INICIAR
     html +=
-      "<div style='padding:0 20px;margin-top:-20px;margin-bottom:20px;'>" +
+      "<div style='padding:0 20px;margin-bottom:20px;'>" +
         "<button id='btn-iniciar-entreno' style='width:100%;height:54px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(200,224,0,0.3);'>" +
           "<svg width='18' height='18' viewBox='0 0 24 24' fill='#1C1C1E'><polygon points='5 3 19 12 5 21 5 3'/></svg>" +
           "INICIAR ENTRENAMIENTO" +
         "</button>" +
       "</div>";
 
-    // Lista ejercicios (preview)
+    // Lista ejercicios (preview), agrupados por superserie
     html += "<div style='padding:0 20px;'>";
     html += "<div style='font-size:12px;font-weight:600;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;'>Ejercicios · " + diaRutina.ejercicios.length + "</div>";
-    diaRutina.ejercicios.forEach(function(ej, i){
-      html +=
-        "<div style='display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:.5px solid rgba(255,255,255,0.05);'>" +
-          "<span style='width:22px;font-size:14px;font-weight:600;color:rgba(255,255,255,0.25);'>" + (i+1) + "</span>" +
-          renderFotoEjercicio(ej) +
-          "<div style='flex:1;'>" +
-            "<div style='font-size:15px;font-weight:600;color:#FFF;margin-bottom:3px;'>" + ej.nombre + "</div>" +
-            "<div style='font-size:12px;color:rgba(255,255,255,0.35);'>" + ej.series + " series · " + ej.repeticiones + " · " + ej.descanso_seg + "\" descanso</div>" +
-          "</div>" +
-          (ej.video_url ? "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='2'><polygon points='23 7 16 12 23 17 23 7'/><rect x='1' y='5' width='15' height='14' rx='2'/></svg>" : "") +
-        "</div>";
+    var contador = 0;
+    agruparPorSuperserie(diaRutina.ejercicios).forEach(function(grupo){
+      if(grupo.superserie){
+        html += "<div style='font-size:11px;font-weight:800;color:#0A84FF;letter-spacing:.5px;text-transform:uppercase;background:rgba(10,132,255,0.1);border-radius:8px;padding:6px 10px;margin:10px 0 4px;'>SUPERSERIE ×" + grupo.rondas + " RONDAS</div>";
+      }
+      grupo.items.forEach(function(ej){
+        contador++;
+        html +=
+          "<div style='display:flex;align-items:center;gap:14px;padding:12px 0" + (grupo.superserie ? " 12px 10px;border-left:2px solid rgba(10,132,255,0.4);margin-left:2px;" : ";") + "border-bottom:.5px solid rgba(255,255,255,0.05);'>" +
+            "<span style='width:22px;font-size:14px;font-weight:600;color:rgba(255,255,255,0.25);'>" + contador + "</span>" +
+            renderFotoEjercicio(ej) +
+            "<div style='flex:1;'>" +
+              "<div style='font-size:15px;font-weight:600;color:#FFF;margin-bottom:3px;'>" + ej.nombre + "</div>" +
+              "<div style='font-size:12px;color:rgba(255,255,255,0.35);'>" + ej.series + " series · " + ej.repeticiones + " · " + ej.descanso_seg + "\" descanso</div>" +
+            "</div>" +
+            (ej.video_url ? "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='2'><polygon points='23 7 16 12 23 17 23 7'/><rect x='1' y='5' width='15' height='14' rx='2'/></svg>" : "") +
+          "</div>";
+      });
     });
     html += "</div>";
 
@@ -214,6 +347,8 @@
     _workout.historialPrev = {};
     _workout.cronSegundos = 0;
     _workout.diaNumero    = diaRutina.numero;
+    _workout.diaRutina    = diaRutina;
+    _workout.rutina       = rutina;
 
     // Cargar historial anterior para pre-rellenar pesos/reps
     var alumno = window.db.getAlumnoPorId(window.ALUMNO_ID);
@@ -281,12 +416,27 @@
         "<div id='barra-progreso-entreno' style='height:100%;background:#C8E000;width:0%;transition:width .3s;'></div>" +
       "</div>";
 
+    // Mapa ejIdx -> texto de encabezado de superserie (si el ejercicio
+    // es el primero de su grupo)
+    var headerPorIdx = {};
+    (function(){
+      var idx = 0;
+      agruparPorSuperserie(diaRutina.ejercicios).forEach(function(grupo){
+        if(grupo.superserie) headerPorIdx[idx] = "SUPERSERIE ×" + grupo.rondas + " RONDAS";
+        idx += grupo.items.length;
+      });
+    })();
+
     diaRutina.ejercicios.forEach(function(ej, ejIdx){
       var ejKey  = ej.id || ej.nombre;
       var series = _workout.seriesData[ejKey] || [];
       var todasDone = series.length > 0 && series.every(function(s){ return s.done; });
 
-      html += "<div id='ej-card-" + ejIdx + "' class='me-ej-card" + (todasDone?" completado":"") + "'>";
+      if(headerPorIdx[ejIdx]){
+        html += "<div style='font-size:11px;font-weight:800;color:#0A84FF;letter-spacing:.5px;text-transform:uppercase;background:rgba(10,132,255,0.1);border-radius:8px;padding:6px 10px;margin:14px 0 4px;'>" + headerPorIdx[ejIdx] + "</div>";
+      }
+
+      html += "<div id='ej-card-" + ejIdx + "' class='me-ej-card" + (todasDone?" completado":"") + (ej.superserie ? " superserie" : "") + "'>";
 
       // Header ejercicio
       html +=
@@ -494,11 +644,14 @@
   }
 
   window._finalizarEntreno = function(){
+    var diaRutina = _workout.diaRutina, rutina = _workout.rutina;
     pararCron();
     var totalSeries = 0;
     Object.values(_workout.seriesData).forEach(function(ss){ totalSeries += ss.filter(function(s){ return s.done; }).length; });
     var duracion = Math.max(1, Math.round(_workout.cronSegundos/60));
+    var tiempoTxt = pad2(Math.floor(_workout.cronSegundos/60)) + ":" + pad2(_workout.cronSegundos%60);
     _sensacion = 3;
+    var _rating = 0;
 
     window.lanzarConfetti();
 
@@ -508,19 +661,34 @@
       "<div class='mc-card'>" +
         "<div style='font-size:52px;margin-bottom:10px;'>🎉</div>" +
         "<h2>¡Sesión completada!</h2>" +
-        "<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0;'>" +
+        "<div style='font-size:13px;color:rgba(255,255,255,.4);margin-bottom:6px;'>⏱ " + tiempoTxt + "</div>" +
+        "<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:10px 0 16px;'>" +
           "<div style='background:#1C1C1C;border-radius:12px;padding:12px;'><div style='font-size:22px;font-weight:800;color:#C8E000;'>" + duracion + "</div><div style='font-size:11px;color:rgba(255,255,255,.4);'>minutos</div></div>" +
           "<div style='background:#1C1C1C;border-radius:12px;padding:12px;'><div style='font-size:22px;font-weight:800;color:#C8E000;'>" + _workout.ejercicios.length + "</div><div style='font-size:11px;color:rgba(255,255,255,.4);'>ejercicios</div></div>" +
           "<div style='background:#1C1C1C;border-radius:12px;padding:12px;'><div style='font-size:22px;font-weight:800;color:#C8E000;'>" + totalSeries + "</div><div style='font-size:11px;color:rgba(255,255,255,.4);'>series</div></div>" +
+        "</div>" +
+        "<div style='font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:8px;'>¿Te ha gustado este entrenamiento?</div>" +
+        "<div class='mc-rating' style='font-size:28px;letter-spacing:6px;margin-bottom:14px;'>" +
+          [1,2,3,4,5].map(function(i){ return "<span data-star='" + i + "' style='cursor:pointer;color:rgba(255,255,255,.15);'>★</span>"; }).join("") +
         "</div>" +
         "<div class='mc-sensacion'>" +
           ["😫","😕","😐","💪","🔥"].map(function(e,i){ return "<span data-val='" + (i+1) + "'>" + e + "</span>"; }).join("") +
         "</div>" +
         "<textarea rows='2' placeholder='Nota personal (opcional)' id='mc-nota' class='mc-card textarea'></textarea>" +
         "<button class='pill-btn' id='mc-guardar'>Guardar y cerrar</button>" +
+        "<button id='mc-editar' style='width:100%;margin-top:8px;height:44px;background:none;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;'>✏️ Editar resultados</button>" +
       "</div>";
 
     document.body.appendChild(modal);
+
+    modal.querySelectorAll(".mc-rating span").forEach(function(star){
+      star.addEventListener("click", function(){
+        _rating = parseInt(star.getAttribute("data-star"),10);
+        modal.querySelectorAll(".mc-rating span").forEach(function(s2){
+          s2.style.color = parseInt(s2.getAttribute("data-star"),10) <= _rating ? "#FFD60A" : "rgba(255,255,255,.15)";
+        });
+      });
+    });
 
     modal.querySelectorAll(".mc-sensacion span").forEach(function(s){
       s.addEventListener("click", function(){
@@ -528,6 +696,18 @@
         s.classList.add("sel"); s.style.opacity="1"; s.style.transform="scale(1.3)";
         _sensacion = parseInt(s.getAttribute("data-val"),10);
       });
+    });
+
+    // Editar resultados: vuelve al modo entreno sin guardar ni perder el progreso
+    document.getElementById("mc-editar").addEventListener("click", function(){
+      modal.remove();
+      if(_workout.cronInterval) clearInterval(_workout.cronInterval);
+      _workout.cronInterval = setInterval(function(){
+        _workout.cronSegundos++;
+        var el = document.getElementById("me-timer-display");
+        if(el) el.textContent = pad2(Math.floor(_workout.cronSegundos/60)) + ":" + pad2(_workout.cronSegundos%60);
+      }, 1000);
+      renderModoEntreno(diaRutina, rutina);
     });
 
     document.getElementById("mc-guardar").addEventListener("click", function(){
@@ -548,6 +728,7 @@
         ejercicios_total: _workout.ejercicios.length,
         duracion_min: duracion,
         sensacion: _sensacion,
+        rating: _rating,
         nota: nota,
         series_data: _workout.seriesData,
         ejercicios: ejArray
