@@ -332,14 +332,15 @@
 
   function renderAlumnoDetalle(id){
     var a = window.db.getAlumnoPorId(id);
-    var tabs = ["resumen","rutina","alimentacion","progreso","notas"];
+    var tabs = ["seguimiento","resumen","rutina","alimentacion","progreso","notas"];
     var tabActivo = "resumen";
 
     function render(){
       var html = "<h1>" + a.nombre + " " + (a.apellido||"") + "</h1>" +
         "<button class='btn-coach secondary' id='btn-volver-alumnos' style='margin-bottom:14px;'>← Volver a alumnos</button>" +
         "<div class='coach-tabs'>" + tabs.map(function(t){
-          return "<button data-t='" + t + "' class='" + (t===tabActivo?"active":"") + "'>" + t.charAt(0).toUpperCase()+t.slice(1) + "</button>";
+          var tabLabels = {seguimiento:"📊 Seguimiento",resumen:"Resumen",rutina:"Rutina",alimentacion:"Alimentación",progreso:"Progreso",notas:"Notas"};
+        return "<button data-t='" + t + "' class='" + (t===tabActivo?"active":"") + "'>" + (tabLabels[t]||t.charAt(0).toUpperCase()+t.slice(1)) + "</button>";
         }).join("") + "</div><div id='tab-content'></div>";
       $("#sec-alumnos").innerHTML = html;
       $("#btn-volver-alumnos").addEventListener("click", render_alumnos);
@@ -351,7 +352,120 @@
 
     function renderTab(){
       var box = $("#tab-content"); var html = "";
-      if(tabActivo === "resumen"){
+      if(tabActivo === "seguimiento"){
+        var hoy7 = window.db.fechaHoy();
+        var regs7d = window.db.getRegistros(a.id);
+        var nutPlan = window.db.getPlanPorId(a.plan_alimentacion_id);
+
+        // Last 7 days
+        var dias7 = [];
+        for(var di7 = 6; di7 >= 0; di7--){
+          var d7 = new Date(); d7.setDate(d7.getDate() - di7);
+          var fkey = d7.toISOString().split("T")[0];
+          var dayNames = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+          dias7.push({
+            key: fkey,
+            label: dayNames[d7.getDay()] + " " + d7.getDate(),
+            entrenó: regs7d.some(function(r){ return r.fecha === fkey; }),
+            nutri: (function(){ var n = window.db.getNutricion(a.id, fkey); return n && n.comidos && Object.keys(n.comidos).length > 0; })()
+          });
+        }
+
+        var semanaHTML = '<div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;">';
+        dias7.forEach(function(d){
+          var isHoy = d.key === hoy7;
+          semanaHTML +=
+            '<div style="flex:1;min-width:38px;background:' + (isHoy ? 'rgba(200,224,0,0.08)' : '#141414') + ';border:1px solid ' + (isHoy ? 'rgba(200,224,0,0.3)' : 'rgba(255,255,255,0.06)') + ';border-radius:12px;padding:8px 4px;text-align:center;">' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:6px;">' + d.label + '</div>' +
+            '<div style="font-size:14px;">' + (d.entrenó ? '🏋️' : '—') + '</div>' +
+            '<div style="font-size:14px;margin-top:2px;">' + (d.nutri ? '🥗' : '—') + '</div>' +
+            '</div>';
+        });
+        semanaHTML += '</div>';
+        semanaHTML += '<div style="display:flex;gap:12px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.4);">' +
+          '<span>🏋️ Entrenó</span><span>🥗 Registró nutrición</span></div>';
+
+        // Last workout
+        var lastReg = regs7d.length ? regs7d[regs7d.length - 1] : null;
+        var workoutHTML = '';
+        if(lastReg){
+          var ejsData = lastReg.series_data || lastReg.ejercicios || [];
+          var stars = '';
+          if(lastReg.rating){ for(var si=0;si<5;si++) stars += (si < lastReg.rating ? '★' : '☆'); }
+          workoutHTML =
+            '<div style="background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;margin-bottom:16px;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
+              '<div><div style="font-size:14px;font-weight:700;">' + (lastReg.sesion_nombre||lastReg.dia_numero||'Entrenamiento') + '</div>' +
+              '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">' + lastReg.fecha + (lastReg.duracion_min ? ' · ' + lastReg.duracion_min + ' min' : '') + '</div></div>' +
+              (stars ? '<div style="color:#C8E000;font-size:18px;letter-spacing:1px;">' + stars + '</div>' : '') +
+            '</div>' +
+            (lastReg.nota ? '<div style="background:rgba(200,224,0,0.06);border-radius:8px;padding:8px 12px;font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:10px;border-left:3px solid #C8E000;">' + lastReg.nota + '</div>' : '') +
+            (ejsData.length ?
+              '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+              '<tr style="color:rgba(255,255,255,0.35);"><th style="text-align:left;padding:4px 0;font-weight:600;">Ejercicio</th><th style="text-align:center;padding:4px;">Series</th><th style="text-align:center;padding:4px;">Reps</th><th style="text-align:right;padding:4px;">Peso</th></tr>' +
+              ejsData.map(function(ej){
+                var setsArr = ej.sets || [];
+                var totalReps = setsArr.reduce(function(s,st){ return s + (parseInt(st.reps)||0); }, 0);
+                var maxPeso = setsArr.reduce(function(mx,st){ return Math.max(mx, parseFloat(st.peso)||0); }, 0);
+                return '<tr style="border-top:1px solid rgba(255,255,255,0.05);">' +
+                  '<td style="padding:6px 0;color:#FFF;">' + (ej.nombre||ej.name||'—') + '</td>' +
+                  '<td style="text-align:center;color:rgba(255,255,255,0.6);">' + setsArr.length + '</td>' +
+                  '<td style="text-align:center;color:rgba(255,255,255,0.6);">' + (totalReps||ej.repeticiones||'—') + '</td>' +
+                  '<td style="text-align:right;color:#C8E000;font-weight:700;">' + (maxPeso ? maxPeso + ' kg' : '—') + '</td>' +
+                '</tr>';
+              }).join('') +
+              '</table>' : '<div style="color:rgba(255,255,255,0.3);font-size:13px;">Sin detalle de ejercicios</div>') +
+            '</div>';
+        } else {
+          workoutHTML = '<div style="background:#141414;border-radius:12px;padding:16px;color:rgba(255,255,255,0.3);font-size:13px;margin-bottom:16px;">Sin entrenamientos registrados todavía</div>';
+        }
+
+        // Today's nutrition
+        var nutHoy = window.db.getNutricion(a.id, hoy7);
+        var nutHTML = '';
+        if(nutPlan && nutPlan.comidas && nutPlan.comidas.length){
+          var totalKcal = 0, metaKcal = nutPlan.calorias_objetivo || 0;
+          nutHTML = '<div style="background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;">' +
+            '<div style="font-size:13px;font-weight:700;margin-bottom:10px;">Nutrición hoy</div>';
+          nutPlan.comidas.forEach(function(comida, ci){
+            var opIdx = nutHoy.opciones && nutHoy.opciones[ci] !== undefined ? nutHoy.opciones[ci] : null;
+            var comidoKeys = nutHoy.comidos || {};
+            var eaten = comidoKeys[ci] === true || (typeof comidoKeys[ci] === 'object' && comidoKeys[ci] !== null);
+            var opNombre = '';
+            if(opIdx !== null && comida.opciones && comida.opciones[opIdx]) {
+              opNombre = comida.opciones[opIdx].nombre;
+              totalKcal += comida.opciones[opIdx].calorias_total || 0;
+            }
+            nutHTML +=
+              '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+              '<div>' +
+                '<span style="font-size:13px;color:' + (eaten ? '#FFF' : 'rgba(255,255,255,0.35)') + ';">' + comida.nombre + '</span>' +
+                (opNombre ? '<span style="font-size:11px;color:#C8E000;margin-left:6px;">· ' + opNombre + '</span>' : '') +
+              '</div>' +
+              '<span style="font-size:18px;">' + (eaten ? '✅' : '⬜') + '</span>' +
+              '</div>';
+          });
+          var pct = metaKcal ? Math.min(100, Math.round(totalKcal / metaKcal * 100)) : 0;
+          nutHTML +=
+            '<div style="margin-top:10px;">' +
+            '<div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;">' +
+              '<span>' + totalKcal + ' kcal consumidas</span><span>Meta: ' + metaKcal + ' kcal</span>' +
+            '</div>' +
+            '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;">' +
+              '<div style="height:100%;width:' + pct + '%;background:#C8E000;border-radius:99px;"></div>' +
+            '</div>' +
+            '</div></div>';
+        } else {
+          nutHTML = '<div style="background:#141414;border-radius:12px;padding:16px;color:rgba(255,255,255,0.3);font-size:13px;">Sin plan de alimentación asignado</div>';
+        }
+
+        html = '<div class="coach-card">' +
+          '<h3 style="margin-bottom:14px;">📅 Últimos 7 días</h3>' + semanaHTML +
+          '<h3 style="margin-bottom:10px;margin-top:4px;">💪 Último entrenamiento</h3>' + workoutHTML +
+          '<h3 style="margin-bottom:10px;">🥗 Nutrición hoy</h3>' + nutHTML +
+          '</div>';
+
+      } else if(tabActivo === "resumen"){
         var rNombre = (function(){ var r = window.db.getRutinaPorId(a.rutina_id); return r ? r.nombre : (a.rutina_id || "Sin rutina"); })();
         var pNombre = (function(){ var p = window.db.getPlanPorId(a.plan_alimentacion_id); return p ? p.nombre : (a.plan_alimentacion_id || "Sin plan"); })();
         html = "<div class='coach-card'>" +
