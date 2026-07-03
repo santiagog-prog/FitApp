@@ -65,7 +65,7 @@
   .gym-banner{
     position:relative; overflow:hidden;
     padding:28px 20px 20px;
-    background:linear-gradient(160deg,#0D1600 0%,#080808 50%,#0A0A0A 100%);
+    background:linear-gradient(160deg,rgba(13,22,0,0.88) 0%,rgba(8,8,8,0.92) 50%,rgba(10,10,10,0.97) 100%), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=60&auto=format') center/cover no-repeat;
   }
   .gym-banner-glow{
     position:absolute; top:-60px; right:-40px;
@@ -256,8 +256,9 @@
     <ellipse class="gym-ellipse" cx="130" cy="8" rx="55" ry="5" fill="rgba(200,224,0,0.08)" style="display:block;margin:0 auto;"/>
   </div>
 
-  <div id="quote-text" class="quote-text">"El cuerpo logra lo que la mente cree"</div>
-  <div id="quote-brand" class="quote-brand">Just Train — FitApp</div>
+  <div style="font-size:21px;font-weight:900;color:#FFF;text-align:center;letter-spacing:-0.5px;line-height:1.25;padding:0 20px;margin-top:10px;">Tu coach. Tu plan.<br>Tu progreso.<br><span style="color:#C8E000;">Todo en un lugar.</span></div>
+  <div id="quote-text" class="quote-text" style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);margin-top:10px;">"El cuerpo logra lo que la mente cree"</div>
+  <div id="quote-brand" class="quote-brand">FitApp</div>
 </div>
 
 <!-- ── CONTINUAR SESIÓN ── -->
@@ -360,15 +361,15 @@
 
   // ── QUOTES CAROUSEL ──────────────────────────────────────
   var QUOTES = [
-    { text:"El cuerpo logra lo que la mente cree.", brand:"Just Train — FitApp" },
-    { text:'"Impossible is nothing."', brand:"Adidas" },
-    { text:'"Just Do It."', brand:"Nike" },
+    { text:"El cuerpo logra lo que la mente cree.", brand:"FitApp" },
     { text:"La disciplina es elegir entre lo que quieres ahora y lo que quieres más.", brand:"FitApp" },
-    { text:'"I am the greatest. I said that even before I knew I was."', brand:"Muhammad Ali" },
     { text:"Sin dolor no hay gloria. Sin esfuerzo no hay resultados.", brand:"FitApp" },
-    { text:'"Protect this house."', brand:"Under Armour" },
     { text:"Un buen entrenamiento es cuando duele ayer, duele hoy y aún así vuelves mañana.", brand:"FitApp" },
-    { text:'"Train insane or remain the same."', brand:"Old School Gym" }
+    { text:"No entrenas para verte bien en el gym. Entrenas para ser mejor fuera de él.", brand:"FitApp" },
+    { text:"Cada kilo que levantas hoy es un argumento a tu favor mañana.", brand:"FitApp" },
+    { text:"La constancia vence al talento que no trabaja.", brand:"FitApp" },
+    { text:"Tu mayor competencia está en el espejo.", brand:"FitApp" },
+    { text:"El cuerpo que quieres está al otro lado de la excusa.", brand:"FitApp" }
   ];
   var qIdx = 0;
   function nextQuote(){

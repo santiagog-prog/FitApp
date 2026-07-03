@@ -57,6 +57,8 @@
   var COLOR_PROT = "#60A5FA", COLOR_CARB = "#FBBF24", COLOR_GRAS = "#A78BFA";
 
   // ── ANILLO MACROS (3 colores, se llena progresivamente) ──
+  var _anilloUid = 0;
+
   function anilloKcal(kcalConsum, kcalObj, prot, carb, grasa){
     var cP = COLOR_PROT, cC = COLOR_CARB, cG = COLOR_GRAS;
     var R = 52, CX = 65, CY = 65, SW = 10;
@@ -64,6 +66,7 @@
     var pct = kcalObj > 0 ? Math.min(100, kcalConsum / kcalObj * 100) : 0;
     var totalArc = (pct / 100) * circ;
     var macTotal = prot + carb + grasa;
+    var uid = 'an' + (++_anilloUid);
     var svgBase = '<svg width="130" height="130" viewBox="0 0 130 130">' +
       '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="'+SW+'"/>';
 
@@ -82,15 +85,25 @@
     var rotC = rotP + (prot  / macTotal) * (pct / 100) * 360;
     var rotG = rotC + (carb  / macTotal) * (pct / 100) * 360;
 
+    // Circles start empty (dashoffset=circ) — animated to target via animarAnillos()
     svgBase +=
-      '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cP+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offP.toFixed(1)+'" transform="rotate('+rotP+' '+CX+' '+CY+')" stroke-linecap="butt"/>' +
-      '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cC+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offC.toFixed(1)+'" transform="rotate('+rotC+' '+CX+' '+CY+')" stroke-linecap="butt"/>' +
-      '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cG+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offG.toFixed(1)+'" transform="rotate('+rotG+' '+CX+' '+CY+')" stroke-linecap="butt"/>' +
+      '<circle id="'+uid+'P" cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cP+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+circ.toFixed(1)+'" data-to="'+offP.toFixed(1)+'" transform="rotate('+rotP+' '+CX+' '+CY+')" stroke-linecap="butt" style="transition:stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1);"/>' +
+      '<circle id="'+uid+'C" cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cC+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+circ.toFixed(1)+'" data-to="'+offC.toFixed(1)+'" transform="rotate('+rotC+' '+CX+' '+CY+')" stroke-linecap="butt" style="transition:stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1) 0.1s;"/>' +
+      '<circle id="'+uid+'G" cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cG+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+circ.toFixed(1)+'" data-to="'+offG.toFixed(1)+'" transform="rotate('+rotG+' '+CX+' '+CY+')" stroke-linecap="butt" style="transition:stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1) 0.2s;"/>' +
       '<text x="'+CX+'" y="'+(CY-4)+'" text-anchor="middle" font-size="19" font-weight="800" fill="#FFF" font-family="Inter,sans-serif">' + Math.round(kcalConsum) + '</text>' +
       '<text x="'+CX+'" y="'+(CY+12)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.35)" font-family="Inter,sans-serif">kcal</text>' +
       '<text x="'+CX+'" y="'+(CY+24)+'" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.2)" font-family="Inter,sans-serif">' + Math.round(pct) + '% objetivo</text>';
 
     return svgBase + '</svg>';
+  }
+
+  function animarAnillos(){
+    requestAnimationFrame(function(){
+      document.querySelectorAll('[data-to]').forEach(function(el){
+        var target = el.getAttribute('data-to');
+        if(target !== null) el.style.strokeDashoffset = target;
+      });
+    });
   }
 
   // Suma kcal/macros del día a partir del plan + estado (comidos/extras).
@@ -151,6 +164,7 @@
   window.NutriUI = {
     macroBar: macroBar,
     anilloKcal: anilloKcal,
+    animarAnillos: animarAnillos,
     calcularTotalesDia: calcularTotalesDia,
     renderResumenCard: renderResumenCard,
     COLOR_PROT: COLOR_PROT, COLOR_CARB: COLOR_CARB, COLOR_GRAS: COLOR_GRAS
@@ -439,6 +453,7 @@
 
     html += '<div style="height:20px;"></div></div>';
     document.getElementById("page-nutricion").innerHTML = html;
+    if(window.NutriUI && window.NutriUI.animarAnillos) window.NutriUI.animarAnillos();
 
     // Eventos agua
     // (usados con onclick="window._toggleAgua(i)" inline)

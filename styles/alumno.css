@@ -252,15 +252,17 @@
 .me-val-label{ font-size:10px; color:var(--text-dim); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
 .me-val-row{ display:flex; align-items:center; gap:8px; }
 .me-val-btn{
-  width:44px; height:44px; border-radius:50%; background:var(--surface2);
-  border:none; color:var(--text); font-size:20px; cursor:pointer;
+  width:38px; height:38px; border-radius:50%; background:var(--surface2);
+  border:none; color:var(--text); font-size:18px; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
 }
-.me-val-num{ font-size:24px; font-weight:800; color:var(--text); min-width:38px; text-align:center; }
+.me-val-num{ font-size:22px; font-weight:800; color:var(--text); min-width:32px; text-align:center; }
 .me-val-num.accent{ color:var(--accent); }
 .me-check-btn{
-  width:52px; height:52px; border-radius:50%; border:none; cursor:pointer;
-  background:var(--accent-dim); color:var(--accent); font-size:20px;
+  width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
+  background:var(--accent-dim); color:var(--accent); font-size:18px;
+  flex-shrink:0;
   display:flex; align-items:center; justify-content:center; flex-shrink:0;
   transition:all .2s;
 }

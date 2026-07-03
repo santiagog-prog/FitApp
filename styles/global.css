@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
 :root{
-  /* ── Core backgrounds ─────────────────────────────────── */
-  --bg:           #080808;
-  --bg-base:      #080808;
-  --surface:      #111111;
-  --bg-card:      #111111;
-  --surface2:     #181818;
-  --bg-card-2:    #181818;
-  --surface3:     #202020;
+  /* ── Core backgrounds — tres niveles de profundidad ───── */
+  --bg:           #0A0A0A;
+  --bg-base:      #0A0A0A;
+  --surface:      #141414;
+  --bg-card:      #141414;
+  --surface2:     #1C1C1E;
+  --bg-card-2:    #1C1C1E;
+  --surface3:     #242426;
   --surface-glass:rgba(255,255,255,0.04);
   /* ── Accent — lime premium ────────────────────────────── */
   --accent:       #C8E000;
@@ -40,12 +40,12 @@
   /* ── Typography ───────────────────────────────────────── */
   --font-ui:     'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-data:   'Space Mono', monospace;
-  /* ── Radii ────────────────────────────────────────────── */
-  --radius-xs:   8px;
-  --radius-sm:   12px;
+  /* ── Radii — cards 16px, only pills at 999px ────────── */
+  --radius-xs:   6px;
+  --radius-sm:   10px;
   --radius:      16px;
-  --radius-lg:   20px;
-  --radius-xl:   26px;
+  --radius-lg:   18px;
+  --radius-xl:   20px;
   --radius-pill: 999px;
   /* ── Shadows ──────────────────────────────────────────── */
   --shadow-card:  0 1px 0 rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.4);

@@ -353,17 +353,46 @@
     }
 
     // ── Macros de hoy — MISMO componente que en Nutrición ──
-    // window.NutriUI.renderResumenCard viene de nutricion.js: una sola
-    // fuente de verdad para que ambas pantallas marquen exactamente lo
-    // mismo (antes Inicio tenía su propio donut con otro cálculo/diseño).
     (function(){
-      var fechaMacros = window.db.fechaHoy();
-      var nutM  = window.db.getNutricion(alumno.id, fechaMacros);
       var planM = window.db.getPlanPorId(alumno.plan_alimentacion_id);
-      nutM.scans = window.db.getFoodScans(alumno.id, fechaMacros);
-      if(planM && window.NutriUI){
-        html += '<div id="macros-home-card" style="cursor:pointer;margin:0 20px 14px;">' + window.NutriUI.renderResumenCard(planM, nutM) + '</div>';
+      if(!planM || !window.NutriUI) return;
+
+      function tieneData(nut){
+        if(nut.extras && nut.extras.length > 0) return true;
+        if(nut.scans && nut.scans.length > 0) return true;
+        if(nut.comidos && Object.keys(nut.comidos).length > 0) return true;
+        return false;
       }
+
+      var fechaHoyM = window.db.fechaHoy();
+      var nutHoy = window.db.getNutricion(alumno.id, fechaHoyM);
+      nutHoy.scans = window.db.getFoodScans(alumno.id, fechaHoyM);
+
+      if(tieneData(nutHoy)){
+        html += '<div id="macros-home-card" style="cursor:pointer;margin:0 20px 14px;">' + window.NutriUI.renderResumenCard(planM, nutHoy) + '</div>';
+        return;
+      }
+
+      // Fallback: yesterday
+      var dAyer = new Date(); dAyer.setDate(dAyer.getDate() - 1);
+      var fechaAyer = dAyer.getFullYear() + '-' + pad2(dAyer.getMonth()+1) + '-' + pad2(dAyer.getDate());
+      var nutAyer = window.db.getNutricion(alumno.id, fechaAyer);
+      nutAyer.scans = window.db.getFoodScans(alumno.id, fechaAyer);
+
+      if(tieneData(nutAyer)){
+        html += '<div style="padding:0 20px;margin-bottom:4px;">' +
+          '<span style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:0.8px;">datos de ayer</span>' +
+        '</div>' +
+        '<div id="macros-home-card" style="cursor:pointer;margin:0 20px 14px;opacity:0.75;">' + window.NutriUI.renderResumenCard(planM, nutAyer) + '</div>';
+        return;
+      }
+
+      // Empty state — no data at all
+      html += '<div style="background:#141414;border:1px solid rgba(255,255,255,0.07);border-radius:16px;margin:0 20px 14px;padding:24px 20px;text-align:center;">' +
+        '<div style="font-size:36px;margin-bottom:10px;">🥗</div>' +
+        '<div style="font-size:15px;font-weight:700;color:#FFF;margin-bottom:6px;">Registra tu primera comida</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.35);line-height:1.5;">Ve a Nutrición y elige qué comiste hoy.<br>Tu anillo de macros aparecerá aquí.</div>' +
+      '</div>';
     })();
 
     // ── Objetivos del día ────────────────────────────────
@@ -580,6 +609,7 @@
     html += "</div>";
 
     page.innerHTML = html;
+    if(window.NutriUI && window.NutriUI.animarAnillos) window.NutriUI.animarAnillos();
 
     // ── FitScore animado ────────────────────────────────
     var fscEl = document.getElementById("fsc-num");

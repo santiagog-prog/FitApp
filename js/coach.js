@@ -1247,10 +1247,10 @@
 
     // Alertas próximos vencimientos
     if(vencenProx.length){
-      html += "<div class='coach-card'><h3 style='margin-bottom:12px;color:#FF9500;'>⚠️ Vencen pronto</h3>";
+      html += "<div class='coach-card'><h3 style='margin-bottom:12px;color:#C8E000;'>⚠️ Vencen pronto</h3>";
       vencenProx.forEach(function(v){
         var label = v.diasRestantes < 0 ? "Vencido hace " + Math.abs(v.diasRestantes) + " días" : (v.diasRestantes === 0 ? "Vence hoy" : "Vence en " + v.diasRestantes + " día" + (v.diasRestantes!==1?"s":""));
-        var color = v.diasRestantes < 0 ? "#FF453A" : (v.diasRestantes <= 2 ? "#FF9500" : "#C8E000");
+        var color = v.diasRestantes < 0 ? "#FF453A" : (v.diasRestantes <= 2 ? "#C8E000" : "#C8E000");
         html += "<div style='display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #242424;'>" +
           "<div><div style='font-weight:600;'>" + v.alumno.nombre + " " + (v.alumno.apellido||"") + "</div>" +
           "<div style='font-size:12px;color:" + color + ";margin-top:2px;'>" + label + " · $" + (v.precio||0) + "/mes</div></div>" +
