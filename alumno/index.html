@@ -102,5 +102,50 @@
 <script src="../js/pages/mas.js?v=20260617f"></script>
 <script src="../js/pages/cardio.js?v=20260617f"></script>
 <script src="../js/alumno.js?v=20260621b"></script>
+<script>
+// ── Service Worker + Notificaciones ──────────────────────
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("../sw.js", { scope: "../" })
+    .then(function(reg){
+      // Pedir permiso de notificaciones al usuario
+      if("Notification" in window && Notification.permission === "default"){
+        setTimeout(function(){
+          Notification.requestPermission().then(function(perm){
+            if(perm === "granted") _scheduleNotifs(reg);
+          });
+        }, 5000); // Pide permiso 5s después de abrir
+      } else if(Notification.permission === "granted"){
+        _scheduleNotifs(reg);
+      }
+    });
+}
+
+function _scheduleNotifs(){
+  // Recordatorios de comidas según el plan de Santiago (hora local)
+  var RECORDATORIOS = [
+    { hora:7,  min:25, titulo:"🌅 Hora del desayuno", cuerpo:"Dale, empieza bien el día. Registra tu desayuno en FitApp." },
+    { hora:10, min:25, titulo:"🍎 Media mañana", cuerpo:"Snack proteico. Recuerda marcarlo en Nutrición." },
+    { hora:13, min:25, titulo:"🍗 Almuerzo", cuerpo:"La comida más importante. ¿Ya tienes todo listo?" },
+    { hora:16, min:25, titulo:"⚡ Pre-entreno", cuerpo:"Si entrenas hoy, carga carbos ahora. Faltan 5 min." },
+    { hora:19, min:55, titulo:"🌙 Cena", cuerpo:"Alta en proteína, baja en carbos. Registra tu cena." }
+  ];
+  var ahora = new Date();
+  RECORDATORIOS.forEach(function(r){
+    var disparo = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), r.hora, r.min, 0);
+    if(disparo <= ahora) disparo.setDate(disparo.getDate()+1); // Mañana si ya pasó
+    var delay = disparo - ahora;
+    setTimeout(function(){
+      if(Notification.permission === "granted"){
+        new Notification(r.titulo, {
+          body: r.cuerpo,
+          icon: "../assets/icons/icon-192.png",
+          badge: "../assets/icons/icon-192.png",
+          tag: "fitapp-comida-" + r.hora
+        });
+      }
+    }, delay);
+  });
+}
+</script>
 </body>
 </html>
