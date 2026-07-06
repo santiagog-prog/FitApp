@@ -479,13 +479,79 @@
           "<button class='btn-coach secondary' id='btn-eliminar-alumno' style='margin-top:8px;color:#FF6B5B;border-color:rgba(255,69,58,.3);'>🗑️ Eliminar alumno</button>" +
         "</div>";
       } else if(tabActivo === "rutina"){
-        var r = window.db.getRutinaPorId(a.rutina_id);
-        html = "<div class='coach-card'>" + (r ? ("<p><strong>" + r.nombre + "</strong></p><p>" + r.mesociclo + "</p>") : "<p>Sin rutina asignada.</p>") +
-          "<button class='btn-coach secondary' id='btn-cambiar-rutina' style='margin-top:10px;'>Cambiar rutina</button></div>";
+        var rut = window.db.getRutinaPorId(a.rutina_id);
+        var ejBib = window.db.getEjercicios();
+        html = "<div class='coach-card'>" +
+          "<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;'>" +
+            "<div>" +
+              "<div style='font-size:14px;font-weight:700;'>" + (rut ? rut.nombre : "Sin rutina asignada") + "</div>" +
+              (rut && rut.mesociclo ? "<span style='background:#1C1C1E;border-radius:99px;padding:3px 10px;font-size:11px;color:#C8E000;margin-top:4px;display:inline-block;'>" + rut.mesociclo + "</span>" : "") +
+            "</div>" +
+            "<button class='btn-coach secondary' id='btn-cambiar-rutina' style='font-size:12px;padding:7px 14px;'>Cambiar rutina</button>" +
+          "</div>" +
+          (rut ? rut.dias.map(function(dia, di){
+            return "<div style='margin-bottom:16px;'>" +
+              "<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.07);'>" +
+                "<span style='font-size:12px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:0.5px;'>" + dia.nombre + " <span style='color:rgba(255,255,255,0.3);font-weight:400;text-transform:none;letter-spacing:0;'>" + (dia.tipo||"") + "</span></span>" +
+                "<button class='btn-coach secondary btn-add-ej-dia' data-di='" + di + "' style='font-size:11px;padding:4px 10px;'>+ Ejercicio</button>" +
+              "</div>" +
+              (dia.ejercicios && dia.ejercicios.length ? dia.ejercicios.map(function(ej, ei){
+                return "<div style='display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#1C1C1E;border-radius:10px;margin-bottom:6px;'>" +
+                  "<div style='flex:1;min-width:0;'>" +
+                    "<div style='font-size:14px;font-weight:600;'>" + ej.nombre + "</div>" +
+                    "<div style='font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;'>" + (ej.series||3) + " series × " + (ej.repeticiones||"12") + (ej.descanso_seg ? " · " + ej.descanso_seg + "s descanso" : "") + (ej.peso_sugerido ? " · " + ej.peso_sugerido + "kg sugerido" : "") + "</div>" +
+                    (ej.nota_tecnica ? "<div style='font-size:11px;color:rgba(200,224,0,0.65);margin-top:4px;line-height:1.4;'>💡 " + ej.nota_tecnica.slice(0,80) + (ej.nota_tecnica.length>80?"…":"") + "</div>" : "") +
+                  "</div>" +
+                  "<button class='btn-coach secondary btn-edit-ej' data-di='" + di + "' data-ei='" + ei + "' style='font-size:11px;padding:5px 10px;flex-shrink:0;'>✏️ Editar</button>" +
+                  "<button class='btn-del-ej' data-di='" + di + "' data-ei='" + ei + "' style='background:none;border:none;color:#FF453A;cursor:pointer;font-size:18px;flex-shrink:0;padding:4px;'>✕</button>" +
+                "</div>";
+              }).join("") : "<p style='font-size:13px;color:rgba(255,255,255,0.25);margin:6px 0;'>Sin ejercicios en este día</p>") +
+            "</div>";
+          }).join("") : "<p style='color:rgba(255,255,255,0.3);text-align:center;padding:20px 0;'>Asigna una rutina para editarla aquí</p>") +
+        "</div>";
       } else if(tabActivo === "alimentacion"){
-        var p = window.db.getPlanPorId(a.plan_alimentacion_id);
-        html = "<div class='coach-card'>" + (p ? ("<p><strong>" + p.nombre + "</strong></p><p>Objetivo calórico: " + p.calorias_objetivo + " kcal</p>") : "<p>Sin plan asignado.</p>") +
-          "<button class='btn-coach secondary' id='btn-cambiar-plan' style='margin-top:10px;'>Cambiar plan</button></div>";
+        var plan = window.db.getPlanPorId(a.plan_alimentacion_id);
+        html = "<div class='coach-card'>" +
+          "<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;'>" +
+            "<div style='font-size:14px;font-weight:700;'>" + (plan ? plan.nombre : "Sin plan asignado") + "</div>" +
+            "<button class='btn-coach secondary' id='btn-cambiar-plan' style='font-size:12px;padding:7px 14px;'>Cambiar plan</button>" +
+          "</div>" +
+          (plan ? (
+            "<div style='display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;'>" +
+              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Kcal objetivo</div><div style='font-size:18px;font-weight:800;color:#C8E000;'>" + (plan.calorias_objetivo||0) + "</div></div>" +
+              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Proteína</div><div style='font-size:18px;font-weight:800;color:#30D158;'>" + ((plan.macros||{}).proteina||0) + "g</div></div>" +
+              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Carbohidratos</div><div style='font-size:18px;font-weight:800;color:#0A84FF;'>" + ((plan.macros||{}).carbohidratos||0) + "g</div></div>" +
+              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Grasas</div><div style='font-size:18px;font-weight:800;color:#FF9F0A;'>" + ((plan.macros||{}).grasas||0) + "g</div></div>" +
+            "</div>" +
+            "<button class='btn-coach secondary' id='btn-edit-macros' style='width:100%;margin-bottom:14px;'>✏️ Editar kcal y macros</button>" +
+            "<div id='comidas-list'>" +
+            (plan.comidas||[]).map(function(comida, ci){
+              return "<div style='background:#1C1C1E;border-radius:12px;padding:12px 14px;margin-bottom:8px;'>" +
+                "<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;'>" +
+                  "<div>" +
+                    "<div style='font-size:14px;font-weight:700;'>" + comida.nombre + (comida.hora ? " <span style='color:rgba(255,255,255,0.3);font-size:12px;font-weight:400;'>· " + comida.hora + "</span>" : "") + "</div>" +
+                    "<div style='font-size:12px;color:rgba(255,255,255,0.35);margin-top:2px;'>" + (comida.opciones||[]).length + " opciones</div>" +
+                  "</div>" +
+                  "<div style='display:flex;gap:6px;'>" +
+                    "<button class='btn-coach secondary btn-edit-comida' data-ci='" + ci + "' style='font-size:11px;padding:5px 10px;'>✏️</button>" +
+                    "<button class='btn-del-comida' data-ci='" + ci + "' style='background:none;border:none;color:#FF453A;cursor:pointer;font-size:18px;padding:4px;'>✕</button>" +
+                  "</div>" +
+                "</div>" +
+                (comida.opciones||[]).map(function(op, oi){
+                  return "<div style='display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:4px;'>" +
+                    "<div style='flex:1;font-size:12px;color:rgba(255,255,255,0.6);'>" + op.nombre + "</div>" +
+                    "<div style='font-size:11px;color:rgba(255,255,255,0.3);'>" + (op.calorias_total||0) + " kcal</div>" +
+                    "<button class='btn-edit-opcion btn-coach secondary' data-ci='" + ci + "' data-oi='" + oi + "' style='font-size:10px;padding:3px 8px;'>✏️</button>" +
+                    "<button class='btn-del-opcion' data-ci='" + ci + "' data-oi='" + oi + "' style='background:none;border:none;color:#FF453A;cursor:pointer;font-size:14px;padding:2px 4px;'>✕</button>" +
+                  "</div>";
+                }).join("") +
+                "<button class='btn-coach secondary btn-add-opcion' data-ci='" + ci + "' style='font-size:11px;padding:5px 10px;margin-top:6px;width:100%;'>+ Opción de comida</button>" +
+              "</div>";
+            }).join("") +
+            "</div>" +
+            "<button class='btn-coach secondary' id='btn-add-comida' style='width:100%;margin-top:6px;'>+ Agregar comida</button>"
+          ) : "<p style='color:rgba(255,255,255,0.3);text-align:center;padding:20px 0;'>Asigna un plan para editarlo aquí</p>") +
+        "</div>";
       } else if(tabActivo === "progreso"){
         var pesos = window.db.getPesos(a.id), regs = window.db.getRegistros(a.id), medallas = window.db.getMedallas(a.id);
         var ultPesos = pesos.slice(-8);
@@ -542,28 +608,247 @@
         });
       }
       if(tabActivo === "rutina"){
-        $("#btn-cambiar-rutina").addEventListener("click", function(){
+        var ejBib2 = window.db.getEjercicios();
+        // Cambiar rutina asignada
+        var btnCambiarRut = document.getElementById("btn-cambiar-rutina");
+        if(btnCambiarRut) btnCambiarRut.addEventListener("click", function(){
           var rutinas = window.db.getRutinas();
           coachModal("Cambiar rutina", "<select id='sel-rutina' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;'>" +
             rutinas.map(function(r){ return "<option value='"+r.id+"'" + (r.id===a.rutina_id?" selected":"") + ">"+r.nombre+"</option>"; }).join("") +
             "</select><button class='btn-coach' id='guardar-rutina-sel' style='margin-top:14px;'>Guardar</button>", function(){
-            $("#guardar-rutina-sel").addEventListener("click", function(){
-              a.rutina_id = $("#sel-rutina").value; window.db.saveAlumno(a); window.cerrarCoachModal(); renderTab();
+            document.getElementById("guardar-rutina-sel").addEventListener("click", function(){
+              a.rutina_id = document.getElementById("sel-rutina").value; window.db.saveAlumno(a); window.cerrarCoachModal(); renderTab();
+            });
+          });
+        });
+        // Editar ejercicio
+        box.querySelectorAll(".btn-edit-ej").forEach(function(btn){
+          btn.addEventListener("click", function(){
+            var di = parseInt(this.getAttribute("data-di"),10), ei = parseInt(this.getAttribute("data-ei"),10);
+            var rr = window.db.getRutinaPorId(a.rutina_id); if(!rr) return;
+            var ej = rr.dias[di].ejercicios[ei];
+            coachModal("✏️ Editar ejercicio", "<div class='coach-form'>" +
+              "<label>Nombre</label><input id='ee-nom' value='" + (ej.nombre||"").replace(/'/g,"&#39;") + "'>" +
+              "<div class='row2'><div><label>Series</label><input id='ee-series' type='number' value='" + (ej.series||3) + "'></div><div><label>Reps / RIR</label><input id='ee-reps' value='" + (ej.repeticiones||"12") + "'></div></div>" +
+              "<div class='row2'><div><label>Descanso (seg)</label><input id='ee-desc' type='number' value='" + (ej.descanso_seg||90) + "'></div><div><label>Peso sugerido (kg)</label><input id='ee-peso' type='number' step='0.5' value='" + (ej.peso_sugerido||0) + "'></div></div>" +
+              "<label>Video URL (YouTube / TikTok)</label><input id='ee-vid' value='" + (ej.video_url||"") + "' placeholder='https://...'>" +
+              "<label>💡 Técnica TikTok</label><p style='font-size:11px;color:rgba(255,255,255,0.35);margin:-6px 0 6px;'>Escribe cues, errores comunes y tips estilo TikTok trainer</p>" +
+              "<textarea id='ee-tec' style='width:100%;min-height:130px;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;resize:vertical;font-family:inherit;font-size:13px;' placeholder='🔥 Cue: empuja el suelo, no jales la barra&#10;⚠️ Error: no redondees la espalda baja&#10;✅ Tip: exhala en el esfuerzo, inhala en la bajada'>" + (ej.nota_tecnica||"") + "</textarea>" +
+              "<button class='btn-coach' id='ee-guardar' style='margin-top:14px;'>Guardar cambios</button>" +
+            "</div>", function(){
+              document.getElementById("ee-guardar").addEventListener("click", function(){
+                var rr2 = window.db.getRutinaPorId(a.rutina_id); if(!rr2) return;
+                var e2 = rr2.dias[di].ejercicios[ei];
+                e2.nombre = document.getElementById("ee-nom").value;
+                e2.series = parseInt(document.getElementById("ee-series").value,10)||3;
+                e2.repeticiones = document.getElementById("ee-reps").value;
+                e2.descanso_seg = parseInt(document.getElementById("ee-desc").value,10)||90;
+                e2.peso_sugerido = parseFloat(document.getElementById("ee-peso").value)||0;
+                e2.video_url = document.getElementById("ee-vid").value;
+                e2.nota_tecnica = document.getElementById("ee-tec").value;
+                e2.sets = Array.from({length:e2.series}, function(_,si){ return (e2.sets&&e2.sets[si]) ? e2.sets[si] : {reps:10,peso:e2.peso_sugerido||0}; });
+                window.db.saveRutina(rr2); window.cerrarCoachModal(); renderTab();
+              });
+            });
+          });
+        });
+        // Eliminar ejercicio
+        box.querySelectorAll(".btn-del-ej").forEach(function(btn){
+          btn.addEventListener("click", function(){
+            if(!confirm("¿Quitar este ejercicio?")) return;
+            var di = parseInt(this.getAttribute("data-di"),10), ei = parseInt(this.getAttribute("data-ei"),10);
+            var rr = window.db.getRutinaPorId(a.rutina_id); if(!rr) return;
+            rr.dias[di].ejercicios.splice(ei,1); window.db.saveRutina(rr); renderTab();
+          });
+        });
+        // Agregar ejercicio al día
+        box.querySelectorAll(".btn-add-ej-dia").forEach(function(btn){
+          btn.addEventListener("click", function(){
+            var di = parseInt(this.getAttribute("data-di"),10);
+            coachModal("➕ Agregar ejercicio", "<div class='coach-form'>" +
+              "<label>Ejercicio</label><select id='ae-bib' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;'>" +
+              ejBib2.map(function(e){ return "<option value='"+e.id+"'>"+e.nombre+" ("+e.grupo+")</option>"; }).join("") + "</select>" +
+              "<div class='row2'><div><label>Series</label><input id='ae-series' type='number' value='3'></div><div><label>Reps / RIR</label><input id='ae-reps' value='12'></div></div>" +
+              "<div class='row2'><div><label>Descanso (seg)</label><input id='ae-desc' type='number' value='90'></div><div><label>Peso sugerido (kg)</label><input id='ae-peso' type='number' step='0.5' value='0'></div></div>" +
+              "<label>Video URL (opcional)</label><input id='ae-vid' placeholder='https://...'>" +
+              "<label>💡 Técnica TikTok</label>" +
+              "<textarea id='ae-tec' style='width:100%;min-height:100px;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;resize:vertical;font-family:inherit;font-size:13px;' placeholder='Tips de técnica para este ejercicio...'></textarea>" +
+              "<button class='btn-coach' id='ae-confirmar' style='margin-top:14px;'>Agregar</button>" +
+            "</div>", function(){
+              document.getElementById("ae-confirmar").addEventListener("click", function(){
+                var selId = document.getElementById("ae-bib").value;
+                var ejBase = ejBib2.filter(function(e){ return e.id===selId; })[0] || {};
+                var series = parseInt(document.getElementById("ae-series").value,10)||3;
+                var rr = window.db.getRutinaPorId(a.rutina_id); if(!rr) return;
+                rr.dias[di].ejercicios.push({
+                  id: window.db.generarId("ej"), nombre: ejBase.nombre||"Ejercicio", grupo: ejBase.grupo||"",
+                  series: series, repeticiones: document.getElementById("ae-reps").value||"12",
+                  descanso_seg: parseInt(document.getElementById("ae-desc").value,10)||90,
+                  peso_sugerido: parseFloat(document.getElementById("ae-peso").value)||0,
+                  video_url: document.getElementById("ae-vid").value || (ejBase.video_url||""),
+                  foto: ejBase.foto||"", nota_tecnica: document.getElementById("ae-tec").value,
+                  sets: Array.from({length:series}, function(){ return {reps:10,peso:0}; })
+                });
+                window.db.saveRutina(rr); window.cerrarCoachModal(); renderTab();
+              });
             });
           });
         });
       }
       if(tabActivo === "alimentacion"){
-        $("#btn-cambiar-plan").addEventListener("click", function(){
+        var planEdit = window.db.getPlanPorId(a.plan_alimentacion_id);
+        // Cambiar plan asignado
+        var btnCambiarPlan = document.getElementById("btn-cambiar-plan");
+        if(btnCambiarPlan) btnCambiarPlan.addEventListener("click", function(){
           var planes = window.db.getPlanes();
           coachModal("Cambiar plan", "<select id='sel-plan' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;'>" +
             planes.map(function(p){ return "<option value='"+p.id+"'" + (p.id===a.plan_alimentacion_id?" selected":"") + ">"+p.nombre+"</option>"; }).join("") +
-            "</select><button class='btn-coach' id='guardar-plan-sel' style='margin-top:14px;'>Guardar</button></div>", function(){
-            $("#guardar-plan-sel").addEventListener("click", function(){
-              a.plan_alimentacion_id = $("#sel-plan").value; window.db.saveAlumno(a); window.cerrarCoachModal(); renderTab();
+            "</select><button class='btn-coach' id='guardar-plan-sel' style='margin-top:14px;'>Guardar</button>", function(){
+            document.getElementById("guardar-plan-sel").addEventListener("click", function(){
+              a.plan_alimentacion_id = document.getElementById("sel-plan").value; window.db.saveAlumno(a); window.cerrarCoachModal(); renderTab();
             });
           });
         });
+        if(planEdit){
+          // Editar kcal y macros
+          var btnEditMacros = document.getElementById("btn-edit-macros");
+          if(btnEditMacros) btnEditMacros.addEventListener("click", function(){
+            var m = planEdit.macros||{};
+            coachModal("✏️ Editar kcal y macros", "<div class='coach-form'>" +
+              "<label>Kcal objetivo</label><input id='em-kcal' type='number' value='" + (planEdit.calorias_objetivo||2000) + "'>" +
+              "<div class='row2'><div><label>Proteína (g)</label><input id='em-prot' type='number' value='" + (m.proteina||150) + "'></div><div><label>Carbohidratos (g)</label><input id='em-carb' type='number' value='" + (m.carbohidratos||250) + "'></div></div>" +
+              "<div><label>Grasas (g)</label><input id='em-gras' type='number' value='" + (m.grasas||70) + "'></div>" +
+              "<button class='btn-coach' id='em-guardar' style='margin-top:14px;'>Guardar</button>" +
+            "</div>", function(){
+              document.getElementById("em-guardar").addEventListener("click", function(){
+                var pp = window.db.getPlanPorId(a.plan_alimentacion_id); if(!pp) return;
+                pp.calorias_objetivo = parseInt(document.getElementById("em-kcal").value,10)||2000;
+                pp.macros = { proteina: parseInt(document.getElementById("em-prot").value,10)||150, carbohidratos: parseInt(document.getElementById("em-carb").value,10)||250, grasas: parseInt(document.getElementById("em-gras").value,10)||70 };
+                window.db.savePlan(pp); window.cerrarCoachModal(); renderTab();
+              });
+            });
+          });
+          // Editar comida (nombre + hora)
+          box.querySelectorAll(".btn-edit-comida").forEach(function(btn){
+            btn.addEventListener("click", function(){
+              var ci = parseInt(this.getAttribute("data-ci"),10);
+              var pp = window.db.getPlanPorId(a.plan_alimentacion_id); if(!pp) return;
+              var com = pp.comidas[ci];
+              coachModal("✏️ Editar comida", "<div class='coach-form'>" +
+                "<label>Nombre</label><input id='ec-nom' value='" + (com.nombre||"").replace(/'/g,"&#39;") + "'>" +
+                "<label>Hora</label><input id='ec-hora' type='time' value='" + (com.hora||"12:00") + "'>" +
+                "<label>Descripción</label><textarea id='ec-desc' style='width:100%;padding:8px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;min-height:60px;'>" + (com.descripcion||"") + "</textarea>" +
+                "<button class='btn-coach' id='ec-guardar' style='margin-top:14px;'>Guardar</button>" +
+              "</div>", function(){
+                document.getElementById("ec-guardar").addEventListener("click", function(){
+                  var pp2 = window.db.getPlanPorId(a.plan_alimentacion_id); if(!pp2) return;
+                  pp2.comidas[ci].nombre = document.getElementById("ec-nom").value;
+                  pp2.comidas[ci].hora = document.getElementById("ec-hora").value;
+                  pp2.comidas[ci].descripcion = document.getElementById("ec-desc").value;
+                  window.db.savePlan(pp2); window.cerrarCoachModal(); renderTab();
+                });
+              });
+            });
+          });
+          // Eliminar comida
+          box.querySelectorAll(".btn-del-comida").forEach(function(btn){
+            btn.addEventListener("click", function(){
+              if(!confirm("¿Eliminar esta comida del plan?")) return;
+              var ci = parseInt(this.getAttribute("data-ci"),10);
+              var pp = window.db.getPlanPorId(a.plan_alimentacion_id); if(!pp) return;
+              pp.comidas.splice(ci,1); window.db.savePlan(pp); renderTab();
+            });
+          });
+          // Editar opción de comida
+          box.querySelectorAll(".btn-edit-opcion").forEach(function(btn){
+            btn.addEventListener("click", function(){
+              var ci = parseInt(this.getAttribute("data-ci"),10), oi = parseInt(this.getAttribute("data-oi"),10);
+              var pp = window.db.getPlanPorId(a.plan_alimentacion_id); if(!pp) return;
+              var op = pp.comidas[ci].opciones[oi];
+              coachModal("✏️ Editar opción", "<div class='coach-form'>" +
+                "<label>Nombre de la opción</label><input id='eo-nom' value='" + (op.nombre||"").replace(/'/g,"&#39;") + "'>" +
+                "<label>Kcal totales</label><input id='eo-kcal' type='number' value='" + (op.calorias_total||0) + "'>" +
+                "<label>Alimentos (uno por línea: cantidad nombre kcal prot carb gras)</label>" +
+                "<textarea id='eo-ings' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;min-height:140px;font-family:monospace;font-size:12px;'>" +
+                (op.alimentos||[]).map(function(al){ return (al.cantidad||"") + " | " + al.nombre + " | " + (al.calorias||0) + " kcal | P:" + (al.proteina||0) + "g | C:" + (al.carbos||0) + "g | G:" + (al.grasas||0) + "g"; }).join("\n") +
+                "</textarea>" +
+                "<p style='font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;'>Formato: cantidad | nombre | kcal | P:Xg | C:Xg | G:Xg</p>" +
+                "<button class='btn-coach' id='eo-guardar' style='margin-top:14px;'>Guardar</button>" +
+              "</div>", function(){
+                document.getElementById("eo-guardar").addEventListener("click", function(){
+                  var pp2 = window.db.getPlanPorId(a.plan_alimentacion_id); if(!pp2) return;
+                  var op2 = pp2.comidas[ci].opciones[oi];
+                  op2.nombre = document.getElementById("eo-nom").value;
+                  op2.calorias_total = parseInt(document.getElementById("eo-kcal").value,10)||0;
+                  var lines = document.getElementById("eo-ings").value.split("\n").filter(function(l){ return l.trim(); });
+                  op2.alimentos = lines.map(function(line){
+                    var parts = line.split("|").map(function(s){ return s.trim(); });
+                    return {
+                      cantidad: parts[0]||"", nombre: parts[1]||"Alimento",
+                      calorias: parseInt((parts[2]||"0").replace(/[^\d]/g,""))||0,
+                      proteina: parseInt((parts[3]||"0").replace(/[^\d]/g,""))||0,
+                      carbos: parseInt((parts[4]||"0").replace(/[^\d]/g,""))||0,
+                      grasas: parseInt((parts[5]||"0").replace(/[^\d]/g,""))||0
+                    };
+                  });
+                  window.db.savePlan(pp2); window.cerrarCoachModal(); renderTab();
+                });
+              });
+            });
+          });
+          // Eliminar opción
+          box.querySelectorAll(".btn-del-opcion").forEach(function(btn){
+            btn.addEventListener("click", function(){
+              if(!confirm("¿Eliminar esta opción?")) return;
+              var ci = parseInt(this.getAttribute("data-ci"),10), oi = parseInt(this.getAttribute("data-oi"),10);
+              var pp = window.db.getPlanPorId(a.plan_alimentacion_id); if(!pp) return;
+              pp.comidas[ci].opciones.splice(oi,1); window.db.savePlan(pp); renderTab();
+            });
+          });
+          // Agregar opción a comida
+          box.querySelectorAll(".btn-add-opcion").forEach(function(btn){
+            btn.addEventListener("click", function(){
+              var ci = parseInt(this.getAttribute("data-ci"),10);
+              coachModal("➕ Nueva opción", "<div class='coach-form'>" +
+                "<label>Nombre de la opción</label><input id='ao-nom' placeholder='Ej: Avena proteica con banana 🔥'>" +
+                "<label>Kcal totales</label><input id='ao-kcal' type='number' value='0'>" +
+                "<label>Alimentos (uno por línea)</label>" +
+                "<textarea id='ao-ings' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;min-height:120px;font-family:monospace;font-size:12px;' placeholder='70g | Avena en hojuelas | 266 kcal | P:10g | C:47g | G:5g\n1 unidad | Banana | 89 kcal | P:1g | C:23g | G:0g'></textarea>" +
+                "<button class='btn-coach' id='ao-guardar' style='margin-top:14px;'>Agregar opción</button>" +
+              "</div>", function(){
+                document.getElementById("ao-guardar").addEventListener("click", function(){
+                  var pp = window.db.getPlanPorId(a.plan_alimentacion_id); if(!pp) return;
+                  var lines = document.getElementById("ao-ings").value.split("\n").filter(function(l){ return l.trim(); });
+                  pp.comidas[ci].opciones.push({
+                    nombre: document.getElementById("ao-nom").value||"Nueva opción",
+                    calorias_total: parseInt(document.getElementById("ao-kcal").value,10)||0,
+                    alimentos: lines.map(function(line){
+                      var parts = line.split("|").map(function(s){ return s.trim(); });
+                      return { cantidad:parts[0]||"", nombre:parts[1]||"Alimento", calorias:parseInt((parts[2]||"0").replace(/[^\d]/g,""))||0, proteina:parseInt((parts[3]||"0").replace(/[^\d]/g,""))||0, carbos:parseInt((parts[4]||"0").replace(/[^\d]/g,""))||0, grasas:parseInt((parts[5]||"0").replace(/[^\d]/g,""))||0 };
+                    })
+                  });
+                  window.db.savePlan(pp); window.cerrarCoachModal(); renderTab();
+                });
+              });
+            });
+          });
+          // Agregar comida nueva
+          var btnAddComida = document.getElementById("btn-add-comida");
+          if(btnAddComida) btnAddComida.addEventListener("click", function(){
+            coachModal("➕ Nueva comida", "<div class='coach-form'>" +
+              "<label>Nombre</label><input id='nc-nom' placeholder='Ej: Desayuno'>" +
+              "<label>Hora</label><input id='nc-hora' type='time' value='08:00'>" +
+              "<label>Descripción</label><textarea id='nc-desc' style='width:100%;padding:8px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;min-height:60px;'></textarea>" +
+              "<button class='btn-coach' id='nc-guardar' style='margin-top:14px;'>Crear comida</button>" +
+            "</div>", function(){
+              document.getElementById("nc-guardar").addEventListener("click", function(){
+                var pp = window.db.getPlanPorId(a.plan_alimentacion_id); if(!pp) return;
+                pp.comidas.push({ nombre: document.getElementById("nc-nom").value||"Comida", hora: document.getElementById("nc-hora").value, descripcion: document.getElementById("nc-desc").value, opciones:[] });
+                window.db.savePlan(pp); window.cerrarCoachModal(); renderTab();
+              });
+            });
+          });
+        }
       }
       if(tabActivo === "notas"){
         $("#btn-enviar-nota").addEventListener("click", function(){
