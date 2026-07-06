@@ -182,7 +182,7 @@
           '<div class="ncb-nombre">' + comida.nombre + (comida.hora ? ' <span style="font-size:11px;color:rgba(255,255,255,0.35);font-weight:400;">· ' + comida.hora + '</span>' : '') + '</div>' +
           (elegida ? (function(){
             var desc = _generarDescReceta(elegida);
-            return '<div style="margin-top:8px;padding:12px 14px;background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;font-style:italic;">' + desc + '</div>';
+            return '<div style="margin-top:8px;padding:12px 14px;background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;">' + desc + '</div>';
           })() : '') +
         '</div>' +
         (elegida ? '<div class="ncb-kcal">' + (elegida.calorias_total || 0) + ' kcal</div>' : '') +
