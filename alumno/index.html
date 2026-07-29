@@ -105,7 +105,8 @@
 <script>
 // ── Service Worker + Notificaciones ──────────────────────
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("../sw.js", { scope: "../" })
+  // No explicit scope — defaults to /FitApp/ (the SW file's directory), which is correct
+  navigator.serviceWorker.register("../sw.js")
     .then(function(reg){
       // Pedir permiso de notificaciones al usuario
       if("Notification" in window && Notification.permission === "default"){
