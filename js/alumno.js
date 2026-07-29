@@ -171,26 +171,49 @@
     document.body.appendChild(loadEl);
     setTimeout(function(){ var b = document.getElementById("db-load-bar"); if(b) b.style.width = "80%"; }, 50);
 
-    window.db.init(window.ALUMNO_ID)
-      .then(function(){
-        // Ahora sí el caché está poblado: validar que la sesión sea real
-        if(!window.db.getAlumnoPorId(window.ALUMNO_ID)){
-          window.db.clearSesion();
-          location.href = "../index.html";
-          return;
-        }
-        loadEl.remove();
-        showPage("inicio");
-      })
-      .catch(function(err){
-        console.error("[alumno] db.init error:", err);
-        loadEl.innerHTML =
-          '<div style="text-align:center;color:#ff6b6b;padding:32px;">' +
-            '<div style="font-size:36px;margin-bottom:12px;">⚠️</div>' +
-            '<div style="font-weight:700;font-size:16px;margin-bottom:8px;">Sin conexión</div>' +
-            '<div style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:24px;">Verifica tu conexión a internet.<br>Reintentando en 3 segundos...</div>' +
-          '</div>';
-        setTimeout(function(){ location.reload(); }, 3000);
-      });
+    var _dbInitRetries = 0;
+    function intentarInit(){
+      window.db.init(window.ALUMNO_ID)
+        .then(function(){
+          // API respondió — validar que el alumno exista de verdad
+          if(!window.db.getAlumnoPorId(window.ALUMNO_ID)){
+            // El alumno no existe en la base de datos (código incorrecto o borrado)
+            window.db.clearSesion();
+            location.href = "../index.html";
+            return;
+          }
+          loadEl.remove();
+          showPage("inicio");
+        })
+        .catch(function(err){
+          console.error("[alumno] db.init error:", err);
+          _dbInitRetries++;
+          var mensaje = _dbInitRetries >= 2
+            ? "El servidor está temporalmente caído.<br>Inténtalo más tarde."
+            : "Sin conexión al servidor.<br>Reintentando...";
+          loadEl.innerHTML =
+            '<div style="text-align:center;padding:32px;max-width:280px;">' +
+              '<div style="font-size:40px;margin-bottom:14px;">📡</div>' +
+              '<div style="font-weight:800;font-size:16px;color:#fff;margin-bottom:8px;">No se pudo conectar</div>' +
+              '<div style="color:rgba(255,255,255,0.45);font-size:13px;line-height:1.5;margin-bottom:20px;">' + mensaje + '</div>' +
+              '<button id="btn-reintentar" style="background:#C8E000;color:#0A0A0A;font-weight:800;font-size:14px;padding:12px 28px;border:none;border-radius:99px;cursor:pointer;margin-bottom:10px;display:block;width:100%;">Reintentar</button>' +
+              '<button id="btn-cerrar-sesion" style="background:transparent;color:rgba(255,255,255,0.3);font-size:12px;padding:8px;border:none;cursor:pointer;display:block;width:100%;">Cerrar sesión</button>' +
+            '</div>';
+          // Reintentar manual
+          document.getElementById("btn-reintentar").addEventListener("click", function(){
+            loadEl.innerHTML = '<div style="color:#C8E000;font-weight:800;font-size:15px;">Conectando...</div>';
+            setTimeout(intentarInit, 300);
+          });
+          // Cerrar sesión y volver al login
+          document.getElementById("btn-cerrar-sesion").addEventListener("click", function(){
+            window.db.clearSesion(); location.href = "../index.html";
+          });
+          // Auto-reintentar UNA sola vez después de 8s (no loop infinito)
+          if(_dbInitRetries < 2){
+            setTimeout(intentarInit, 8000);
+          }
+        });
+    }
+    intentarInit();
   });
 })();
