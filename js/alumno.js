@@ -155,7 +155,7 @@
     var loadEl = document.createElement("div");
     loadEl.id = "db-loading-screen";
     loadEl.style.cssText = "position:fixed;inset:0;z-index:99999;background:#0A0A0A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;";
-    loadEl.innerHTML =
+    var LOGO_SMALL =
       '<svg width="56" height="56" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">' +
         '<rect width="96" height="96" rx="22" fill="#0F1500"/>' +
         '<rect x="30" y="44" width="36" height="8" rx="4" fill="#C8E000"/>' +
@@ -163,13 +163,26 @@
         '<rect x="11" y="42" width="9" height="12" rx="3" fill="#C8E000" opacity=".55"/>' +
         '<rect x="65" y="38" width="12" height="20" rx="4" fill="#C8E000"/>' +
         '<rect x="76" y="42" width="9" height="12" rx="3" fill="#C8E000" opacity=".55"/>' +
-      '</svg>' +
-      '<div style="color:#C8E000;font-weight:800;font-size:15px;letter-spacing:.5px;">Cargando tu perfil...</div>' +
-      '<div style="width:120px;height:3px;background:#1a1a1a;border-radius:99px;overflow:hidden;">' +
-        '<div id="db-load-bar" style="height:100%;width:0;background:#C8E000;border-radius:99px;transition:width 2s ease;"></div>' +
-      '</div>';
+      '</svg>';
+    function renderCargando(msg){
+      loadEl.innerHTML =
+        LOGO_SMALL +
+        '<div id="db-load-msg" style="color:#C8E000;font-weight:800;font-size:15px;letter-spacing:.5px;text-align:center;">' + (msg||"Cargando tu perfil...") + '</div>' +
+        '<div style="width:120px;height:3px;background:#1a1a1a;border-radius:99px;overflow:hidden;">' +
+          '<div id="db-load-bar" style="height:100%;width:0;background:#C8E000;border-radius:99px;transition:width 18s linear;"></div>' +
+        '</div>' +
+        '<div id="db-load-sub" style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;max-width:220px;line-height:1.5;"></div>';
+    }
+    renderCargando("Cargando tu perfil...");
     document.body.appendChild(loadEl);
-    setTimeout(function(){ var b = document.getElementById("db-load-bar"); if(b) b.style.width = "80%"; }, 50);
+    setTimeout(function(){ var b=document.getElementById("db-load-bar"); if(b) b.style.width="90%"; }, 80);
+    // Si tarda más de 5s mostramos mensaje tranquilizador
+    var _slowTimer = setTimeout(function(){
+      var msg=document.getElementById("db-load-msg");
+      var sub=document.getElementById("db-load-sub");
+      if(msg) msg.textContent="Conectando con el servidor...";
+      if(sub) sub.textContent="Esto puede tardar unos segundos la primera vez del día.";
+    }, 5000);
 
     var _dbInitRetries = 0;
     function intentarInit(){
@@ -182,11 +195,13 @@
             location.href = "../index.html";
             return;
           }
+          clearTimeout(_slowTimer);
           loadEl.remove();
           showPage("inicio");
         })
         .catch(function(err){
           console.error("[alumno] db.init error:", err);
+          clearTimeout(_slowTimer);
           _dbInitRetries++;
           var mensaje = _dbInitRetries >= 2
             ? "El servidor está temporalmente caído.<br>Inténtalo más tarde."
