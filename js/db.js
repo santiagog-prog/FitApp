@@ -643,7 +643,7 @@
         objetivo:"ganancia_muscular",nivel:"principiante",duracion_semanas:4,
         mesociclo:"Mesociclo 2 – Push Pull Legs + Torso – Principiante – 4 semanas",
         dias:[
-          {numero:1,nombre:"PUSH",tipo:"fuerza",ejercicios:[
+          {numero:1,nombre:"PUSH",dia_semana:"Lunes",tipo:"fuerza",ejercicios:[
             {id:"ej2_1",nombre:"Peck Deck",grupo:"Pecho",series:3,repeticiones:"8-10/RIR 1",descanso_seg:90,nota_tecnica:"Rango completo, contracción en el pico",sets:[{reps:9,peso:20},{reps:9,peso:20},{reps:8,peso:20}]},
             {id:"ej2_2",nombre:"Press horizontal en máquina",grupo:"Pecho",series:3,repeticiones:"10/RIR 1",descanso_seg:90,nota_tecnica:"Codos a 45°, controla el descenso",sets:[{reps:10,peso:30},{reps:10,peso:30},{reps:10,peso:30}]},
             {id:"ej2_3",nombre:"Press militar con mancuerna sentado",grupo:"Hombros",series:3,repeticiones:"10/RIR 2",descanso_seg:90,nota_tecnica:"Espalda apoyada, sin arquear lumbar",sets:[{reps:10,peso:12},{reps:10,peso:12},{reps:10,peso:12}]},
@@ -651,7 +651,7 @@
             {id:"ej2_5",nombre:"Extensión de tríceps en polea con barra recta",grupo:"Tríceps",series:3,repeticiones:"12/RIR 2",descanso_seg:60,nota_tecnica:"Codos fijos pegados al torso",video_url:"https://www.youtube.com/watch?v=2-LAMcpzODU",foto:"https://img.youtube.com/vi/2-LAMcpzODU/mqdefault.jpg",superserie:"A",superserie_rondas:3,sets:[{reps:12,peso:15},{reps:12,peso:15},{reps:12,peso:15}]},
             {id:"ej2_6",nombre:"Fondos en máquina agarre neutro",grupo:"Tríceps",series:2,repeticiones:"12/RIR 2",descanso_seg:90,nota_tecnica:"Torso ligeramente inclinado adelante",sets:[{reps:12,peso:0},{reps:12,peso:0}]}
           ]},
-          {numero:2,nombre:"PULL",tipo:"fuerza",ejercicios:[
+          {numero:2,nombre:"PULL",dia_semana:"Martes",tipo:"fuerza",ejercicios:[
             {id:"ej2_7",nombre:"Jalón neutro en polea",grupo:"Espalda",series:3,repeticiones:"10-12/RIR 1",descanso_seg:90,nota_tecnica:"Estira los brazos al máximo arriba",sets:[{reps:11,peso:40},{reps:11,peso:40},{reps:10,peso:40}]},
             {id:"ej2_8",nombre:"Remo prono con barra",grupo:"Espalda",series:3,repeticiones:"10/RIR 1",descanso_seg:90,nota_tecnica:"Espalda recta, lleva la barra al abdomen",sets:[{reps:10,peso:35},{reps:10,peso:35},{reps:10,peso:35}]},
             {id:"ej2_9",nombre:"Face Pull",grupo:"Espalda",series:3,repeticiones:"12/RIR 2",descanso_seg:60,nota_tecnica:"Tira hacia la cara, codos altos",sets:[{reps:12,peso:15},{reps:12,peso:15},{reps:12,peso:15}]},
@@ -659,7 +659,7 @@
             {id:"ej2_11",nombre:"Curl martillo con mancuerna bilateral de pie",grupo:"Bíceps",series:3,repeticiones:"10/RIR 2",descanso_seg:60,nota_tecnica:"Agarre neutro, sube ambos brazos a la vez",superserie:"B",superserie_rondas:3,sets:[{reps:10,peso:10},{reps:10,peso:10},{reps:10,peso:10}]},
             {id:"ej2_12",nombre:"Encogimiento de hombros en polea",grupo:"Trapecio",series:3,repeticiones:"12/RIR 2",descanso_seg:60,nota_tecnica:"Sube los hombros sin rotar",sets:[{reps:12,peso:30},{reps:12,peso:30},{reps:12,peso:30}]}
           ]},
-          {numero:3,nombre:"LEG 1",tipo:"fuerza",ejercicios:[
+          {numero:3,nombre:"LEG 1",dia_semana:"Miércoles",tipo:"fuerza",ejercicios:[
             {id:"ej2_13",nombre:"Zancadas estáticas",grupo:"Cuádriceps",series:3,repeticiones:"8/RIR 1",descanso_seg:120,nota_tecnica:"Rodilla de atrás casi toca el suelo",sets:[{reps:8,peso:14},{reps:8,peso:14},{reps:8,peso:14}]},
             {id:"ej2_14",nombre:"Prensa inclinada",grupo:"Cuádriceps",series:3,repeticiones:"10/RIR 1",descanso_seg:120,nota_tecnica:"Pies a la anchura de hombros",sets:[{reps:10,peso:90},{reps:10,peso:90},{reps:10,peso:90}]},
             {id:"ej2_15",nombre:"Patada de glúteos en polea",grupo:"Glúteos",series:3,repeticiones:"10/RIR 1",descanso_seg:90,nota_tecnica:"Contracción en el pico, sin balanceo",sets:[{reps:10,peso:15},{reps:10,peso:15},{reps:10,peso:15}]},
@@ -667,7 +667,7 @@
             {id:"ej2_17",nombre:"Curl femoral acostado en máquina",grupo:"Isquiotibiales",series:3,repeticiones:"12/RIR 2",descanso_seg:60,nota_tecnica:"Contrae al final del recorrido",superserie:"C",superserie_rondas:3,sets:[{reps:12,peso:30},{reps:12,peso:30},{reps:12,peso:30}]},
             {id:"ej2_18",nombre:"Gemelos en prensa",grupo:"Pantorrillas",series:3,repeticiones:"15/RIR 1",descanso_seg:60,nota_tecnica:"Rango completo, pausa arriba",sets:[{reps:15,peso:60},{reps:15,peso:60},{reps:15,peso:60}]}
           ]},
-          {numero:4,nombre:"TORSO",tipo:"fuerza",ejercicios:[
+          {numero:4,nombre:"TORSO",dia_semana:"Jueves",tipo:"fuerza",ejercicios:[
             {id:"ej2_19",nombre:"Aperturas en máquina",grupo:"Pecho",series:3,repeticiones:"10/RIR 1",descanso_seg:90,nota_tecnica:"Codos ligeramente flexionados",sets:[{reps:10,peso:18},{reps:10,peso:18},{reps:10,peso:18}]},
             {id:"ej2_20",nombre:"Remo bajo neutro",grupo:"Espalda",series:3,repeticiones:"12/RIR 1",descanso_seg:90,nota_tecnica:"Espalda recta, aprieta los omóplatos",sets:[{reps:12,peso:30},{reps:12,peso:30},{reps:12,peso:30}]},
             {id:"ej2_21",nombre:"Press militar con barra (Military Press)",grupo:"Hombros",series:3,repeticiones:"8/RIR 2",descanso_seg:120,nota_tecnica:"Sin arquear la espalda baja",sets:[{reps:8,peso:25},{reps:8,peso:25},{reps:8,peso:25}]},
@@ -675,7 +675,7 @@
             {id:"ej2_23",nombre:"Jalón supino en polea",grupo:"Espalda",series:3,repeticiones:"10/RIR 1",descanso_seg:60,nota_tecnica:"Agarre supino, lleva la barra al pecho",superserie:"D",superserie_rondas:3,sets:[{reps:10,peso:35},{reps:10,peso:35},{reps:10,peso:35}]},
             {id:"ej2_24",nombre:"Fondos en máquina agarre neutro",grupo:"Tríceps",series:2,repeticiones:"10/RIR 2",descanso_seg:90,nota_tecnica:"Torso ligeramente inclinado adelante",sets:[{reps:10,peso:0},{reps:10,peso:0}]}
           ]},
-          {numero:5,nombre:"Descanso activo",tipo:"descanso",ejercicios:[]}
+          {numero:5,nombre:"Descanso activo",dia_semana:"Viernes",tipo:"descanso",ejercicios:[]}
         ]
       };
 
@@ -723,41 +723,18 @@
       self.savePlan(plan);
       self.saveAlumno(alumno);
 
-      var hoy=new Date(), regs=[];
-      for(var i=9;i>=0;i--){
-        var d=new Date(hoy); d.setDate(d.getDate()-i);
-        var fecha=d.toISOString().split("T")[0];
-        if(i%4!==0){
-          var diaIdx=i%4;
-          regs.push({id:generarId("reg"),alumno_id:"a_demo1",fecha:fecha,dia_numero:diaIdx+1,sesion_nombre:rutina.dias[diaIdx].nombre,duracion_min:45+(i%4)*5,sensacion:3+(i%3),nota:"",ejercicios_completados:rutina.dias[diaIdx].ejercicios.length,ejercicios_total:rutina.dias[diaIdx].ejercicios.length});
-        }
-        if(i%2===0) self.savePeso("a_demo1",{fecha:fecha,kg:parseFloat((65+(9-i)*0.15).toFixed(1))});
-      }
-      regs.forEach(function(r){ C.registros.push(r); });
-      apiWrite(function(){ return apiPost("registros",regs); });
+      // Peso inicial real — solo el de hoy, sin historial inventado
+      self.savePeso("a_demo1",{fecha:fechaHoy(),kg:65});
 
-      self.saveMedidas("a_demo1",{fecha:"2026-05-01",cuello:37,pecho:94,cintura:78,cadera:92,brazo_izq:31,brazo_der:31.5,muslo_izq:52,muslo_der:52,pantorrilla:35});
-      self.saveNota("a_demo1",{fecha:fechaHoy(),texto:"Buena semana Santi, sigue así con la técnica del press militar.",leida:false});
-      self.checkMedallas("a_demo1");
-
+      // Hábitos reales — sin checks históricos falsos
       var habitos=[
-        {id:"h_1",nombre:"Tomar 2L de agua",icono:"agua",hora_sugerida:"08:00",racha:7,creado:"2026-05-01"},
-        {id:"h_2",nombre:"Tomar creatina",icono:"default",hora_sugerida:"09:00",racha:7,creado:"2026-05-01"},
-        {id:"h_3",nombre:"Ir al gimnasio",icono:"correr",hora_sugerida:"18:00",racha:3,creado:"2026-05-01"},
-        {id:"h_4",nombre:"Movilidad post-entreno 10min",icono:"meditar",hora_sugerida:"19:30",racha:2,creado:"2026-05-10"},
-        {id:"h_5",nombre:"Dormir mínimo 7 horas",icono:"dormir",hora_sugerida:"22:30",racha:5,creado:"2026-05-10"}
+        {id:"h_1",nombre:"Tomar 2L de agua",icono:"agua",hora_sugerida:"08:00",racha:0,creado:fechaHoy()},
+        {id:"h_2",nombre:"Tomar creatina",icono:"default",hora_sugerida:"09:00",racha:0,creado:fechaHoy()},
+        {id:"h_3",nombre:"Ir al gimnasio",icono:"correr",hora_sugerida:"18:00",racha:0,creado:fechaHoy()},
+        {id:"h_4",nombre:"Movilidad post-entreno 10min",icono:"meditar",hora_sugerida:"19:30",racha:0,creado:fechaHoy()},
+        {id:"h_5",nombre:"Dormir mínimo 7 horas",icono:"dormir",hora_sugerida:"22:30",racha:0,creado:fechaHoy()}
       ];
       habitos.forEach(function(h){ self.saveHabito("a_demo1",h); });
-
-      var hoyDate=new Date(), checkRows=[];
-      for(var hi=6;hi>=0;hi--){
-        var dh=new Date(hoyDate); dh.setDate(dh.getDate()-hi);
-        var fh=dh.toISOString().split("T")[0];
-        var checks={h_1:hi%2===0,h_2:hi%2===0,h_3:hi%3!==0,h_4:hi<4,h_5:hi<5};
-        C.habito_checks[fh]=checks;
-        checkRows.push({alumno_id:"a_demo1",fecha:fh,checks:checks});
-      }
-      apiWrite(function(){ return apiPost("habito_checks",checkRows); });
 
       self.saveGymInfo({
         activo:true,nombre:"TK Fitness Gym",tagline:"Tu mejor versión empieza aquí",
