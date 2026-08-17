@@ -340,6 +340,12 @@
 (function(){
   "use strict";
 
+  // ── AUTO-LOGIN: si ya hay sesión activa, ir directo al alumno ──
+  try {
+    var _sid = JSON.parse(localStorage.getItem("fitapp_alumno_actual"));
+    if(_sid){ location.replace("alumno/index.html"); }
+  } catch(e){}
+
   // ── CARGA DE ALUMNOS (backend) ───────────────────────────
   // El login por código de 4 dígitos necesita la lista de
   // alumnos en caché antes de poder validar nada. Deshabilitamos
