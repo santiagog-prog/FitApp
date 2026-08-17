@@ -27,26 +27,26 @@
     var html = "<div style='padding-top:4px;'>";
 
     // Banner progreso
-    html += "<div style='margin:0 20px 16px;background:#141414;border-radius:16px;padding:20px;'>" +
+    html += "<div style='margin:0 20px 16px;background:var(--surface);border-radius:16px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow-card);'>" +
       "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;'>" +
-        "<div><div style='font-size:26px;font-weight:800;color:#C8E000;'>" + hechoHoy + "/" + totalHoy + "</div>" +
-        "<div style='font-size:12px;color:rgba(255,255,255,.35);margin-top:2px;'>completados hoy</div></div>" +
+        "<div><div style='font-size:26px;font-weight:800;color:var(--accent-text);'>" + hechoHoy + "/" + totalHoy + "</div>" +
+        "<div style='font-size:12px;color:var(--text-muted);margin-top:2px;'>completados hoy</div></div>" +
         "<div style='font-size:36px;'>" + (pct===100?"🔥":(pct>=50?"💪":"⚡")) + "</div>" +
       "</div>" +
-      "<div style='background:rgba(255,255,255,.06);border-radius:99px;height:6px;overflow:hidden;'>" +
+      "<div style='background:var(--surface3);border-radius:99px;height:6px;overflow:hidden;'>" +
         "<div style='width:" + pct + "%;height:100%;background:#C8E000;border-radius:99px;transition:width .4s;'></div>" +
       "</div></div>";
 
     // Tabs Marcar hoy / Calendario
-    html += "<div style='display:flex;background:#141414;border-radius:12px;padding:3px;margin:0 20px 16px;'>" +
+    html += "<div style='display:flex;background:var(--surface2);border-radius:12px;padding:3px;margin:0 20px 16px;'>" +
       "<button id='tab-hab-hoy' style='flex:1;height:38px;border:none;background:#C8E000;color:#1C1C1E;font-size:13px;font-weight:700;border-radius:9px;font-family:inherit;cursor:pointer;'>Marcar hoy</button>" +
-      "<button id='tab-hab-cal' style='flex:1;height:38px;border:none;background:transparent;color:rgba(255,255,255,0.5);font-size:13px;font-weight:600;border-radius:9px;font-family:inherit;cursor:pointer;'>Calendario</button>" +
+      "<button id='tab-hab-cal' style='flex:1;height:38px;border:none;background:transparent;color:var(--text-muted);font-size:13px;font-weight:600;border-radius:9px;font-family:inherit;cursor:pointer;'>Calendario</button>" +
     "</div>";
 
     // Vista "Hoy"
     html += "<div id='habitos-vista-hoy'>";
     if(habitos.length === 0){
-      html += "<div style='text-align:center;padding:50px 20px;color:rgba(255,255,255,.3);font-size:14px;'>Tu coach aún no ha asignado hábitos.<br><br>Puedes crear los tuyos abajo.</div>";
+      html += "<div style='text-align:center;padding:50px 20px;color:var(--text-muted);font-size:14px;'>Tu coach aún no ha asignado hábitos.<br><br>Puedes crear los tuyos abajo.</div>";
     } else {
       html += "<div id='habitos-timeline' style='padding:0 20px;'></div>";
     }
@@ -91,20 +91,20 @@
       var esUltimo = (i === habitos.length-1);
       return '<div style="display:flex;gap:14px;' + (!esUltimo?"margin-bottom:0;":"") + '">' +
         '<div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;">' +
-          '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.3);margin-bottom:8px;height:16px;line-height:16px;">' + (h.hora_sugerida||"") + '</div>' +
-          '<div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;' + (done?"background:#C8E000;":"background:#242424;border:2px solid rgba(255,255,255,0.15);") + '"></div>' +
-          (!esUltimo ? '<div style="width:1px;flex:1;background:rgba(255,255,255,0.06);margin-top:4px;min-height:32px;"></div>' : '') +
+          '<div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;height:16px;line-height:16px;">' + (h.hora_sugerida||"") + '</div>' +
+          '<div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;' + (done?"background:#C8E000;":"background:var(--surface3);border:2px solid var(--border-strong);") + '"></div>' +
+          (!esUltimo ? '<div style="width:1px;flex:1;background:var(--border);margin-top:4px;min-height:32px;"></div>' : '') +
         '</div>' +
-        '<div style="flex:1;background:#141414;border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:1px solid ' + (done?"rgba(200,224,0,0.2)":"rgba(255,255,255,0.04)") + ';">' +
+        '<div style="flex:1;background:var(--surface);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:1px solid ' + (done?"rgba(90,128,0,0.25)":"var(--border)") + ';box-shadow:var(--shadow-card);">' +
           '<div style="flex:1;">' +
-            '<div style="font-size:15px;font-weight:600;' + (done?"color:rgba(255,255,255,0.4);text-decoration:line-through;":"color:#FFF;") + '">' + h.nombre + '</div>' +
-            (racha > 1 ? '<div style="font-size:11px;color:#C8E000;margin-top:3px;">🔥 Racha: ' + racha + ' días</div>' : '') +
+            '<div style="font-size:15px;font-weight:600;' + (done?"color:var(--text-muted);text-decoration:line-through;":"color:var(--text);") + '">' + h.nombre + '</div>' +
+            (racha > 1 ? '<div style="font-size:11px;color:var(--accent-text);margin-top:3px;">🔥 Racha: ' + racha + ' días</div>' : '') +
           '</div>' +
-          '<div class="habito-check-btn" data-hid="' + h.id + '" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;' + (done?"background:#C8E000;":"border:2px solid rgba(255,255,255,0.2);") + '">' +
+          '<div class="habito-check-btn" data-hid="' + h.id + '" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;' + (done?"background:#C8E000;":"border:2px solid var(--surface3);") + '">' +
             (done ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>' : '') +
           '</div>' +
           '<div class="habito-menu-btn" data-hid="' + h.id + '" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;opacity:.5;">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text-secondary)"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -153,12 +153,12 @@
     if(!tabHoy || !tabCal) return;
     if(tab === "hoy"){
       tabHoy.style.background = "#C8E000"; tabHoy.style.color = "#1C1C1E";
-      tabCal.style.background = "transparent"; tabCal.style.color = "rgba(255,255,255,0.5)";
+      tabCal.style.background = "transparent"; tabCal.style.color = "var(--text-muted)";
       if(vHoy) vHoy.style.display = "block";
       if(vCal) vCal.style.display = "none";
     } else {
       tabCal.style.background = "#C8E000"; tabCal.style.color = "#1C1C1E";
-      tabHoy.style.background = "transparent"; tabHoy.style.color = "rgba(255,255,255,0.5)";
+      tabHoy.style.background = "transparent"; tabHoy.style.color = "var(--text-muted)";
       if(vHoy) vHoy.style.display = "none";
       if(vCal) vCal.style.display = "block";
       _renderCalendario(alumnoId);
@@ -172,7 +172,7 @@
     var container = document.getElementById("habitos-vista-cal");
     if(!container) return;
     var habitos = window.db.getHabitos(alumnoId) || [];
-    if(!habitos.length){ container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.3);">Sin hábitos asignados.</div>'; return; }
+    if(!habitos.length){ container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-muted);">Sin hábitos asignados.</div>'; return; }
 
     var HORA_INI = 5, HORA_FIN = 23;
     var PX_POR_HORA = 64;
@@ -192,14 +192,14 @@
     for(var h = HORA_INI; h <= HORA_FIN; h++){
       var y = (h - HORA_INI) * PX_POR_HORA;
       var label = h < 12 ? (h + " AM") : (h === 12 ? "12 PM" : (h-12) + " PM");
-      horasHTML += '<div style="position:absolute;top:' + (y-8) + 'px;right:0;font-size:10px;font-weight:600;color:rgba(255,255,255,0.25);line-height:1;text-align:right;">' + label + '</div>';
+      horasHTML += '<div style="position:absolute;top:' + (y-8) + 'px;right:0;font-size:10px;font-weight:600;color:var(--text-muted);line-height:1;text-align:right;">' + label + '</div>';
     }
 
     // Líneas horizontales
     var lineasHTML = "";
     for(var lh = HORA_INI; lh <= HORA_FIN; lh++){
       var ly = (lh - HORA_INI) * PX_POR_HORA;
-      lineasHTML += '<div style="position:absolute;top:' + ly + 'px;left:0;right:0;height:1px;background:rgba(255,255,255,0.04);"></div>';
+      lineasHTML += '<div style="position:absolute;top:' + ly + 'px;left:0;right:0;height:1px;background:var(--border);"></div>';
     }
 
     // Bloques de hábitos
@@ -215,9 +215,9 @@
       var done = completadosHoy.indexOf(hab.id) !== -1;
       var color = HAB_COLORS[idx % HAB_COLORS.length];
       bloquesHTML +=
-        '<div style="position:absolute;top:' + topY + 'px;left:0;right:0;height:' + (PX_POR_HORA * 0.85) + 'px;background:' + (done ? color : "rgba(255,255,255,0.05)") + ';border-left:3px solid ' + color + ';border-radius:0 8px 8px 0;padding:6px 10px;opacity:' + (done?"1":"0.7") + ';transition:all .3s;">' +
+        '<div style="position:absolute;top:' + topY + 'px;left:0;right:0;height:' + (PX_POR_HORA * 0.85) + 'px;background:' + (done ? color : "var(--surface2)") + ';border-left:3px solid ' + color + ';border-radius:0 8px 8px 0;padding:6px 10px;opacity:' + (done?"1":"0.7") + ';transition:all .3s;">' +
           '<div style="font-size:12px;font-weight:700;color:' + (done?"#0A0A0A":"#FFF") + ';overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">' + hab.nombre + '</div>' +
-          '<div style="font-size:10px;color:' + (done?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.4)") + ';margin-top:2px;">' + horaStr + (done?" · ✓ completado":"") + '</div>' +
+          '<div style="font-size:10px;color:' + (done?"rgba(0,0,0,0.6)":"var(--text-muted)") + ';margin-top:2px;">' + horaStr + (done?" · ✓ completado":"") + '</div>' +
         '</div>';
     });
 
@@ -236,7 +236,7 @@
           return '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;">' +
             dias.map(function(d, i){
               var activo = i === 0;
-              return '<div style="flex-shrink:0;height:32px;padding:0 14px;border-radius:99px;display:flex;align-items:center;font-size:12px;font-weight:700;background:' + (activo?"#C8E000":"rgba(255,255,255,0.06)") + ';color:' + (activo?"#0A0A0A":"rgba(255,255,255,0.5)") + ';">' + d + '</div>';
+              return '<div style="flex-shrink:0;height:32px;padding:0 14px;border-radius:99px;display:flex;align-items:center;font-size:12px;font-weight:700;background:' + (activo?"#C8E000":"var(--surface2)") + ';color:' + (activo?"#1C1C1E":"var(--text-muted)") + ';border:1px solid ' + (activo?"transparent":"var(--border)") + ';">' + d + '</div>';
             }).join("") +
           '</div>';
         })() +
@@ -264,11 +264,11 @@
     modal.innerHTML =
       '<div class="modal-bottom-sheet">' +
       '<div class="modal-handle"></div>' +
-      '<div id="mh-editar" style="padding:16px 0;font-size:16px;color:#FFF;cursor:pointer;display:flex;align-items:center;gap:12px;border-bottom:.5px solid rgba(255,255,255,.06);">' +
+      '<div id="mh-editar" style="padding:16px 0;font-size:16px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:12px;border-bottom:.5px solid var(--border);">' +
         '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar hábito</div>' +
-      '<div id="mh-eliminar" style="padding:16px 0;font-size:16px;color:#FF453A;cursor:pointer;display:flex;align-items:center;gap:12px;border-bottom:.5px solid rgba(255,255,255,.06);">' +
+      '<div id="mh-eliminar" style="padding:16px 0;font-size:16px;color:#FF453A;cursor:pointer;display:flex;align-items:center;gap:12px;border-bottom:.5px solid var(--border);">' +
         '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF453A" stroke-width="1.5"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>Eliminar hábito</div>' +
-      '<div id="mh-cancelar" style="padding:16px 0;font-size:16px;color:rgba(255,255,255,.4);cursor:pointer;text-align:center;margin-top:4px;">Cancelar</div>' +
+      '<div id="mh-cancelar" style="padding:16px 0;font-size:16px;color:var(--text-muted);cursor:pointer;text-align:center;margin-top:4px;">Cancelar</div>' +
       '</div>';
     modal.addEventListener("click", function(e){ if(e.target===modal) modal.remove(); });
     document.body.appendChild(modal);
@@ -287,9 +287,9 @@
     modal.innerHTML =
       '<div class="modal-bottom-sheet">' +
       '<div class="modal-handle"></div>' +
-      '<div style="font-size:18px;font-weight:700;color:#FFF;margin-bottom:16px;">Editar hábito</div>' +
-      '<input id="edit-hab-nombre" value="' + h.nombre.replace(/"/g,"&quot;") + '" style="width:100%;height:48px;background:#1C1C1C;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:0 16px;color:#FFF;font-family:inherit;font-size:15px;margin-bottom:12px;box-sizing:border-box;">' +
-      '<input id="edit-hab-hora" type="time" value="' + (h.hora_sugerida||"08:00") + '" style="width:100%;height:48px;background:#1C1C1C;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:0 16px;color:#FFF;font-family:inherit;font-size:15px;margin-bottom:20px;box-sizing:border-box;">' +
+      '<div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px;">Editar hábito</div>' +
+      '<input id="edit-hab-nombre" value="' + h.nombre.replace(/"/g,"&quot;") + '" style="width:100%;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:0 16px;color:var(--text);font-family:inherit;font-size:15px;margin-bottom:12px;box-sizing:border-box;">' +
+      '<input id="edit-hab-hora" type="time" value="' + (h.hora_sugerida||"08:00") + '" style="width:100%;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:0 16px;color:var(--text);font-family:inherit;font-size:15px;margin-bottom:20px;box-sizing:border-box;">' +
       '<button id="btn-guardar-edit-hab" style="width:100%;height:52px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;">Guardar cambios</button>' +
       '</div>';
     modal.addEventListener("click", function(e){ if(e.target===modal) modal.remove(); });
@@ -322,9 +322,9 @@
     modal.innerHTML =
       '<div class="modal-bottom-sheet">' +
       '<div class="modal-handle"></div>' +
-      '<div style="font-size:18px;font-weight:700;color:#FFF;margin-bottom:16px;">Nuevo hábito</div>' +
-      '<input id="new-hab-nombre" placeholder="Ej: Estirar antes de dormir" style="width:100%;height:48px;background:#1C1C1C;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:0 16px;color:#FFF;font-family:inherit;font-size:15px;margin-bottom:12px;box-sizing:border-box;">' +
-      '<input id="new-hab-hora" type="time" value="08:00" style="width:100%;height:48px;background:#1C1C1C;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:0 16px;color:#FFF;font-family:inherit;font-size:15px;margin-bottom:20px;box-sizing:border-box;">' +
+      '<div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px;">Nuevo hábito</div>' +
+      '<input id="new-hab-nombre" placeholder="Ej: Estirar antes de dormir" style="width:100%;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:0 16px;color:var(--text);font-family:inherit;font-size:15px;margin-bottom:12px;box-sizing:border-box;">' +
+      '<input id="new-hab-hora" type="time" value="08:00" style="width:100%;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:0 16px;color:var(--text);font-family:inherit;font-size:15px;margin-bottom:20px;box-sizing:border-box;">' +
       '<button id="btn-crear-hab" style="width:100%;height:52px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;">Crear hábito</button>' +
       '</div>';
     modal.addEventListener("click", function(e){ if(e.target===modal) modal.remove(); });

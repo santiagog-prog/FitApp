@@ -68,12 +68,12 @@
     var macTotal = prot + carb + grasa;
     var uid = 'an' + (++_anilloUid);
     var svgBase = '<svg width="130" height="130" viewBox="0 0 130 130">' +
-      '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="'+SW+'"/>';
+      '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="'+SW+'"/>';
 
     if(macTotal <= 0 || pct === 0){
       svgBase +=
-        '<text x="'+CX+'" y="'+(CY-4)+'" text-anchor="middle" font-size="20" font-weight="800" fill="rgba(255,255,255,0.25)" font-family="Inter,sans-serif">0</text>' +
-        '<text x="'+CX+'" y="'+(CY+14)+'" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)" font-family="Inter,sans-serif">kcal</text>';
+        '<text x="'+CX+'" y="'+(CY-4)+'" text-anchor="middle" font-size="20" font-weight="800" fill="#8E8E93" font-family="Inter,sans-serif">0</text>' +
+        '<text x="'+CX+'" y="'+(CY+14)+'" text-anchor="middle" font-size="10" fill="#8E8E93" font-family="Inter,sans-serif">kcal</text>';
       return svgBase + '</svg>';
     }
 
@@ -90,9 +90,9 @@
       '<circle id="'+uid+'P" cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cP+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+circ.toFixed(1)+'" data-to="'+offP.toFixed(1)+'" transform="rotate('+rotP+' '+CX+' '+CY+')" stroke-linecap="butt" style="transition:stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1);"/>' +
       '<circle id="'+uid+'C" cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cC+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+circ.toFixed(1)+'" data-to="'+offC.toFixed(1)+'" transform="rotate('+rotC+' '+CX+' '+CY+')" stroke-linecap="butt" style="transition:stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1) 0.1s;"/>' +
       '<circle id="'+uid+'G" cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+cG+'" stroke-width="'+SW+'" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+circ.toFixed(1)+'" data-to="'+offG.toFixed(1)+'" transform="rotate('+rotG+' '+CX+' '+CY+')" stroke-linecap="butt" style="transition:stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1) 0.2s;"/>' +
-      '<text x="'+CX+'" y="'+(CY-4)+'" text-anchor="middle" font-size="19" font-weight="800" fill="#FFF" font-family="Inter,sans-serif">' + Math.round(kcalConsum) + '</text>' +
-      '<text x="'+CX+'" y="'+(CY+12)+'" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.35)" font-family="Inter,sans-serif">kcal</text>' +
-      '<text x="'+CX+'" y="'+(CY+24)+'" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.2)" font-family="Inter,sans-serif">' + Math.round(pct) + '% objetivo</text>';
+      '<text x="'+CX+'" y="'+(CY-4)+'" text-anchor="middle" font-size="19" font-weight="800" fill="#1C1C1E" font-family="Inter,sans-serif">' + Math.round(kcalConsum) + '</text>' +
+      '<text x="'+CX+'" y="'+(CY+12)+'" text-anchor="middle" font-size="9" fill="#8E8E93" font-family="Inter,sans-serif">kcal</text>' +
+      '<text x="'+CX+'" y="'+(CY+24)+'" text-anchor="middle" font-size="8" fill="#8E8E93" font-family="Inter,sans-serif">' + Math.round(pct) + '% objetivo</text>';
 
     return svgBase + '</svg>';
   }
@@ -179,10 +179,10 @@
       '<div class="ncb-head">' +
         '<div class="ncb-icon">' + icono + '</div>' +
         '<div class="ncb-info">' +
-          '<div class="ncb-nombre">' + comida.nombre + (comida.hora ? ' <span style="font-size:11px;color:rgba(255,255,255,0.35);font-weight:400;">· ' + comida.hora + '</span>' : '') + '</div>' +
+          '<div class="ncb-nombre">' + comida.nombre + (comida.hora ? ' <span style="font-size:11px;color:var(--text-muted);font-weight:400;">· ' + comida.hora + '</span>' : '') + '</div>' +
           (elegida ? (function(){
             var desc = _generarDescReceta(elegida);
-            return '<div style="margin-top:8px;padding:12px 14px;background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;">' + desc + '</div>';
+            return '<div style="margin-top:8px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;font-size:13px;color:var(--text-secondary);line-height:1.6;">' + desc + '</div>';
           })() : '') +
         '</div>' +
         (elegida ? '<div class="ncb-kcal">' + (elegida.calorias_total || 0) + ' kcal</div>' : '') +
@@ -196,15 +196,15 @@
         html += '<div class="opcion-card' + (sel ? " sel" : "") + '" onclick="window._elegirOpcion(' + ci + ',' + oi + ')" ' +
           'style="position:relative;flex-shrink:0;width:168px;padding:12px 13px;border-radius:16px;cursor:pointer;transition:transform .15s;' +
           (sel ? 'transform:scale(1.02);' : '') +
-          'background:' + (sel ? 'linear-gradient(150deg,rgba(200,224,0,0.16),rgba(200,224,0,0.04))' : 'rgba(255,255,255,0.04)') + ';' +
-          'border:1.5px solid ' + (sel ? '#C8E000' : 'rgba(255,255,255,0.08)') + ';' +
+          'background:' + (sel ? 'rgba(200,224,0,0.12)' : 'var(--surface2)') + ';' +
+          'border:1.5px solid ' + (sel ? '#C8E000' : 'var(--border)') + ';' +
           (sel ? 'box-shadow:0 4px 18px rgba(200,224,0,0.18);' : '') + '">' +
           (sel ? '<div style="position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:#C8E000;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.4);">' +
             '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
           '</div>' : '') +
-          '<div style="font-size:12px;font-weight:800;color:' + (sel?'#C8E000':'#FFF') + ';margin-bottom:4px;">' + op.nombre + '</div>' +
-          '<div style="font-size:10px;color:rgba(255,255,255,0.4);line-height:1.4;margin-bottom:6px;height:28px;overflow:hidden;">' + ingredientes + '</div>' +
-          '<div style="font-size:11px;font-weight:700;color:' + (sel?'rgba(255,255,255,0.85)':'rgba(255,255,255,0.6)') + ';">' + (op.calorias_total||0) + ' kcal</div>' +
+          '<div style="font-size:12px;font-weight:800;color:' + (sel?'var(--accent-text)':'var(--text)') + ';margin-bottom:4px;">' + op.nombre + '</div>' +
+          '<div style="font-size:10px;color:var(--text-muted);line-height:1.4;margin-bottom:6px;height:28px;overflow:hidden;">' + ingredientes + '</div>' +
+          '<div style="font-size:11px;font-weight:700;color:var(--text-secondary);">' + (op.calorias_total||0) + ' kcal</div>' +
         '</div>';
       });
       html += '</div>';
@@ -305,10 +305,10 @@
     modal.innerHTML =
       '<div class="mc-card" style="text-align:left;">' +
         '<h2 style="text-align:center;margin-bottom:16px;">🔄 ¿Qué comiste en su lugar?</h2>' +
-        '<label style="font-size:12px;color:rgba(255,255,255,.4);">Alimento</label>' +
-        '<input id="remp-nombre" value="' + actual.nombre + '" style="width:100%;height:44px;background:#1C1C1C;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:0 12px;color:#FFF;font-size:15px;font-family:inherit;margin:6px 0 12px;">' +
-        '<label style="font-size:12px;color:rgba(255,255,255,.4);">Motivo (opcional)</label>' +
-        '<input id="remp-motivo" value="' + (actual.motivo||"") + '" style="width:100%;height:44px;background:#1C1C1C;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:0 12px;color:#FFF;font-size:15px;font-family:inherit;margin:6px 0 16px;">' +
+        '<label style="font-size:12px;color:var(--text-muted);">Alimento</label>' +
+        '<input id="remp-nombre" value="' + actual.nombre + '" style="width:100%;height:44px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0 12px;color:var(--text);font-size:15px;font-family:inherit;margin:6px 0 12px;">' +
+        '<label style="font-size:12px;color:var(--text-muted);">Motivo (opcional)</label>' +
+        '<input id="remp-motivo" value="' + (actual.motivo||"") + '" style="width:100%;height:44px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0 12px;color:var(--text);font-size:15px;font-family:inherit;margin:6px 0 16px;">' +
         '<button class="pill-btn" id="remp-guardar">Guardar</button>' +
         ((_estado.reemplazos && _estado.reemplazos[key]) ? '<button style="width:100%;margin-top:8px;height:44px;background:none;border:1px solid rgba(255,69,58,.3);color:#FF453A;border-radius:50px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;" id="remp-quitar">Quitar reemplazo</button>' : '') +
       '</div>';
@@ -357,7 +357,7 @@
 
     if(!_plan){
       document.getElementById("page-nutricion").innerHTML =
-        '<div style="text-align:center;padding:60px 20px;color:rgba(255,255,255,.3);">Tu coach aún no ha asignado un plan de alimentación.</div>';
+        '<div style="text-align:center;padding:60px 20px;color:var(--text-muted);">Tu coach aún no ha asignado un plan de alimentación.</div>';
       return;
     }
 
@@ -412,15 +412,15 @@
       _plan.suplementos.forEach(function(sup){
         var tomado = _estado.suplementos[sup.id] === true;
         html += '<div onclick="window._toggleSuplemento(\'' + sup.id + '\')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;cursor:pointer;' +
-          'background:' + (tomado ? 'rgba(52,199,89,0.08)' : 'rgba(255,255,255,0.04)') + ';' +
-          'border:1px solid ' + (tomado ? 'rgba(52,199,89,0.3)' : 'rgba(255,255,255,0.08)') + ';">' +
+          'background:' + (tomado ? 'rgba(52,199,89,0.08)' : 'var(--surface2)') + ';' +
+          'border:1px solid ' + (tomado ? 'rgba(52,199,89,0.3)' : 'var(--border)') + ';">' +
           '<span style="font-size:22px;">' + (sup.icono||'💊') + '</span>' +
           '<div style="flex:1;">' +
-            '<div style="font-size:14px;font-weight:700;color:#FFF;">' + sup.nombre + '</div>' +
-            '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:1px;">' + (sup.instruccion||'') + '</div>' +
+            '<div style="font-size:14px;font-weight:700;color:var(--text);">' + sup.nombre + '</div>' +
+            '<div style="font-size:11px;color:var(--text-muted);margin-top:1px;">' + (sup.instruccion||'') + '</div>' +
           '</div>' +
           '<div style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;' +
-            'background:' + (tomado ? '#34C759' : 'rgba(255,255,255,0.08)') + ';border:1px solid ' + (tomado ? '#34C759' : 'rgba(255,255,255,0.15)') + ';">' +
+            'background:' + (tomado ? '#34C759' : 'var(--surface3)') + ';border:1px solid ' + (tomado ? '#34C759' : 'var(--border)') + ';">' +
             (tomado ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>' : '') +
           '</div>' +
         '</div>';
@@ -442,11 +442,11 @@
       '</button>';
     }
     html += '</div>';
-    html += '<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:6px;">' + _estado.agua + '/8 vasos completados</div></div>';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">' + _estado.agua + '/8 vasos completados</div></div>';
 
     // ── Registrar con foto (manual, sin IA) ──
     html += '<div style="padding:8px 16px 4px;">' +
-      '<button id="btn-foto-comida" style="width:100%;height:46px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:50px;color:rgba(255,255,255,.6);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">📷 Registrar comida manual con foto</button>' +
+      '<button id="btn-foto-comida" style="width:100%;height:46px;background:var(--surface2);border:1px solid var(--border);border-radius:50px;color:var(--text-secondary);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">📷 Registrar comida manual con foto</button>' +
       '<input type="file" accept="image/*" capture="environment" id="comida-foto-input" style="display:none;">' +
       '<input type="file" accept="image/*" capture="environment" id="ia-foto-input" style="display:none;">' +
     '</div>';
@@ -707,15 +707,15 @@
       var checks = alimentos.map(function(_, i){ return true; });
 
       function renderResultado(){
-        var html = '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Detectados · ' + alimentos.length + ' componentes</div>';
+        var html = '<div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Detectados · ' + alimentos.length + ' componentes</div>';
         alimentos.forEach(function(al, i){
-          html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:.5px solid rgba(255,255,255,.05);">' +
+          html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border);">' +
             '<input type="checkbox" id="al-chk-' + i + '" ' + (checks[i]?"checked":"") + ' style="margin-top:3px;accent-color:#C8E000;width:18px;height:18px;flex-shrink:0;">' +
             '<div style="flex:1;">' +
-              '<div style="font-size:14px;font-weight:600;color:#FFF;">' + al.nombre + '</div>' +
-              '<div style="font-size:12px;color:rgba(255,255,255,.35);margin-top:2px;">' + (al.porcion||"") + ' · P:' + al.proteina + 'g C:' + al.carbos + 'g G:' + al.grasas + 'g</div>' +
+              '<div style="font-size:14px;font-weight:600;color:var(--text);">' + al.nombre + '</div>' +
+              '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">' + (al.porcion||"") + ' · P:' + al.proteina + 'g C:' + al.carbos + 'g G:' + al.grasas + 'g</div>' +
             '</div>' +
-            '<div style="font-size:15px;font-weight:700;color:#C8E000;">' + al.calorias + '<span style="font-size:10px;font-weight:400;color:rgba(255,255,255,.3);"> kcal</span></div>' +
+            '<div style="font-size:15px;font-weight:700;color:var(--accent-text);">' + al.calorias + '<span style="font-size:10px;font-weight:400;color:var(--text-muted);"> kcal</span></div>' +
           '</div>';
         });
         html += '<button id="btn-registrar-escaner" style="width:100%;height:48px;background:#C8E000;border:none;border-radius:14px;color:#1C1C1E;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:14px;">Registrar seleccionados</button>';
