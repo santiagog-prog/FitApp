@@ -308,6 +308,13 @@
       C.alumnos=C.alumnos.filter(function(a){ return a.id!==id; });
       apiWrite(function(){ return apiDelete("alumnos",{id:id}); });
     },
+    updateAlumno: function(id, cambios){
+      var idx=C.alumnos.findIndex(function(a){ return a.id===id; });
+      if(idx<0) return;
+      Object.assign(C.alumnos[idx], cambios);
+      var a=C.alumnos[idx];
+      apiWrite(function(){ return apiPost("alumnos",a); });
+    },
 
     // ── RUTINAS ──────────────────────────────────────────────
     getRutinas: function(){ return C.rutinas.slice(); },
@@ -361,6 +368,13 @@
     // ── PESOS ────────────────────────────────────────────────
     getPesos: function(alumnoId){
       return alumnoId?C.pesos.filter(function(p){ return p.alumno_id===alumnoId; }):C.pesos.slice();
+    },
+    addPeso: function(alumnoId, kg){
+      var fecha=this.fechaHoy();
+      var entry={alumno_id:alumnoId,fecha:fecha,kg:kg,valor:kg};
+      var idx=C.pesos.findIndex(function(p){ return p.alumno_id===alumnoId&&p.fecha===fecha; });
+      if(idx>=0) C.pesos[idx]=entry; else C.pesos.push(entry);
+      apiWrite(function(){ return apiPost("pesos",{alumno_id:alumnoId,fecha:fecha,kg:kg}); });
     },
     savePeso: function(alumnoId, peso){
       peso.alumno_id=alumnoId;

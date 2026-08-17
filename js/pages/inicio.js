@@ -51,10 +51,10 @@
     var itemsHTML = notas.length > 0 ?
       notas.slice().reverse().map(function(n){
         return '<div class="notif-item"><div class="notif-icon">📋</div>' +
-          '<div><div style="font-size:14px;color:#FFF;line-height:1.4;">' + n.texto + '</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">' + n.fecha + '</div></div></div>';
+          '<div><div style="font-size:14px;color:var(--text);line-height:1.4;">' + n.texto + '</div>' +
+          '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">' + n.fecha + '</div></div></div>';
       }).join('') :
-      '<div style="text-align:center;padding:40px 0;color:rgba(255,255,255,0.3);font-size:14px;">No tienes notificaciones nuevas</div>';
+      '<div style="text-align:center;padding:40px 0;color:var(--text-muted);font-size:14px;">No tienes notificaciones nuevas</div>';
     modal.innerHTML =
       '<div class="modal-bottom-sheet">' +
       '<div class="modal-handle"></div>' +
@@ -68,11 +68,11 @@
   // ── BÚSQUEDA ─────────────────────────────────────────────
   window.abrirBusqueda = function(){
     var modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed;inset:0;background:#0A0A0A;z-index:9999;padding:calc(env(safe-area-inset-top) + 16px) 20px 20px;';
+    modal.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;padding:calc(env(safe-area-inset-top) + 16px) 20px 20px;';
     modal.innerHTML =
       '<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">' +
         '<input id="search-input" class="search-input" placeholder="Buscar ejercicio, rutina, hábito..." autofocus>' +
-        '<button onclick="this.closest(\'[style*=fixed]\').remove()" style="background:none;border:none;color:#C8E000;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;">Cancelar</button>' +
+        '<button onclick="this.closest(\'[style*=fixed]\').remove()" style="background:none;border:none;color:var(--accent-text);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;">Cancelar</button>' +
       '</div><div id="search-results"></div>';
     document.body.appendChild(modal);
     setTimeout(function(){ var inp=document.getElementById('search-input'); if(inp) inp.focus(); },100);
@@ -87,14 +87,14 @@
     var resultsEl = document.getElementById('search-results');
     if(!resultsEl) return;
     if(ejercicios.length===0){
-      resultsEl.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.3);padding:40px 0;">Sin resultados para "'+query+'"</div>';
+      resultsEl.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:40px 0;">Sin resultados para "'+query+'"</div>';
       return;
     }
     resultsEl.innerHTML = ejercicios.slice(0,15).map(function(e){
       return '<div class="search-result-row">' +
-        '<div class="search-icon-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><path d="M6 4v16M18 4v16M6 12h12"/></svg></div>' +
-        '<div><div style="font-size:14px;color:#FFF;font-weight:500;">' + e.nombre + '</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.4);">' + (e.grupo||'Ejercicio') + '</div></div>' +
+        '<div class="search-icon-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M6 4v16M18 4v16M6 12h12"/></svg></div>' +
+        '<div><div style="font-size:14px;color:var(--text);font-weight:500;">' + e.nombre + '</div>' +
+        '<div style="font-size:12px;color:var(--text-muted);">' + (e.grupo||'Ejercicio') + '</div></div>' +
       '</div>';
     }).join('');
   }
@@ -163,15 +163,15 @@
       var offset = circ - (pct / 100) * circ;
       return '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">' +
         '<svg width="72" height="72" viewBox="0 0 72 72">' +
-          '<circle cx="36" cy="36" r="28" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>' +
+          '<circle cx="36" cy="36" r="28" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="5"/>' +
           '<circle cx="36" cy="36" r="28" fill="none" stroke="' + ring.color + '" stroke-width="5" ' +
             'stroke-linecap="round" stroke-dasharray="' + circ.toFixed(1) + '" ' +
             'stroke-dashoffset="' + offset.toFixed(1) + '" transform="rotate(-90 36 36)" ' +
             'style="transition:stroke-dashoffset 0.8s ease;"/>' +
-          '<text x="36" y="33" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="800" fill="#FFFFFF">' + ring.valor + '</text>' +
-          '<text x="36" y="46" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="rgba(255,255,255,0.35)">' + ring.unidad + '</text>' +
+          '<text x="36" y="33" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="800" fill="#1C1C1E">' + ring.valor + '</text>' +
+          '<text x="36" y="46" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#8E8E93">' + ring.unidad + '</text>' +
         '</svg>' +
-        '<span style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-align:center;">' + ring.etiqueta + '</span>' +
+        '<span style="font-size:11px;color:var(--text-muted);font-weight:600;text-align:center;">' + ring.etiqueta + '</span>' +
       '</div>';
     }).join("");
   }
@@ -192,9 +192,9 @@
 
     var headerHTML =
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px 10px;">' +
-        '<button onclick="window._navegarMes(-1)" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:22px;cursor:pointer;padding:6px;line-height:1;">‹</button>' +
-        '<span style="font-size:15px;font-weight:700;color:#FFF;">' + nombresMes[mes] + ' ' + anio + '</span>' +
-        '<button onclick="window._navegarMes(1)"  style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:22px;cursor:pointer;padding:6px;line-height:1;">›</button>' +
+        '<button onclick="window._navegarMes(-1)" style="background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;padding:6px;line-height:1;">‹</button>' +
+        '<span style="font-size:15px;font-weight:700;color:var(--text);">' + nombresMes[mes] + ' ' + anio + '</span>' +
+        '<button onclick="window._navegarMes(1)"  style="background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;padding:6px;line-height:1;">›</button>' +
       '</div>';
 
     var diasHTML = '<div id="days-scroll" style="display:flex;gap:6px;overflow-x:auto;padding:0 20px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;">';
@@ -205,10 +205,10 @@
       var tieneEntreno = registros.some(function(r){ return r.fecha === fechaStr; });
       var letra = letras[fecha.getDay()];
 
-      var bg        = esHoy ? "#C8E000" : tieneEntreno ? "rgba(52,199,89,0.12)" : "#1C1C1C";
-      var textColor = esHoy ? "#1C1C1E"  : tieneEntreno ? "#34C759" : "rgba(255,255,255,0.7)";
-      var letraColor= esHoy ? "#1C1C1E"  : "rgba(255,255,255,0.25)";
-      var border    = esHoy ? "none"      : tieneEntreno ? "1px solid rgba(52,199,89,0.25)" : "1px solid rgba(255,255,255,0.05)";
+      var bg        = esHoy ? "#C8E000" : tieneEntreno ? "rgba(52,199,89,0.10)" : "var(--surface)";
+      var textColor = esHoy ? "#1C1C1E"  : tieneEntreno ? "#34C759" : "var(--text)";
+      var letraColor= esHoy ? "#1C1C1E"  : "var(--text-muted)";
+      var border    = esHoy ? "none"      : tieneEntreno ? "1px solid rgba(52,199,89,0.25)" : "1px solid var(--border)";
 
       diasHTML += '<div id="day-' + fechaStr + '" ' +
         'style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;' +
@@ -255,13 +255,13 @@
         "</div>" +
         "<div class='ah-icons'>" +
           "<button class='ah-icon-btn' id='ah-btn-videos' style='position:relative;'>" +
-            "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round'><polygon points='23 7 16 12 23 17 23 7'/><rect x='1' y='5' width='15' height='14' rx='2'/></svg>" +
+            "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='var(--text-secondary)' stroke-width='2' stroke-linecap='round'><polygon points='23 7 16 12 23 17 23 7'/><rect x='1' y='5' width='15' height='14' rx='2'/></svg>" +
           "</button>" +
           "<button class='ah-icon-btn' id='ah-btn-busqueda' style='position:relative;'>" +
-            "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='8'/><path d='M21 21l-4.35-4.35'/></svg>" +
+            "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='var(--text-secondary)' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='8'/><path d='M21 21l-4.35-4.35'/></svg>" +
           "</button>" +
           "<button class='ah-icon-btn' id='ah-btn-notif' style='position:relative;'>" +
-            "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round'><path d='M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 01-3.46 0'/></svg>" +
+            "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='var(--text-secondary)' stroke-width='2' stroke-linecap='round'><path d='M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 01-3.46 0'/></svg>" +
             "<span class='badge-dot'></span>" +
           "</button>" +
           "<div class='ah-avatar' id='ah-avatar-btn' style='overflow:hidden;position:relative;'>" +
@@ -318,13 +318,13 @@
         var isHoy    = f === hoyStr;
         var tieneEnt = registros.some(function(r){ return r.fecha === f; });
         html += "<div class='dia-strip-item' data-fecha='" + f + "' style='flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;'>" +
-          "<div style='font-size:10px;font-weight:600;color:" + (isHoy ? "#C8E000" : "rgba(255,255,255,0.35)") + ";text-transform:uppercase;letter-spacing:0.5px;'>" + labels[wi] + "</div>" +
+          "<div style='font-size:10px;font-weight:600;color:" + (isHoy ? "var(--accent-text)" : "var(--text-muted)") + ";text-transform:uppercase;letter-spacing:0.5px;'>" + labels[wi] + "</div>" +
           "<div class='dia-strip-circulo' style='width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;" +
             (isHoy
               ? "background:#C8E000;color:#1C1C1E;font-weight:900;"
               : tieneEnt
-                ? "background:rgba(200,224,0,0.15);color:#C8E000;font-weight:700;border:1.5px solid rgba(200,224,0,0.4);"
-                : "background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4);font-weight:600;") +
+                ? "background:rgba(90,128,0,0.12);color:var(--accent-text);font-weight:700;border:1.5px solid rgba(90,128,0,0.3);"
+                : "background:var(--surface);color:var(--text-muted);font-weight:600;border:1px solid var(--border);") +
             "font-size:13px;'>" + dayNum + "</div>" +
           (tieneEnt && !isHoy ? "<div style='width:5px;height:5px;border-radius:50%;background:#C8E000;opacity:0.6;'></div>" : "<div style='width:5px;height:5px;'></div>") +
         "</div>";
@@ -472,7 +472,7 @@
           "<div class='hcd-nombre'>" + diaRutina.nombre + "</div>" +
           "<div class='hcd-meta'>" + diaRutina.ejercicios.length + " ejercicios" + (hechoHoy ? " · ✅ ¡Hecho!" : " · Toca para empezar") + "</div>" +
         "</div>" +
-        "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.25)' stroke-width='2' stroke-linecap='round'><polyline points='9 18 15 12 9 6'/></svg>" +
+        "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='var(--text-dim)' stroke-width='2' stroke-linecap='round'><polyline points='9 18 15 12 9 6'/></svg>" +
       "</div>";
     } else {
       html += "<div style='background:var(--surface);border-radius:var(--radius);padding:16px 20px;margin:0 20px 12px;border:1px solid var(--border);'>" +
@@ -513,13 +513,12 @@
         '<div style="font-size:12px;font-weight:700;color:#C8E000;cursor:pointer;">Ver todo →</div>' +
       '</div>';
       // Mini bar chart de entrenos semana
-      html += '<div style="background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:14px 16px;">';
-      // Fila de días como pills glassmorphism
+      html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:14px 16px;box-shadow:var(--shadow-card);">';
       html += '<div style="display:flex;gap:6px;margin-bottom:12px;">';
       semData.forEach(function(row){
         var kcalPct = Math.min(100, Math.round(row.kcal/kcalMeta*100));
-        var bg = row.esHoy ? '#C8E000' : row.entreno > 0 ? 'rgba(52,199,89,0.2)' : 'rgba(255,255,255,0.05)';
-        var textCol = row.esHoy ? '#0A0A0A' : row.entreno > 0 ? '#34C759' : 'rgba(255,255,255,0.4)';
+        var bg = row.esHoy ? '#C8E000' : row.entreno > 0 ? 'rgba(52,199,89,0.12)' : 'var(--surface2)';
+        var textCol = row.esHoy ? '#1C1C1E' : row.entreno > 0 ? '#34C759' : 'var(--text-muted)';
         var emoji = row.esHoy ? '⚡' : row.entreno > 0 ? '✅' : row.habitos > 0 ? '🌿' : '';
         html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:'+bg+';border-radius:12px;padding:8px 2px;">' +
           '<div style="font-size:9px;font-weight:700;color:'+textCol+';">'+row.label+'</div>' +
@@ -535,15 +534,15 @@
       html += '<div style="display:flex;gap:8px;">';
       html += '<div style="flex:1;background:rgba(255,149,0,0.1);border-radius:12px;padding:10px;text-align:center;border:1px solid rgba(255,149,0,0.15);">' +
         '<div style="font-size:16px;font-weight:900;color:#FF9F0A;">' + totalEnt + '</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:600;margin-top:2px;">🏋️ entrenos</div>' +
+        '<div style="font-size:10px;color:var(--text-muted);font-weight:600;margin-top:2px;">🏋️ entrenos</div>' +
       '</div>';
       html += '<div style="flex:1;background:rgba(91,200,250,0.1);border-radius:12px;padding:10px;text-align:center;border:1px solid rgba(91,200,250,0.15);">' +
         '<div style="font-size:16px;font-weight:900;color:#5AC8FA;">' + (totalKcal > 0 ? (totalKcal > 999 ? (Math.round(totalKcal/100)/10)+'k' : totalKcal) : '0') + '</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:600;margin-top:2px;">🔥 kcal</div>' +
+        '<div style="font-size:10px;color:var(--text-muted);font-weight:600;margin-top:2px;">🔥 kcal</div>' +
       '</div>';
       html += '<div style="flex:1;background:rgba(191,90,242,0.1);border-radius:12px;padding:10px;text-align:center;border:1px solid rgba(191,90,242,0.15);">' +
         '<div style="font-size:16px;font-weight:900;color:#BF5AF2;">' + totalHab + '</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:600;margin-top:2px;">🌿 hábitos</div>' +
+        '<div style="font-size:10px;color:var(--text-muted);font-weight:600;margin-top:2px;">🌿 hábitos</div>' +
       '</div>';
       html += '</div>';
       html += '</div></div>';
@@ -575,21 +574,21 @@
       if(activo){
         var rivalId = vinculo.alumno1===alumno.id ? vinculo.alumno2 : vinculo.alumno1;
         var rival = window.db.getAlumnoPorId(rivalId);
-        html += "<div id='reto-card-home' style='background:#141414;border-radius:18px;margin:0 20px 14px;padding:16px;border:1px solid rgba(200,224,0,0.12);cursor:pointer;'>" +
-          "<div style='font-size:11px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;'>⚔️ Reto activo</div>" +
+        html += "<div id='reto-card-home' style='background:var(--surface);border-radius:18px;margin:0 20px 14px;padding:16px;border:1px solid rgba(90,128,0,0.25);cursor:pointer;box-shadow:var(--shadow-card);'>" +
+          "<div style='font-size:11px;font-weight:700;color:var(--accent-text);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;'>⚔️ Reto activo</div>" +
           "<div style='display:flex;align-items:center;justify-content:space-between;'>" +
-            "<div style='font-size:15px;font-weight:700;color:#FFF;'>Tú vs " + (rival?rival.nombre:"tu rival") + "</div>" +
-            "<div style='font-size:12px;color:rgba(255,255,255,.4);'>Ver →</div>" +
+            "<div style='font-size:15px;font-weight:700;color:var(--text);'>Tú vs " + (rival?rival.nombre:"tu rival") + "</div>" +
+            "<div style='font-size:12px;color:var(--text-muted);'>Ver →</div>" +
           "</div>" +
         "</div>";
       } else {
-        html += "<div id='reto-card-home' style='background:#141414;border-radius:18px;margin:0 20px 14px;padding:14px 16px;border:1px dashed rgba(255,255,255,0.08);cursor:pointer;display:flex;align-items:center;gap:12px;'>" +
+        html += "<div id='reto-card-home' style='background:var(--surface);border-radius:18px;margin:0 20px 14px;padding:14px 16px;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-card);'>" +
           "<span style='font-size:22px;'>🤝</span>" +
           "<div style='flex:1;'>" +
-            "<div style='font-size:14px;font-weight:700;color:#FFF;'>Retar a un amigo</div>" +
-            "<div style='font-size:12px;color:rgba(255,255,255,.35);margin-top:2px;'>Compita con su código · Toca para comenzar</div>" +
+            "<div style='font-size:14px;font-weight:700;color:var(--text);'>Retar a un amigo</div>" +
+            "<div style='font-size:12px;color:var(--text-muted);margin-top:2px;'>Compite con tu código · Toca para comenzar</div>" +
           "</div>" +
-          "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='2'><polyline points='9 18 15 12 9 6'/></svg>" +
+          "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='var(--text-dim)' stroke-width='2'><polyline points='9 18 15 12 9 6'/></svg>" +
         "</div>";
       }
     })();
@@ -675,7 +674,7 @@
         if(!detalle){
           var cont = document.createElement("div");
           cont.id = "detalle-dia-home";
-          cont.style.cssText = "margin:0 20px 14px;background:#141414;border-radius:14px;padding:14px;";
+          cont.style.cssText = "margin:0 20px 14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);";
           var statsGrid = document.querySelector("#page-inicio > div > div[style*='grid-template-columns:1fr 1fr 1fr']");
           if(statsGrid) statsGrid.before(cont);
           detalle = cont;
@@ -687,12 +686,12 @@
         if(nutDelDia && nutDelDia.alimentos) nutDelDia.alimentos.forEach(function(a){ kcalDia += (a.calorias||0); });
         var contenido = "";
         if(regsDelDia.length){
-          contenido += regsDelDia.map(function(r){ return '<div style="font-size:13px;font-weight:600;color:#FFF;">✅ ' + r.sesion_nombre + (r.duracion_min ? ' · ' + r.duracion_min + ' min' : '') + '</div>'; }).join("");
+          contenido += regsDelDia.map(function(r){ return '<div style="font-size:13px;font-weight:600;color:var(--text);">✅ ' + r.sesion_nombre + (r.duracion_min ? ' · ' + r.duracion_min + ' min' : '') + '</div>'; }).join("");
         } else {
-          contenido += '<div style="font-size:13px;color:rgba(255,255,255,0.3);">Sin entrenamiento este día</div>';
+          contenido += '<div style="font-size:13px;color:var(--text-muted);">Sin entrenamiento este día</div>';
         }
-        if(kcalDia > 0) contenido += '<div style="font-size:12px;color:#C8E000;margin-top:6px;">' + kcalDia + ' kcal registradas</div>';
-        detalle.innerHTML = '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">' + fecha + '</div>' + contenido;
+        if(kcalDia > 0) contenido += '<div style="font-size:12px;color:var(--accent-text);font-weight:600;margin-top:6px;">' + kcalDia + ' kcal registradas</div>';
+        detalle.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">' + fecha + '</div>' + contenido;
       });
     });
   };

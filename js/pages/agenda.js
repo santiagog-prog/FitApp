@@ -26,8 +26,8 @@
     if(back){
       header.innerHTML =
         "<div style='display:flex;align-items:center;gap:10px;padding:14px 0 10px;'>" +
-          "<button id='ag-back-btn' style='background:none;border:none;color:rgba(255,255,255,0.6);font-size:22px;cursor:pointer;padding:0 4px;'>←</button>" +
-          "<span style='font-size:17px;font-weight:700;color:#FFF;'>" + titulo + "</span>" +
+          "<button id='ag-back-btn' style='background:none;border:none;color:var(--text-secondary);font-size:22px;cursor:pointer;padding:0 4px;'>←</button>" +
+          "<span style='font-size:17px;font-weight:700;color:var(--text);'>" + titulo + "</span>" +
           (extra ? "<span style='margin-left:auto;'>" + extra + "</span>" : "") +
         "</div>";
       var backBtn = document.getElementById("ag-back-btn");
@@ -95,7 +95,7 @@
       diasInfo.push({ d:d, key:key });
       var tareasDia = tareasDelDia(alumno, rutina, registros, key);
       var dots = tareasDia.map(function(t){
-        return "<span class='dp-dot' style='background:" + (t.done ? t.color : "rgba(255,255,255,0.12)") + ";'></span>";
+        return "<span class='dp-dot' style='background:" + (t.done ? t.color : "var(--surface3)") + ";'></span>";
       }).join("");
 
       html += "<div class='dia-pill" + (sel?" selected":"") + (esHoy?" today":"") + "' data-key='" + key + "'>" +
@@ -109,12 +109,12 @@
     var completadosSemana = diasInfo.filter(function(di){ return registros.some(function(r){ return r.fecha === di.key; }); }).length;
     var rachaAct = window.db.calcularRacha ? window.db.calcularRacha(alumno.id) : 0;
     var pctSemana = Math.round(completadosSemana/7*100);
-    html += "<div style='margin:0 16px 14px;background:#141414;border-radius:16px;padding:14px 16px;border:1px solid rgba(255,255,255,0.05);'>" +
+    html += "<div style='margin:0 16px 14px;background:var(--surface);border-radius:16px;padding:14px 16px;border:1px solid var(--border);box-shadow:var(--shadow-card);'>" +
       "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;'>" +
-        "<div style='font-size:13px;font-weight:700;color:#FFF;'>Progreso semanal</div>" +
+        "<div style='font-size:13px;font-weight:700;color:var(--text);'>Progreso semanal</div>" +
         "<div style='display:flex;align-items:center;gap:12px;'>" +
-          "<span style='font-size:11px;color:rgba(255,255,255,0.4);'>" + completadosSemana + "/7 días</span>" +
-          (rachaAct > 0 ? "<span style='font-size:11px;font-weight:700;color:#C8E000;'>🔥 " + rachaAct + " racha</span>" : "") +
+          "<span style='font-size:11px;color:var(--text-muted);'>" + completadosSemana + "/7 días</span>" +
+          (rachaAct > 0 ? "<span style='font-size:11px;font-weight:700;color:var(--accent-text);'>🔥 " + rachaAct + " racha</span>" : "") +
         "</div>" +
       "</div>" +
       "<div style='display:flex;gap:5px;margin-bottom:8px;'>" +
@@ -122,11 +122,11 @@
           var hecho = registros.some(function(r){ return r.fecha === di.key; });
           var esSel = di.key === state.selectedDate;
           var esHoy = di.key === fechaKey(new Date());
-          return "<div style='flex:1;height:6px;border-radius:99px;background:" + (hecho?"#C8E000":(esHoy?"rgba(200,224,0,0.2)":"rgba(255,255,255,0.07)")) + ";'></div>";
+          return "<div style='flex:1;height:6px;border-radius:99px;background:" + (hecho?"#C8E000":(esHoy?"rgba(90,128,0,0.18)":"var(--surface3)")) + ";'></div>";
         }).join("") +
       "</div>" +
       "<div style='display:flex;justify-content:space-between;'>" +
-        diasInfo.map(function(di){ return "<span style='flex:1;font-size:9px;text-align:center;color:rgba(255,255,255,0.2);font-weight:600;'>" + DIAS_L[(di.d.getDay()+6)%7] + "</span>"; }).join("") +
+        diasInfo.map(function(di){ return "<span style='flex:1;font-size:9px;text-align:center;color:var(--text-muted);font-weight:600;'>" + DIAS_L[(di.d.getDay()+6)%7] + "</span>"; }).join("") +
       "</div>" +
     "</div>";
 
@@ -211,9 +211,9 @@
       "<div class='mc-card' style='text-align:center;'>" +
         "<div style='font-size:40px;margin-bottom:8px;'>🚶</div>" +
         "<h2 style='margin-bottom:4px;'>Caminar</h2>" +
-        "<div style='font-size:12px;color:rgba(255,255,255,.4);margin-bottom:18px;'>Meta: " + META_PASOS_DEFAULT.toLocaleString("es") + " pasos</div>" +
+        "<div style='font-size:12px;color:var(--text-muted);margin-bottom:18px;'>Meta: " + META_PASOS_DEFAULT.toLocaleString("es") + " pasos</div>" +
         "<input id='input-pasos-dia' type='number' inputmode='numeric' value='" + (prog.pasos||0) + "' " +
-          "style='width:100%;height:54px;background:#1C1C1C;border:1px solid rgba(255,255,255,.1);border-radius:14px;text-align:center;color:#FFF;font-size:24px;font-weight:800;font-family:\"Space Mono\",monospace;margin-bottom:18px;'>" +
+          "style='width:100%;height:54px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;text-align:center;color:var(--text);font-size:24px;font-weight:800;font-family:\"Space Mono\",monospace;margin-bottom:18px;'>" +
         "<button class='pill-btn' id='btn-guardar-pasos'>Guardar</button>" +
       "</div>";
     document.body.appendChild(modal);
@@ -297,7 +297,7 @@
     html += "<div style='padding:0 20px;margin-bottom:18px;'>" +
       "<div style='background:rgba(200,224,0,0.06);border-left:3px solid #C8E000;border-radius:0 12px 12px 0;padding:12px 14px;'>" +
         "<div style='font-size:11px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;'>📈 Notas de progresión</div>" +
-        "<div style='font-size:13px;color:rgba(255,255,255,0.6);line-height:1.5;'>" + notaProgresion(diaRutina, registrosVP) + "</div>" +
+        "<div style='font-size:13px;color:var(--text-secondary);line-height:1.5;'>" + notaProgresion(diaRutina, registrosVP) + "</div>" +
       "</div>" +
     "</div>";
 
@@ -312,7 +312,7 @@
 
     // Lista ejercicios (preview), agrupados por superserie
     html += "<div style='padding:0 20px;'>";
-    html += "<div style='font-size:12px;font-weight:600;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;'>Ejercicios · " + diaRutina.ejercicios.length + "</div>";
+    html += "<div style='font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;'>Ejercicios · " + diaRutina.ejercicios.length + "</div>";
     var contador = 0;
     agruparPorSuperserie(diaRutina.ejercicios).forEach(function(grupo){
       if(grupo.superserie){
@@ -321,14 +321,14 @@
       grupo.items.forEach(function(ej){
         contador++;
         html +=
-          "<div style='display:flex;align-items:center;gap:14px;padding:12px 0" + (grupo.superserie ? " 12px 10px;border-left:2px solid rgba(10,132,255,0.4);margin-left:2px;" : ";") + "border-bottom:.5px solid rgba(255,255,255,0.05);'>" +
-            "<span style='width:22px;font-size:14px;font-weight:600;color:rgba(255,255,255,0.25);'>" + contador + "</span>" +
+          "<div style='display:flex;align-items:center;gap:14px;padding:12px 0" + (grupo.superserie ? " 12px 10px;border-left:2px solid rgba(10,132,255,0.4);margin-left:2px;" : ";") + "border-bottom:.5px solid var(--border);'>" +
+            "<span style='width:22px;font-size:14px;font-weight:600;color:var(--text-muted);'>" + contador + "</span>" +
             renderFotoEjercicio(ej) +
             "<div style='flex:1;'>" +
-              "<div style='font-size:15px;font-weight:600;color:#FFF;margin-bottom:3px;'>" + ej.nombre + "</div>" +
-              "<div style='font-size:12px;color:rgba(255,255,255,0.35);'>" + ej.series + " series · " + ej.repeticiones + " · " + ej.descanso_seg + "\" descanso</div>" +
+              "<div style='font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;'>" + ej.nombre + "</div>" +
+              "<div style='font-size:12px;color:var(--text-muted);'>" + ej.series + " series · " + ej.repeticiones + " · " + ej.descanso_seg + "\" descanso</div>" +
             "</div>" +
-            (ej.video_url ? "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='2'><polygon points='23 7 16 12 23 17 23 7'/><rect x='1' y='5' width='15' height='14' rx='2'/></svg>" : "") +
+            (ej.video_url ? "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='var(--text-dim)' stroke-width='2'><polygon points='23 7 16 12 23 17 23 7'/><rect x='1' y='5' width='15' height='14' rx='2'/></svg>" : "") +
           "</div>";
       });
     });

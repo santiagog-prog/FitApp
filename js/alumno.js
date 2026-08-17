@@ -6,7 +6,7 @@
   function safe(fn, name){ try{ fn(); }catch(e){ console.error("[alumno] " + name, e); } }
 
   var tabPages = ["inicio", "agenda", "nutricion", "evolucion", "mas"];
-  var allPages = tabPages.concat(["perfil", "gym", "fotos", "habitos", "videos", "cardio"]);
+  var allPages = tabPages.concat(["perfil", "gym", "fotos", "habitos", "videos", "cardio", "editar"]);
   var initialized = {};
 
   window.ALUMNO_ID = null;
@@ -197,7 +197,12 @@
           }
           clearTimeout(_slowTimer);
           loadEl.remove();
-          showPage("inicio");
+          var alumnoSplash = window.db.getAlumnoPorId(window.ALUMNO_ID);
+          if(alumnoSplash && window.mostrarSplashAlumno){
+            mostrarSplashAlumno(alumnoSplash, function(){ showPage("inicio"); });
+          } else {
+            showPage("inicio");
+          }
         })
         .catch(function(err){
           console.error("[alumno] db.init error:", err);
