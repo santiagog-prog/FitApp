@@ -1,65 +1,57 @@
 // ════════════════════════════════════════════════════════════
-// evolucion.js — Progreso: gráfica trading, historial, medallas, fotos, medidas
+// evolucion.js — Progreso: gráfica peso, historial, logros, medidas
 // ════════════════════════════════════════════════════════════
 (function(){
   "use strict";
 
-  var MEDALLAS_CONFIG = [
-    { id:"primera_llama",   icono:"🔥", nombre:"Primera llama",    desc:"Primer entreno completado" },
-    { id:"racha_3",         icono:"📅", nombre:"3 seguidos",        desc:"Racha de 3 días" },
-    { id:"semana_completa", icono:"⚡", nombre:"Semana completa",   desc:"Racha de 7 días" },
-    { id:"mes_fuego",       icono:"🏅", nombre:"Mes de fuego",      desc:"Racha de 30 días" },
-    { id:"hidratado",       icono:"💧", nombre:"Hidratado",         desc:"8 vasos en un día" },
-    { id:"decimo_entreno",  icono:"💪", nombre:"10 entrenos",       desc:"10 sesiones completadas" },
-    { id:"cincuenton",      icono:"🏆", nombre:"50 entrenos",       desc:"50 sesiones completadas" },
-    { id:"primera_bajada",  icono:"📉", nombre:"Primera bajada",    desc:"Bajada de peso registrada" },
-    { id:"me_mido",         icono:"📏", nombre:"Me mido",           desc:"Primeras medidas corporales" },
-    { id:"madrugador",      icono:"🌅", nombre:"Madrugador",        desc:"Entreno antes de las 7 AM" },
-    { id:"noctambulo",      icono:"🌙", nombre:"Noctámbulo",        desc:"Entreno después de las 9 PM" },
-    { id:"semana_limpia",   icono:"🥗", nombre:"Semana limpia",     desc:"7 días registrando comidas" },
-    { id:"mes_completo",    icono:"🌟", nombre:"Mes completo",       desc:"Todos los entrenos del mes" },
-    { id:"elite",           icono:"👑", nombre:"Élite",             desc:"Racha de 60 días" }
-  ];
+  // ── Unidad de peso (kg/lbs) ──────────────────────────────
+  function getUnit(){ return localStorage.getItem("fitapp_unit") || "kg"; }
+  function setUnit(u){ localStorage.setItem("fitapp_unit", u); }
+  function kgToDisplay(kg){ return getUnit() === "lbs" ? Math.round(kg * 2.20462 * 4) / 4 : parseFloat(kg); }
+  function displayToKg(v){ return getUnit() === "lbs" ? Math.round(v / 2.20462 * 10) / 10 : parseFloat(v); }
+  function unitLabel(){ return getUnit() === "lbs" ? "lbs" : "kg"; }
 
-  // ── GRÁFICA TRADING ──────────────────────────────────────
+  // ── GRÁFICA PESO (trading style) ────────────────────────
   function renderGraficaTradingPeso(containerId, pesos){
     var container = document.getElementById(containerId);
     if(!container) return;
     if(pesos.length < 2){
-      container.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:13px;">Registra tu peso para ver la gráfica</div>';
+      container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">Registra tu peso para ver la gráfica</div>';
       return;
     }
     var W = container.offsetWidth || 340;
     var H = 180;
-    var PAD = { top:16, right:16, bottom:36, left:48 };
-    var vals = pesos.map(function(p){ return parseFloat(p.kg); });
-    var minV = Math.min.apply(null, vals)-1;
-    var maxV = Math.max.apply(null, vals)+1;
-    var rX = function(i){ return PAD.left + (i/(pesos.length-1)) * (W-PAD.left-PAD.right); };
-    var rY = function(v){ return PAD.top + (1-(v-minV)/(maxV-minV)) * (H-PAD.top-PAD.bottom); };
+    var PAD = { top:16, right:16, bottom:36, left:52 };
+    var vals = pesos.map(function(p){ return kgToDisplay(parseFloat(p.kg)); });
+    var minV = Math.min.apply(null, vals) - 1;
+    var maxV = Math.max.apply(null, vals) + 1;
+    var rX = function(i){ return PAD.left + (i / (pesos.length - 1)) * (W - PAD.left - PAD.right); };
+    var rY = function(v){ return PAD.top + (1 - (v - minV) / (maxV - minV)) * (H - PAD.top - PAD.bottom); };
 
     var grid = "";
-    for(var g=0; g<=4; g++){
-      var yv = minV + (g/4)*(maxV-minV);
+    for(var g = 0; g <= 4; g++){
+      var yv = minV + (g / 4) * (maxV - minV);
       var yp = rY(yv);
-      grid += '<line x1="' + PAD.left + '" y1="' + yp.toFixed(1) + '" x2="' + (W-PAD.right) + '" y2="' + yp.toFixed(1) + '" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>';
-      grid += '<text x="' + (PAD.left-6) + '" y="' + (yp+4).toFixed(1) + '" text-anchor="end" font-size="10" fill="rgba(255,255,255,0.2)" font-family="Inter,sans-serif">' + yv.toFixed(1) + '</text>';
+      grid += '<line x1="' + PAD.left + '" y1="' + yp.toFixed(1) + '" x2="' + (W - PAD.right) + '" y2="' + yp.toFixed(1) + '" stroke="rgba(0,0,0,0.07)" stroke-width="1"/>';
+      grid += '<text x="' + (PAD.left - 6) + '" y="' + (yp + 4).toFixed(1) + '" text-anchor="end" font-size="10" fill="var(--text-muted)" font-family="Inter,sans-serif">' + yv.toFixed(1) + '</text>';
     }
 
     var area = "M " + rX(0).toFixed(1) + " " + H;
-    pesos.forEach(function(p,i){ area += " L " + rX(i).toFixed(1) + " " + rY(p.kg).toFixed(1); });
-    area += " L " + rX(pesos.length-1).toFixed(1) + " " + H + " Z";
+    pesos.forEach(function(p, i){ area += " L " + rX(i).toFixed(1) + " " + rY(kgToDisplay(p.kg)).toFixed(1); });
+    area += " L " + rX(pesos.length - 1).toFixed(1) + " " + H + " Z";
 
-    var line = pesos.map(function(p,i){ return (i===0?"M":"L") + " " + rX(i).toFixed(1) + " " + rY(p.kg).toFixed(1); }).join(" ");
+    var line = pesos.map(function(p, i){
+      return (i === 0 ? "M" : "L") + " " + rX(i).toFixed(1) + " " + rY(kgToDisplay(p.kg)).toFixed(1);
+    }).join(" ");
 
     var puntos = "", labels = "";
-    var step = Math.ceil(pesos.length/5);
-    pesos.forEach(function(p,i){
-      var cx = rX(i).toFixed(1), cy = rY(p.kg).toFixed(1);
-      puntos += '<circle class="gpeso-dot" cx="' + cx + '" cy="' + cy + '" r="5" fill="#C8E000" stroke="#0A0A0A" stroke-width="2" data-kg="' + p.kg + '" data-fecha="' + p.fecha + '" style="cursor:pointer;"/>';
-      if(i%step===0 || i===pesos.length-1){
+    var step = Math.ceil(pesos.length / 5);
+    pesos.forEach(function(p, i){
+      var cx = rX(i).toFixed(1), cy = rY(kgToDisplay(p.kg)).toFixed(1);
+      puntos += '<circle class="gpeso-dot" cx="' + cx + '" cy="' + cy + '" r="5" fill="#C8E000" stroke="var(--surface)" stroke-width="2" data-kg="' + p.kg + '" data-fecha="' + p.fecha + '" style="cursor:pointer;"/>';
+      if(i % step === 0 || i === pesos.length - 1){
         var f = p.fecha.split("-");
-        labels += '<text x="' + cx + '" y="' + (H-4) + '" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.25)" font-family="Inter,sans-serif">' + f[2] + "/" + f[1] + '</text>';
+        labels += '<text x="' + cx + '" y="' + (H - 4) + '" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-family="Inter,sans-serif">' + f[2] + "/" + f[1] + '</text>';
       }
     });
 
@@ -67,7 +59,7 @@
       '<div style="position:relative;">' +
       '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
         '<defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">' +
-          '<stop offset="0%" stop-color="#C8E000" stop-opacity="0.2"/>' +
+          '<stop offset="0%" stop-color="#C8E000" stop-opacity="0.18"/>' +
           '<stop offset="100%" stop-color="#C8E000" stop-opacity="0"/>' +
         '</linearGradient></defs>' +
         grid +
@@ -75,102 +67,139 @@
         '<path d="' + line + '" fill="none" stroke="#C8E000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' +
         puntos + labels +
       '</svg>' +
-      '<div id="gpeso-tooltip" style="display:none;position:absolute;background:#1C1C1C;border:1px solid rgba(200,224,0,0.4);border-radius:10px;padding:8px 14px;pointer-events:none;z-index:10;">' +
-        '<div id="gpeso-tt-kg" style="font-size:18px;font-weight:800;color:#C8E000;"></div>' +
-        '<div id="gpeso-tt-fecha" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;"></div>' +
+      '<div id="gpeso-tooltip" style="display:none;position:absolute;background:var(--surface2);border:1px solid rgba(200,224,0,0.35);border-radius:10px;padding:8px 14px;pointer-events:none;z-index:10;">' +
+        '<div id="gpeso-tt-kg" style="font-size:18px;font-weight:800;color:var(--accent);"></div>' +
+        '<div id="gpeso-tt-fecha" style="font-size:11px;color:var(--text-muted);margin-top:2px;"></div>' +
       '</div>' +
       '</div>';
 
-    // Tooltip click handler
     container.querySelectorAll(".gpeso-dot").forEach(function(dot){
       dot.addEventListener("click", function(e){
         var tt = document.getElementById("gpeso-tooltip");
-        var svgRect = dot.closest("svg").getBoundingClientRect();
-        var contRect = container.getBoundingClientRect();
         var cx = parseFloat(dot.getAttribute("cx"));
         var cy = parseFloat(dot.getAttribute("cy"));
-        document.getElementById("gpeso-tt-kg").textContent = dot.getAttribute("data-kg") + " kg";
+        var kgVal = kgToDisplay(parseFloat(dot.getAttribute("data-kg")));
+        document.getElementById("gpeso-tt-kg").textContent = kgVal + " " + unitLabel();
         var f = dot.getAttribute("data-fecha").split("-");
         document.getElementById("gpeso-tt-fecha").textContent = f[2] + "/" + f[1] + "/" + f[0];
-        var left = cx - 50;
-        var top = cy - 68;
-        if(left < 0) left = 0;
+        var left = Math.max(0, cx - 50);
         tt.style.left = left + "px";
-        tt.style.top = top + "px";
+        tt.style.top = (cy - 68) + "px";
         tt.style.display = "block";
         e.stopPropagation();
       });
     });
-    document.addEventListener("click", function(){ var tt = document.getElementById("gpeso-tooltip"); if(tt) tt.style.display="none"; }, { once:false });
+    document.addEventListener("click", function(){ var tt = document.getElementById("gpeso-tooltip"); if(tt) tt.style.display = "none"; });
   }
 
-  // ── MEDALLAS ─────────────────────────────────────────────
-  function renderMedallas(alumnoId){
-    var desbloqueadas = window.db.getMedallas(alumnoId);
-    return MEDALLAS_CONFIG.map(function(m){
-      var unlocked = desbloqueadas.indexOf(m.id) !== -1;
-      return '<div class="medalla' + (unlocked?" desbloqueada":"") + '" title="' + m.desc + '">' +
-        '<div class="med-circ">' +
-          (unlocked ? m.icono :
-            '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>') +
-        '</div>' +
-        '<div class="med-nombre">' + m.nombre + '</div>' +
-      '</div>';
-    }).join("");
-  }
+  // ── PROGRESIÓN SEMANAL (4 semanas de entrenos + volumen) ─
+  function renderSemanas(alumnoId, registros){
+    var hoy = new Date();
+    var semanas = [];
+    for(var w = 3; w >= 0; w--){
+      var dias = [];
+      for(var d = 0; d < 7; d++){
+        var fecha = new Date(hoy);
+        fecha.setDate(hoy.getDate() - (w * 7) - (6 - d));
+        var key = fecha.toISOString().split("T")[0];
+        var reg = registros.find(function(r){ return r.fecha === key; });
+        var volumen = 0;
+        if(reg && Array.isArray(reg.ejercicios)){
+          reg.ejercicios.forEach(function(ej){
+            if(Array.isArray(ej.series)) ej.series.forEach(function(s){ volumen += (s.kg || 0) * (s.reps || 0); });
+          });
+        }
+        dias.push({ key:key, hecho:!!reg, volumen:volumen, esHoy: key === hoy.toISOString().split("T")[0] });
+      }
+      var totalVol = dias.reduce(function(s, d){ return s + d.volumen; }, 0);
+      semanas.push({ dias:dias, totalVol:totalVol, numEntrenos:dias.filter(function(d){ return d.hecho; }).length });
+    }
 
-  window.celebrarMedalla = function(medallaId){
-    var m = MEDALLAS_CONFIG.find(function(x){ return x.id===medallaId; });
-    if(!m) return;
-    window.mostrarToast(m.icono + " ¡Medalla desbloqueada! " + m.nombre);
-  };
+    var DIAS_L = ["L","M","X","J","V","S","D"];
+    var maxVol = Math.max.apply(null, semanas.map(function(s){ return s.totalVol; }).concat([1]));
+
+    var html = "<div style='padding:0 20px 20px;'>" +
+      "<div style='font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;'>Progresión semana a semana</div>" +
+      "<div style='font-size:12px;color:var(--text-muted);margin-bottom:14px;'>Volumen total (kg × reps) por semana</div>";
+
+    semanas.forEach(function(sem, si){
+      var pct = maxVol > 0 ? Math.round(sem.totalVol / maxVol * 100) : 0;
+      var label = si === 3 ? "Esta semana" : si === 2 ? "Hace 1 sem" : si === 1 ? "Hace 2 sem" : "Hace 3 sem";
+      html += "<div style='margin-bottom:16px;'>" +
+        "<div style='display:flex;justify-content:space-between;margin-bottom:6px;'>" +
+          "<span style='font-size:13px;font-weight:600;color:var(--text);'>" + label + "</span>" +
+          "<span style='font-size:12px;color:var(--text-muted);'>" + sem.numEntrenos + " entrenos · " +
+            (sem.totalVol > 0 ? kgToDisplay(sem.totalVol).toLocaleString("es") + " " + unitLabel() + " vol." : "sin datos") +
+          "</span>" +
+        "</div>" +
+        // barra de volumen
+        "<div style='height:8px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-bottom:6px;'>" +
+          "<div style='height:100%;width:" + pct + "%;background:" + (si === 3 ? "var(--accent)" : "rgba(200,224,0,0.45)") + ";border-radius:99px;transition:width .6s;'></div>" +
+        "</div>" +
+        // cuadritos de días
+        "<div style='display:flex;gap:4px;'>" +
+        sem.dias.map(function(dia, di){
+          var color = dia.hecho ? "var(--accent)" : dia.esHoy ? "rgba(200,224,0,0.2)" : "var(--surface3)";
+          return "<div style='flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;'>" +
+            "<div style='width:100%;height:22px;border-radius:5px;background:" + color + ";'></div>" +
+            "<span style='font-size:9px;font-weight:600;color:var(--text-muted);'>" + DIAS_L[di] + "</span>" +
+          "</div>";
+        }).join("") +
+        "</div>" +
+      "</div>";
+    });
+
+    html += "</div>";
+    return html;
+  }
 
   // ── HISTORIAL EXPANDIBLE ─────────────────────────────────
   function renderHistorial(registros){
-    if(registros.length === 0) return '<p style="padding:0 20px;color:rgba(255,255,255,.3);font-size:13px;">Aún no hay entrenamientos.</p>';
+    if(registros.length === 0) return '<p style="padding:0 20px;color:var(--text-muted);font-size:13px;">Aún no hay entrenamientos.</p>';
     var emojis = ["😫","😕","😐","💪","🔥"];
-    var sensColors = ["#FF453A","#FF9F0A","rgba(255,255,255,.4)","#30D158","#C8E000"];
-    return registros.slice().reverse().slice(0,10).map(function(r, i){
+    return registros.slice().reverse().slice(0, 10).map(function(r, i){
       var ejercsHTML = "";
       if(Array.isArray(r.ejercicios) && r.ejercicios.length){
         ejercsHTML = '<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">' +
           r.ejercicios.map(function(ej){
             var setsInfo = Array.isArray(ej.series) && ej.series.length
-              ? ej.series.map(function(s,si){ return '<span style="display:inline-block;padding:3px 8px;background:rgba(200,224,0,0.08);border-radius:6px;font-size:11px;font-weight:700;color:#C8E000;margin:2px;">' + (s.reps||"—") + ' reps × ' + (s.kg||0) + ' kg</span>'; }).join("")
-              : '<span style="font-size:11px;color:rgba(255,255,255,.3);">Sin datos de series</span>';
-            return '<div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,0.05);">' +
-              '<div style="font-size:13px;font-weight:700;color:#FFF;margin-bottom:6px;">' + (ej.nombre||ej.name||"Ejercicio") + '</div>' +
+              ? ej.series.map(function(s){
+                  var kgD = kgToDisplay(s.kg || 0);
+                  return '<span style="display:inline-block;padding:3px 8px;background:rgba(200,224,0,0.1);border-radius:6px;font-size:11px;font-weight:700;color:var(--accent-text);margin:2px;">' +
+                    (s.reps || "—") + ' reps × ' + kgD + ' ' + unitLabel() + '</span>';
+                }).join("")
+              : '<span style="font-size:11px;color:var(--text-muted);">Sin datos de series</span>';
+            return '<div style="background:var(--surface2);border-radius:10px;padding:10px 12px;border:1px solid var(--border);">' +
+              '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;">' + (ej.nombre || ej.name || "Ejercicio") + '</div>' +
               '<div style="display:flex;flex-wrap:wrap;gap:4px;">' + setsInfo + '</div>' +
             '</div>';
           }).join("") +
         '</div>';
       } else if(r.nota){
-        ejercsHTML = '<p style="font-size:13px;color:rgba(255,255,255,.5);font-style:italic;padding:8px 0 0;">"' + r.nota + '"</p>';
+        ejercsHTML = '<p style="font-size:13px;color:var(--text-muted);font-style:italic;padding:8px 0 0;">"' + r.nota + '"</p>';
       } else {
-        ejercsHTML = '<p style="font-size:12px;color:rgba(255,255,255,.25);padding:8px 0 0;">Sin detalle disponible para esta sesión.</p>';
+        ejercsHTML = '<p style="font-size:12px;color:var(--text-muted);padding:8px 0 0;">Sin detalle disponible para esta sesión.</p>';
       }
-      var sColor = sensColors[(r.sensacion||3)-1];
       return '<div class="historial-row" id="hw-' + i + '">' +
         '<div class="historial-row-head" data-hw="' + i + '">' +
           '<div style="flex:1;">' +
-            '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;">' + r.fecha + '</div>' +
-            '<div style="font-size:15px;font-weight:700;color:#FFF;">' + (r.sesion_nombre||r.nombre_sesion||"Sesión") + '</div>' +
+            '<div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;">' + r.fecha + '</div>' +
+            '<div style="font-size:15px;font-weight:700;color:var(--text);">' + (r.sesion_nombre || r.nombre_sesion || "Sesión") + '</div>' +
             '<div style="display:flex;align-items:center;gap:8px;margin-top:4px;">' +
-              '<span style="font-size:11px;color:rgba(255,255,255,.35);">⏱ ' + (r.duracion_min||0) + ' min</span>' +
-              '<span style="font-size:11px;color:rgba(255,255,255,.35);">·</span>' +
-              '<span style="font-size:11px;color:rgba(255,255,255,.35);">🏋️ ' + (r.ejercicios_completados||0) + ' ejercicios</span>' +
+              '<span style="font-size:11px;color:var(--text-muted);">⏱ ' + (r.duracion_min || 0) + ' min</span>' +
+              '<span style="font-size:11px;color:var(--text-muted);">·</span>' +
+              '<span style="font-size:11px;color:var(--text-muted);">🏋️ ' + (r.ejercicios_completados || 0) + ' ejercicios</span>' +
             '</div>' +
           '</div>' +
-          '<div style="font-size:24px;line-height:1;">' + (emojis[(r.sensacion||3)-1]) + '</div>' +
-          '<div id="chev-hw-' + i + '" style="color:rgba(255,255,255,.2);font-size:20px;margin-left:10px;transition:transform .3s;">›</div>' +
+          '<div style="font-size:24px;line-height:1;">' + (emojis[(r.sensacion || 3) - 1]) + '</div>' +
+          '<div id="chev-hw-' + i + '" style="color:var(--text-muted);font-size:20px;margin-left:10px;transition:transform .3s;">›</div>' +
         '</div>' +
         '<div id="detail-hw-' + i + '" class="historial-row-body">' + ejercsHTML + '</div>' +
       '</div>';
     }).join("");
   }
 
-
-  // ── INIT ────────────────────────────────────────────────
+  // ── INIT ─────────────────────────────────────────────────
   window.init_evolucion = function(){
     var header = document.getElementById("app-header");
     header.innerHTML =
@@ -178,14 +207,15 @@
       "<div class='ah-subtitle'>Tu evolución</div>" +
       "<div class='ah-title'>Progreso</div>";
 
-    var alumno   = window.db.getAlumnoPorId(window.ALUMNO_ID);
-    var registros= window.db.getRegistros(alumno.id);
-    var pesos    = window.db.getPesos(alumno.id);
-    var medidas  = window.db.getMedidas(alumno.id);
-    var hoy      = new Date();
-    var hoyKey   = window.db.fechaHoy();
-    var regsMes  = registros.filter(function(r){ return new Date(r.fecha).getMonth()===hoy.getMonth(); });
-    var horasTotal = registros.reduce(function(s,r){ return s+(r.duracion_min||0); },0);
+    var alumno    = window.db.getAlumnoPorId(window.ALUMNO_ID);
+    var registros = window.db.getRegistros(alumno.id);
+    var pesos     = window.db.getPesos(alumno.id);
+    var medidas   = window.db.getMedidas(alumno.id);
+    var hoy       = new Date();
+    var hoyKey    = window.db.fechaHoy();
+    var regsMes   = registros.filter(function(r){ return new Date(r.fecha).getMonth() === hoy.getMonth(); });
+    var horasTotal= registros.reduce(function(s, r){ return s + (r.duracion_min || 0); }, 0);
+    var unit      = getUnit();
 
     var html = "<div style='padding-top:4px;'>";
 
@@ -194,42 +224,56 @@
     html += "<div style='display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px 20px;'>" +
       chip(regsMes.length, "Este mes", "📅", "#C8E000") +
       chip(rachaVal + (rachaVal === 1 ? " día" : " días"), "Racha activa", "🔥", "#FF9F0A") +
-      chip(Math.floor(horasTotal/60)+"h " + (horasTotal%60)+"m", "Horas totales", "⏱️", "#60A5FA") +
+      chip(Math.floor(horasTotal / 60) + "h " + (horasTotal % 60) + "m", "Horas totales", "⏱️", "#60A5FA") +
       chip(registros.length, "Entrenamientos", "🏋️", "#A78BFA") +
     "</div>";
 
-    // Link fotos
+    // Botón fotos
     html += "<div style='padding:0 20px 16px;'>" +
-      "<button id='btn-ir-fotos-evo' style='width:100%;height:44px;background:rgba(200,224,0,0.08);color:#C8E000;border:1px solid rgba(200,224,0,0.2);border-radius:50px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;'>📸 Ver fotos de progreso</button>" +
+      "<button id='btn-ir-fotos-evo' style='width:100%;height:44px;background:rgba(200,224,0,0.08);color:var(--accent-text);border:1px solid rgba(200,224,0,0.2);border-radius:50px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;'>📸 Ver fotos de progreso</button>" +
     "</div>";
 
-    // Peso
-    html += "<div style='padding:0 20px 10px;'>" +
-      "<div style='font-size:18px;font-weight:700;color:#FFF;margin-bottom:4px;'>Peso corporal</div>";
+    // Sección peso con toggle kg/lbs
+    html += "<div style='padding:0 20px 6px;display:flex;align-items:center;justify-content:space-between;'>" +
+      "<div style='font-size:18px;font-weight:700;color:var(--text);'>Peso corporal</div>" +
+      "<div style='display:flex;gap:0;border:1px solid var(--border);border-radius:20px;overflow:hidden;'>" +
+        "<button id='unit-kg' style='padding:4px 12px;font-size:12px;font-weight:700;font-family:inherit;border:none;cursor:pointer;background:" + (unit==="kg"?"var(--accent)":"var(--surface2)") + ";color:" + (unit==="kg"?"#1C1C1E":"var(--text-muted)") + ";'>kg</button>" +
+        "<button id='unit-lbs' style='padding:4px 12px;font-size:12px;font-weight:700;font-family:inherit;border:none;cursor:pointer;background:" + (unit==="lbs"?"var(--accent)":"var(--surface2)") + ";color:" + (unit==="lbs"?"#1C1C1E":"var(--text-muted)") + ";'>lbs</button>" +
+      "</div>" +
+    "</div>";
+
     if(pesos.length > 0){
-      var pesoActual = parseFloat(pesos[pesos.length-1].kg);
-      var diff = pesos.length > 1 ? (pesoActual - parseFloat(pesos[pesos.length-2].kg)).toFixed(1) : 0;
-      html += "<div style='font-size:32px;font-weight:800;color:#C8E000;letter-spacing:-.5px;'>" + pesoActual + " kg" +
-        "<span style='font-size:14px;font-weight:500;color:" + (diff<=0?"#34C759":"#FF453A") + ";margin-left:10px;'>" + (diff>0?"+":"") + diff + " kg</span></div>";
-    }
-    html += "</div>";
-
-    html += "<div id='grafica-peso' style='padding:0 0 16px;'></div>";
-
-    // Registrar peso
-    var yaRegistroHoy = pesos.some(function(p){ return p.fecha===hoyKey; });
-    if(!yaRegistroHoy){
-      html += "<div style='padding:0 20px 20px;display:flex;gap:10px;'>" +
-        "<input type='number' step='0.1' id='peso-input' placeholder='Tu peso hoy (kg)' style='flex:1;height:48px;background:#141414;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:0 16px;color:#FFF;font-size:16px;font-family:inherit;'>" +
-        "<button id='btn-registrar-peso' style='height:48px;padding:0 20px;background:#C8E000;color:#1C1C1E;border:none;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit;'>+ Registrar</button>" +
+      var pesoActual = parseFloat(pesos[pesos.length - 1].kg);
+      var diff = pesos.length > 1 ? (pesoActual - parseFloat(pesos[pesos.length - 2].kg)).toFixed(1) : 0;
+      var dispActual = kgToDisplay(pesoActual);
+      var dispDiff   = unit === "lbs" ? (diff * 2.20462).toFixed(1) : diff;
+      html += "<div style='padding:0 20px 4px;'>" +
+        "<div style='font-size:32px;font-weight:800;color:var(--accent);letter-spacing:-.5px;'>" + dispActual + " " + unitLabel() +
+          "<span style='font-size:14px;font-weight:500;color:" + (diff <= 0 ? "#34C759" : "#FF453A") + ";margin-left:10px;'>" + (diff > 0 ? "+" : "") + dispDiff + " " + unitLabel() + "</span></div>" +
       "</div>";
     }
 
+    html += "<div id='grafica-peso' style='padding:0 0 16px;'></div>";
+
+    // Input registrar peso hoy
+    var yaRegistroHoy = pesos.some(function(p){ return p.fecha === hoyKey; });
+    if(!yaRegistroHoy){
+      var placeholder = unit === "lbs" ? "Tu peso hoy (" + kgToDisplay(65).toFixed(1) + " lbs aprox)" : "Tu peso hoy (kg)";
+      html += "<div style='padding:0 20px 20px;display:flex;gap:10px;'>" +
+        "<input type='number' step='0.1' id='peso-input' placeholder='" + placeholder + "' " +
+          "style='flex:1;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:0 16px;color:var(--text);font-size:16px;font-family:inherit;outline:none;'>" +
+        "<button id='btn-registrar-peso' style='height:48px;padding:0 20px;background:var(--accent);color:#1C1C1E;border:none;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit;'>+ Guardar</button>" +
+      "</div>";
+    }
+
+    // Progresión semanal
+    html += renderSemanas(alumno.id, registros);
+
     // Historial
-    html += "<div style='padding:0 20px 10px;'><div style='font-size:18px;font-weight:700;color:#FFF;margin-bottom:12px;'>Mis entrenamientos</div></div>";
+    html += "<div style='padding:0 20px 10px;'><div style='font-size:18px;font-weight:700;color:var(--text);margin-bottom:12px;'>Mis entrenamientos</div></div>";
     html += renderHistorial(registros);
 
-    // Entrenos por tipo (PARTE 3B)
+    // Entrenos por tipo
     var tiposMap = {};
     var TIPOS_CONOCIDOS = ["Push","Pull","Legs","Upper","Lower","Full Body","Cardio","Core","HIIT"];
     registros.forEach(function(r){
@@ -242,20 +286,20 @@
     var tipos = Object.keys(tiposMap);
     if(tipos.length > 1){
       var totalRegs = registros.length || 1;
-      var TIPO_COLORS = { Push:"#C8E000", Pull:"#34C759", Legs:"#FF9F0A", Upper:"#5AC8FA", Lower:"#AF52DE", "Full Body":"#FF375F", Cardio:"#FF6B35", Core:"#30D158", HIIT:"#FF453A", Otros:"rgba(255,255,255,0.3)" };
+      var TIPO_COLORS = { Push:"#C8E000", Pull:"#34C759", Legs:"#FF9F0A", Upper:"#5AC8FA", Lower:"#AF52DE", "Full Body":"#FF375F", Cardio:"#FF6B35", Core:"#30D158", HIIT:"#FF453A", Otros:"var(--text-muted)" };
       html += "<div style='padding:0 20px 20px;'>" +
-        "<div style='font-size:18px;font-weight:700;color:#FFF;margin-bottom:14px;'>Entrenos por tipo</div>" +
+        "<div style='font-size:18px;font-weight:700;color:var(--text);margin-bottom:14px;'>Entrenos por tipo</div>" +
         "<div style='display:flex;flex-direction:column;gap:10px;'>";
-      tipos.sort(function(a,b){ return tiposMap[b]-tiposMap[a]; }).forEach(function(tipo){
+      tipos.sort(function(a, b){ return tiposMap[b] - tiposMap[a]; }).forEach(function(tipo){
         var count = tiposMap[tipo];
-        var pct = Math.round(count/totalRegs*100);
-        var color = TIPO_COLORS[tipo] || "#C8E000";
+        var pct   = Math.round(count / totalRegs * 100);
+        var color = TIPO_COLORS[tipo] || "var(--accent)";
         html += "<div>" +
           "<div style='display:flex;justify-content:space-between;margin-bottom:5px;'>" +
-            "<span style='font-size:14px;font-weight:600;color:#FFF;'>" + tipo + "</span>" +
-            "<span style='font-size:13px;color:rgba(255,255,255,0.4);'>" + count + " sesiones · " + pct + "%</span>" +
+            "<span style='font-size:14px;font-weight:600;color:var(--text);'>" + tipo + "</span>" +
+            "<span style='font-size:13px;color:var(--text-muted);'>" + count + " sesiones · " + pct + "%</span>" +
           "</div>" +
-          "<div style='height:6px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;'>" +
+          "<div style='height:6px;background:var(--surface3);border-radius:99px;overflow:hidden;'>" +
             "<div style='height:100%;width:" + pct + "%;background:" + color + ";border-radius:99px;transition:width .6s ease;'></div>" +
           "</div>" +
         "</div>";
@@ -264,8 +308,10 @@
     }
 
     // Medidas
-    html += "<div style='padding:16px 20px 10px;'><div style='font-size:18px;font-weight:700;color:#FFF;margin-bottom:10px;'>Medidas corporales</div>" +
-      "<button id='btn-medidas' style='width:100%;height:44px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:50px;color:rgba(255,255,255,.6);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;'>📏 Registrar mis medidas</button></div>";
+    html += "<div style='padding:16px 20px 10px;'>" +
+      "<div style='font-size:18px;font-weight:700;color:var(--text);margin-bottom:10px;'>Medidas corporales</div>" +
+      "<button id='btn-medidas' style='width:100%;height:44px;background:var(--surface2);border:1px solid var(--border);border-radius:50px;color:var(--text-muted);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;'>📏 Registrar mis medidas</button>" +
+    "</div>";
 
     if(medidas.length){
       html += "<div style='padding:0 20px 16px;overflow-x:auto;'><table class='medidas-tabla'><tr><th>Fecha</th><th>Cintura</th><th>Cadera</th><th>Brazo</th><th>Muslo</th></tr>";
@@ -275,53 +321,27 @@
       html += "</table></div>";
     }
 
-    // ── FitScore historial (7 días) ──
-    if(window.calcularFitScore){
-      var fsHist = window.db.getFitScoreHistorial(alumno.id, 7);
-      var maxFs = Math.max.apply(null, fsHist.map(function(x){ return x.score||0; }).concat([100]));
-      html += "<div style='padding:0 20px 16px;'>" +
-        "<div style='font-size:18px;font-weight:700;margin-bottom:14px;'>FitScore — últimos 7 días</div>" +
-        "<div style='background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;'>" +
-          "<div style='display:flex;align-items:flex-end;justify-content:space-between;gap:6px;height:80px;'>";
-      var diasLabels = ["L","M","X","J","V","S","D"];
-      fsHist.forEach(function(d, i){
-        var sc = d.score || 0;
-        var h  = maxFs > 0 ? Math.round(sc/maxFs*70) : 0;
-        var dObj = new Date(d.fecha + "T12:00:00");
-        var label = diasLabels[(dObj.getDay()+6)%7];
-        var isToday = d.fecha === window.db.fechaHoy();
-        html += "<div style='flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;'>" +
-          "<div style='font-size:10px;font-weight:700;color:var(--text-muted);'>" + (sc||"-") + "</div>" +
-          "<div style='width:100%;height:" + h + "px;background:" + (isToday?"var(--accent)":"rgba(200,224,0,0.3)") + ";border-radius:4px 4px 0 0;min-height:4px;'></div>" +
-          "<div style='font-size:10px;color:var(--text-muted);font-weight:600;'>" + label + "</div>" +
-        "</div>";
-      });
-      html += "</div></div></div>";
-    }
-
-    // ── Logros (expandidos con LOGROS_DEF) ──
+    // Logros
     var logrosDef = window.LOGROS_DEF || [];
     var desbloqueadas = window.db.getMedallas(alumno.id);
     html += "<div style='padding:0 20px 10px;'>" +
       "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;'>" +
-        "<div style='font-size:18px;font-weight:700;'>Logros</div>" +
-        "<div style='font-size:12px;color:var(--accent);font-weight:700;'>" + desbloqueadas.length + " desbloqueados</div>" +
+        "<div style='font-size:18px;font-weight:700;color:var(--text);'>Logros</div>" +
+        "<div style='font-size:12px;color:var(--accent-text);font-weight:700;'>" + desbloqueadas.length + " desbloqueados</div>" +
       "</div>" +
     "</div>";
 
-    // Logros nuevos (fitscore.js)
     if(logrosDef.length){
       html += "<div class='logros-grid' style='margin-bottom:8px;'>";
       logrosDef.forEach(function(l){
         var ok = desbloqueadas.indexOf(l.id) !== -1;
-        html += "<div class='logro-badge " + (ok?"unlocked":"locked") + "' title='" + l.desc + "'>" +
+        html += "<div class='logro-badge " + (ok ? "unlocked" : "locked") + "' title='" + l.desc + "'>" +
           "<div class='lb-icon'>" + l.icono + "</div>" +
           "<div class='lb-name'>" + l.nombre + "</div>" +
         "</div>";
       });
       html += "</div>";
     } else {
-      // Medallas originales
       html += "<div class='medallas-grid'>" + renderMedallas(alumno.id) + "</div>";
     }
 
@@ -333,12 +353,16 @@
 
     document.getElementById("btn-ir-fotos-evo").addEventListener("click", function(){ window.irAPagina("fotos"); });
 
+    document.getElementById("unit-kg").addEventListener("click", function(){ setUnit("kg"); window.init_evolucion(); });
+    document.getElementById("unit-lbs").addEventListener("click", function(){ setUnit("lbs"); window.init_evolucion(); });
+
     var btnPeso = document.getElementById("btn-registrar-peso");
     if(btnPeso) btnPeso.addEventListener("click", function(){
-      var val = (document.getElementById("peso-input")||{}).value;
+      var val = parseFloat((document.getElementById("peso-input") || {}).value);
       if(!val) return;
-      window.db.savePeso(alumno.id, { fecha:hoyKey, kg:parseFloat(val) });
-      window.mostrarToast("Peso registrado: " + val + " kg");
+      var kgVal = displayToKg(val);
+      window.db.savePeso(alumno.id, { fecha:hoyKey, kg:kgVal });
+      window.mostrarToast("Peso registrado: " + val + " " + unitLabel());
       window.init_evolucion();
     });
 
@@ -346,7 +370,7 @@
 
     document.querySelectorAll(".historial-row-head[data-hw]").forEach(function(el){
       el.addEventListener("click", function(){
-        var i = this.getAttribute("data-hw");
+        var i      = this.getAttribute("data-hw");
         var detail = document.getElementById("detail-hw-" + i);
         var chev   = document.getElementById("chev-hw-" + i);
         if(!detail) return;
@@ -358,36 +382,67 @@
   };
 
   function chip(val, label, icon, color){
-    var c = color || "#C8E000";
-    var ic = icon || "";
-    return '<div style="background:linear-gradient(145deg,#161616,#0f0f0f);border-radius:18px;padding:18px 16px;border:1px solid rgba(255,255,255,.08);box-shadow:0 4px 20px rgba(0,0,0,.4);position:relative;overflow:hidden;">' +
-      '<div style="position:absolute;top:-10px;right:-6px;font-size:42px;opacity:.07;">' + ic + '</div>' +
-      '<div style="font-size:11px;font-weight:700;color:' + c + ';text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">' + label + '</div>' +
-      '<div style="font-size:26px;font-weight:900;color:#FFF;letter-spacing:-.5px;line-height:1;">' + val + '</div>' +
+    return '<div style="background:var(--surface2);border-radius:18px;padding:18px 16px;border:1px solid var(--border);box-shadow:var(--shadow-card);position:relative;overflow:hidden;">' +
+      '<div style="position:absolute;top:-10px;right:-6px;font-size:42px;opacity:.07;">' + icon + '</div>' +
+      '<div style="font-size:11px;font-weight:700;color:' + color + ';text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">' + label + '</div>' +
+      '<div style="font-size:26px;font-weight:900;color:var(--text);letter-spacing:-.5px;line-height:1;">' + val + '</div>' +
     '</div>';
   }
+
+  function renderMedallas(alumnoId){
+    var MEDALLAS_CONFIG = [
+      { id:"primera_llama",   icono:"🔥", nombre:"Primera llama",    desc:"Primer entreno completado" },
+      { id:"racha_3",         icono:"📅", nombre:"3 seguidos",        desc:"Racha de 3 días" },
+      { id:"semana_completa", icono:"⚡", nombre:"Semana completa",   desc:"Racha de 7 días" },
+      { id:"mes_fuego",       icono:"🏅", nombre:"Mes de fuego",      desc:"Racha de 30 días" },
+      { id:"hidratado",       icono:"💧", nombre:"Hidratado",         desc:"8 vasos en un día" },
+      { id:"decimo_entreno",  icono:"💪", nombre:"10 entrenos",       desc:"10 sesiones completadas" },
+      { id:"cincuenton",      icono:"🏆", nombre:"50 entrenos",       desc:"50 sesiones completadas" },
+      { id:"primera_bajada",  icono:"📉", nombre:"Primera bajada",    desc:"Bajada de peso registrada" },
+      { id:"me_mido",         icono:"📏", nombre:"Me mido",           desc:"Primeras medidas corporales" },
+      { id:"madrugador",      icono:"🌅", nombre:"Madrugador",        desc:"Entreno antes de las 7 AM" }
+    ];
+    var desbloqueadas = window.db.getMedallas(alumnoId);
+    return MEDALLAS_CONFIG.map(function(m){
+      var unlocked = desbloqueadas.indexOf(m.id) !== -1;
+      return '<div class="medalla' + (unlocked ? " desbloqueada" : "") + '" title="' + m.desc + '">' +
+        '<div class="med-circ">' +
+          (unlocked ? m.icono :
+            '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>') +
+        '</div>' +
+        '<div class="med-nombre">' + m.nombre + '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  window.celebrarMedalla = function(medallaId){
+    var all = window.LOGROS_DEF || [];
+    var m = all.find(function(x){ return x.id === medallaId; });
+    if(m) window.mostrarToast(m.icono + " ¡Medalla desbloqueada! " + m.nombre);
+  };
 
   function abrirModalMedidas(alumnoId){
     var campos = ["cuello","pecho","cintura","cadera","brazo_izq","brazo_der","muslo_izq","muslo_der","pantorrilla"];
     var labels  = ["Cuello","Pecho","Cintura","Cadera","Brazo izq.","Brazo der.","Muslo izq.","Muslo der.","Pantorrilla"];
     var modal = document.createElement("div");
     modal.className = "modal-celebracion";
-    var inputs = campos.map(function(c,i){
-      return '<div style="margin-bottom:10px;text-align:left;"><label style="font-size:12px;color:rgba(255,255,255,.4);">' + labels[i] + ' (cm)</label>' +
-        '<input type="number" step="0.1" data-campo="' + c + '" style="width:100%;height:44px;margin-top:4px;background:#1C1C1C;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:0 12px;color:#FFF;font-size:15px;font-family:inherit;"></div>';
+    var inputs = campos.map(function(c, i){
+      return '<div style="margin-bottom:10px;text-align:left;">' +
+        '<label style="font-size:12px;font-weight:600;color:var(--text-muted);">' + labels[i] + ' (cm)</label>' +
+        '<input type="number" step="0.1" data-campo="' + c + '" ' +
+          'style="width:100%;height:44px;margin-top:4px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0 12px;color:var(--text);font-size:15px;font-family:inherit;outline:none;box-sizing:border-box;"></div>';
     }).join("");
     modal.innerHTML =
       '<div class="mc-card" style="max-height:80vh;overflow-y:auto;text-align:left;">' +
-        '<h2 style="text-align:center;margin-bottom:16px;">📏 Mis medidas</h2>' +
+        '<h2 style="text-align:center;margin-bottom:16px;color:var(--text);">📏 Mis medidas</h2>' +
         inputs +
         '<button class="pill-btn" id="guardar-medidas" style="margin-top:10px;">Guardar medidas</button>' +
       '</div>';
     document.body.appendChild(modal);
-    modal.addEventListener("click", function(e){ if(e.target===modal) modal.remove(); });
-
+    modal.addEventListener("click", function(e){ if(e.target === modal) modal.remove(); });
     document.getElementById("guardar-medidas").addEventListener("click", function(){
       var data = { fecha:window.db.fechaHoy() };
-      modal.querySelectorAll("[data-campo]").forEach(function(inp){ data[inp.getAttribute("data-campo")] = parseFloat(inp.value)||0; });
+      modal.querySelectorAll("[data-campo]").forEach(function(inp){ data[inp.getAttribute("data-campo")] = parseFloat(inp.value) || 0; });
       window.db.saveMedidas(alumnoId, data);
       var nuevas = window.db.checkMedallas(alumnoId);
       modal.remove();

@@ -262,9 +262,9 @@
     setHeader(function(){ renderLista(); }, diaRutina.nombre);
 
     var html =
-      "<div style='background:linear-gradient(135deg,#1a2200,#0A0A0A);padding:28px 20px 20px;'>" +
-        "<div style='font-size:12px;font-weight:600;color:#C8E000;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;'>Entrenamiento</div>" +
-        "<div style='font-size:24px;font-weight:800;color:#FFF;margin-bottom:12px;letter-spacing:-.5px;'>" + diaRutina.nombre + "</div>" +
+      "<div style='background:linear-gradient(135deg,rgba(200,224,0,0.08),var(--surface));padding:28px 20px 20px;border-bottom:1px solid var(--border);'>" +
+        "<div style='font-size:12px;font-weight:600;color:var(--accent-text);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;'>Entrenamiento</div>" +
+        "<div style='font-size:24px;font-weight:800;color:var(--text);margin-bottom:12px;letter-spacing:-.5px;'>" + diaRutina.nombre + "</div>" +
         (function(){
           var meso = rutina.mesociclo || "";
           var parts = meso.split("–").map(function(s){ return s.trim(); });
@@ -272,7 +272,7 @@
           var icons = ["🏋️", "🔄", "🎯", "📅"];
           return "<div style='display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;'>" +
             parts.map(function(p,i){
-              return "<div style='display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:50px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.65);letter-spacing:.2px;'>" +
+              return "<div style='display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:50px;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.2px;'>" +
                 "<span>" + (icons[i]||"•") + "</span>" +
                 "<span>" + p + "</span>" +
               "</div>";
@@ -338,6 +338,7 @@
     document.getElementById("btn-iniciar-entreno").addEventListener("click", function(){
       iniciarEntrenamiento(diaRutina, rutina);
     });
+    // Listeners para toggle kg/lbs en vista previa (no hay pesos aún, solo info)
   }
 
   // ── MODO ENTRENO ─────────────────────────────────────────
@@ -404,13 +405,24 @@
   function renderModoEntreno(diaRutina, rutina){
     setHeader(function(){ if(confirm("¿Terminar el entrenamiento?")){ pararCron(); abrirVistaPrevia(diaRutina,rutina); } }, diaRutina.nombre);
 
+    var _unit = localStorage.getItem("fitapp_unit") || "kg";
+    var _kgToD = function(kg){ return _unit === "lbs" ? Math.round(kg * 2.20462 * 4) / 4 : parseFloat(kg); };
+    var _dToKg = function(v){ return _unit === "lbs" ? Math.round(v / 2.20462 * 10) / 10 : parseFloat(v); };
+    var _step  = _unit === "lbs" ? 5 : 2.5;
+    var _uLbl  = _unit === "lbs" ? "lbs" : "kg";
+
     var html =
       "<div style='padding:0 20px 12px;display:flex;align-items:center;justify-content:space-between;'>" +
         "<div style='text-align:center;'>" +
-          "<div id='me-timer-display' style='font-size:28px;font-weight:800;color:#C8E000;font-family:\"Space Mono\",monospace;letter-spacing:2px;'>00:00</div>" +
-          "<div style='font-size:10px;color:rgba(255,255,255,0.3);'>TIEMPO DE ENTRENO</div>" +
+          "<div id='me-timer-display' style='font-size:28px;font-weight:800;color:var(--accent);font-family:\"Space Mono\",monospace;letter-spacing:2px;'>00:00</div>" +
+          "<div style='font-size:10px;color:var(--text-muted);'>TIEMPO DE ENTRENO</div>" +
         "</div>" +
-        "<div id='progreso-entreno' style='font-size:13px;color:rgba(255,255,255,0.4);'>0/" + diaRutina.ejercicios.length + "</div>" +
+        // Toggle kg/lbs
+        "<div style='display:flex;gap:0;border:1px solid var(--border);border-radius:20px;overflow:hidden;'>" +
+          "<button id='me-unit-kg' style='padding:4px 10px;font-size:11px;font-weight:700;font-family:inherit;border:none;cursor:pointer;background:" + (_unit==="kg"?"var(--accent)":"var(--surface2)") + ";color:" + (_unit==="kg"?"#1C1C1E":"var(--text-muted)") + ";'>kg</button>" +
+          "<button id='me-unit-lbs' style='padding:4px 10px;font-size:11px;font-weight:700;font-family:inherit;border:none;cursor:pointer;background:" + (_unit==="lbs"?"var(--accent)":"var(--surface2)") + ";color:" + (_unit==="lbs"?"#1C1C1E":"var(--text-muted)") + ";'>lbs</button>" +
+        "</div>" +
+        "<div id='progreso-entreno' style='font-size:13px;color:var(--text-muted);'>0/" + diaRutina.ejercicios.length + "</div>" +
       "</div>" +
       "<div style='height:3px;background:rgba(255,255,255,0.06);margin:0 0 16px;'>" +
         "<div id='barra-progreso-entreno' style='height:100%;background:#C8E000;width:0%;transition:width .3s;'></div>" +
@@ -460,12 +472,13 @@
       // Historial sesión anterior
       var prevH = (_workout.historialPrev && _workout.historialPrev[ejKey]) || [];
       if(prevH.length){
-        html += "<div style='background:rgba(255,255,255,0.03);border-radius:10px;padding:8px 12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.05);'>" +
-          "<div style='font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;'>📊 Sesión anterior</div>" +
+        html += "<div style='background:var(--surface2);border-radius:10px;padding:8px 12px;margin-bottom:12px;border:1px solid var(--border);'>" +
+          "<div style='font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;'>📊 Sesión anterior</div>" +
           "<div style='display:flex;flex-wrap:wrap;gap:6px;'>" +
           prevH.map(function(ps, pi){
-            return "<span style='font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.06);border-radius:6px;padding:3px 8px;'>" +
-              "S" + (pi+1) + ": " + (ps.reps||"?") + " × " + (ps.kg||0) + "kg" +
+            var prevKgD = _kgToD(ps.kg || 0);
+            return "<span style='font-size:11px;font-weight:700;color:var(--text-muted);background:var(--surface3);border-radius:6px;padding:3px 8px;'>" +
+              "S" + (pi+1) + ": " + (ps.reps||"?") + " × " + prevKgD + _uLbl +
             "</span>";
           }).join("") +
           "</div></div>";
@@ -484,13 +497,13 @@
                 "<button class='me-val-btn' onclick='window._cambiarVal(\"" + ejKey + "\"," + sIdx + ",\"reps\",1)'>+</button>" +
               "</div>" +
             "</div>" +
-            // Kg
+            // Kg/Lbs
             "<div class='me-val-ctrl'>" +
-              "<div class='me-val-label'>Kg</div>" +
+              "<div class='me-val-label'>" + _uLbl + "</div>" +
               "<div class='me-val-row'>" +
-                "<button class='me-val-btn' onclick='window._cambiarVal(\"" + ejKey + "\"," + sIdx + ",\"kg\",-2.5)'>−</button>" +
-                "<div id='kg-" + ejIdx + "-" + sIdx + "' class='me-val-num accent'>" + (serie.kg||0) + "</div>" +
-                "<button class='me-val-btn' onclick='window._cambiarVal(\"" + ejKey + "\"," + sIdx + ",\"kg\",2.5)'>+</button>" +
+                "<button class='me-val-btn' onclick='window._cambiarVal(\"" + ejKey + "\"," + sIdx + ",\"kg\"," + (-_step) + ")'>−</button>" +
+                "<div id='kg-" + ejIdx + "-" + sIdx + "' class='me-val-num accent'>" + _kgToD(serie.kg||0) + "</div>" +
+                "<button class='me-val-btn' onclick='window._cambiarVal(\"" + ejKey + "\"," + sIdx + ",\"kg\"," + _step + ")'>+</button>" +
               "</div>" +
             "</div>" +
             // Check
@@ -519,6 +532,12 @@
     "</div>";
 
     page().innerHTML = html;
+
+    // Toggle kg/lbs: re-renderiza el modo entreno con la nueva unidad
+    var btnMeKg  = document.getElementById("me-unit-kg");
+    var btnMeLbs = document.getElementById("me-unit-lbs");
+    if(btnMeKg)  btnMeKg.addEventListener("click",  function(){ localStorage.setItem("fitapp_unit","kg");  renderModoEntreno(diaRutina, rutina); });
+    if(btnMeLbs) btnMeLbs.addEventListener("click", function(){ localStorage.setItem("fitapp_unit","lbs"); renderModoEntreno(diaRutina, rutina); });
   }
 
   // ── HELPERS GLOBALES MODO ENTRENO ─────────────────────────
@@ -535,18 +554,21 @@
     if(!_workout.seriesData[ejKey]) return;
     var serie = _workout.seriesData[ejKey][sIdx];
     if(!serie) return;
+    var unit = localStorage.getItem("fitapp_unit") || "kg";
+    var kgToD = function(kg){ return unit === "lbs" ? Math.round(kg * 2.20462 * 4) / 4 : parseFloat(kg); };
+    var dToKg = function(v){ return unit === "lbs" ? Math.round(v / 2.20462 * 10) / 10 : parseFloat(v); };
+    var ejIdx = Object.keys(_workout.seriesData).indexOf(ejKey);
     if(campo === "reps"){
-      serie.reps = Math.max(0, (serie.reps||0) + delta);
-      document.querySelectorAll("[id^='reps-'][id$='-" + sIdx + "']").forEach(function(e){ if(e.id.split("-")[1] !== undefined) e.textContent = serie.reps; });
-      // más específico: buscar por ej idx + serie idx
-      var ejIdx = Object.keys(_workout.seriesData).indexOf(ejKey);
+      serie.reps = Math.max(0, (serie.reps || 0) + delta);
       var el = document.getElementById("reps-" + ejIdx + "-" + sIdx);
       if(el) el.textContent = serie.reps;
     } else {
-      serie.kg = Math.max(0, parseFloat(((serie.kg||0)+delta).toFixed(1)));
-      var ejIdx2 = Object.keys(_workout.seriesData).indexOf(ejKey);
-      var elkg = document.getElementById("kg-" + ejIdx2 + "-" + sIdx);
-      if(elkg) elkg.textContent = serie.kg;
+      // delta viene en la unidad activa; convertir a kg para guardar
+      var currentDisp = kgToD(serie.kg || 0);
+      var newDisp = Math.max(0, parseFloat((currentDisp + delta).toFixed(2)));
+      serie.kg = dToKg(newDisp);
+      var elkg = document.getElementById("kg-" + ejIdx + "-" + sIdx);
+      if(elkg) elkg.textContent = newDisp;
     }
     if(navigator.vibrate) navigator.vibrate(10);
   };
@@ -742,21 +764,27 @@
 
   function renderFotoEjercicio(ej, cssClass){
     var foto = ej.foto || ej.foto_url || "";
-    // Si no tiene foto, buscar en la biblioteca por nombre
     if(!foto){
       var bib = window.db.getEjercicios();
       var match = bib.filter(function(e){ return e.nombre === ej.nombre; })[0];
       if(match) foto = match.foto || match.foto_url || "";
     }
     var cls = cssClass || "";
-    var wrapStyle = cls ? "" : "width:52px;height:52px;border-radius:10px;background:#1C1C1C;flex-shrink:0;display:flex;align-items:center;justify-content:center;";
+    var wrapStyle = cls ? "" : "width:56px;height:56px;border-radius:12px;background:var(--surface2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;";
     if(foto){
-      return "<div" + (cls ? " class='" + cls + "'" : " style='" + wrapStyle + "overflow:hidden;'") + ">" +
-        "<img src='" + foto + "' style='width:100%;height:100%;object-fit:cover;" + (cls ? "" : "border-radius:10px;") + "'>" +
+      return "<div" + (cls ? " class='" + cls + "'" : " style='" + wrapStyle + "'") + ">" +
+        "<img src='" + foto + "' style='width:100%;height:100%;object-fit:cover;" + (cls ? "" : "border-radius:12px;") + "'>" +
+      "</div>";
+    }
+    // Animación SVG por tipo de ejercicio
+    var animSVG = window.getEjercicioSVG ? window.getEjercicioSVG(ej.nombre) : "";
+    if(animSVG){
+      return "<div" + (cls ? " class='" + cls + "'" : " style='" + wrapStyle + "'") + ">" +
+        animSVG +
       "</div>";
     }
     return "<div" + (cls ? " class='" + cls + "'" : " style='" + wrapStyle + "'") + ">" +
-      "<svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.15)' stroke-width='1.5'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>" +
+      "<svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='var(--text-muted)' stroke-width='1.5'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>" +
     "</div>";
   }
 
