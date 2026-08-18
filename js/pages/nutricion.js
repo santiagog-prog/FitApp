@@ -5,6 +5,14 @@
   "use strict";
 
   var DIAS_SEMANA = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+  var _openMeals = {};
+
+  // Auto-genera nombre descriptivo de una opción a partir de sus 2 ingredientes principales
+  function _nombreOpcion(op){
+    var als = op.alimentos || [];
+    if(!als.length) return op.nombre;
+    return als.slice(0,2).map(function(a){ return a.nombre.split(' ')[0]; }).join(' + ');
+  }
 
   // Genera descripción legible de la receta basada en los ingredientes
   function _generarDescReceta(opcion){
@@ -175,47 +183,52 @@
     var elegida = opcionElegida;
     var COMIDA_ICONS = { "Desayuno":"☀️", "Comida":"🥗", "Cena":"🌙", "Post-entreno":"⚡", "Merienda":"🍎" };
     var icono = COMIDA_ICONS[comida.nombre] || "🍽️";
-    var html = '<div class="nutri-comida-blk">' +
-      '<div class="ncb-head">' +
+    var isOpen = !!_openMeals[ci];
+    var selectedName = elegida ? _nombreOpcion(elegida) : null;
+
+    var html = '<div class="nutri-comida-blk" data-ci="' + ci + '">' +
+      '<div class="ncb-head ncb-toggle" data-ci="' + ci + '" style="cursor:pointer;">' +
         '<div class="ncb-icon">' + icono + '</div>' +
         '<div class="ncb-info">' +
-          '<div class="ncb-nombre">' + comida.nombre + (comida.hora ? ' <span style="font-size:11px;color:var(--text-muted);font-weight:400;">· ' + comida.hora + '</span>' : '') + '</div>' +
-          (elegida ? (function(){
-            var desc = _generarDescReceta(elegida);
-            return '<div style="margin-top:8px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;font-size:13px;color:var(--text-secondary);line-height:1.6;">' + desc + '</div>';
-          })() : '') +
+          '<div class="ncb-nombre">' + comida.nombre +
+            (comida.hora ? ' <span style="font-size:11px;color:var(--text-muted);font-weight:400;">· ' + comida.hora + '</span>' : '') +
+          '</div>' +
+          (selectedName ? '<div style="font-size:12px;color:var(--text-secondary);margin-top:1px;">' + selectedName + '</div>' : '') +
         '</div>' +
         (elegida ? '<div class="ncb-kcal">' + (elegida.calorias_total || 0) + ' kcal</div>' : '') +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;transition:transform .25s;' + (isOpen ? 'transform:rotate(90deg);' : '') + '"><polyline points="9 18 15 12 9 6"/></svg>' +
       '</div>';
 
-    if(comida.opciones && comida.opciones.length > 1){
-      html += '<div class="opciones-scroll" style="display:flex;gap:10px;overflow-x:auto;padding:6px 2px 12px;scrollbar-width:none;">';
-      comida.opciones.forEach(function(op, oi){
-        var sel = estado.opciones[ci] === oi;
-        var ingredientes = (op.alimentos||[]).slice(0,3).map(function(a){ return a.cantidad + ' ' + a.nombre; }).join(' · ');
-        html += '<div class="opcion-card' + (sel ? " sel" : "") + '" onclick="window._elegirOpcion(' + ci + ',' + oi + ')" ' +
-          'style="position:relative;flex-shrink:0;width:168px;padding:12px 13px;border-radius:16px;cursor:pointer;transition:transform .15s;' +
-          (sel ? 'transform:scale(1.02);' : '') +
-          'background:' + (sel ? 'rgba(200,224,0,0.12)' : 'var(--surface2)') + ';' +
-          'border:1.5px solid ' + (sel ? '#C8E000' : 'var(--border)') + ';' +
-          (sel ? 'box-shadow:0 4px 18px rgba(200,224,0,0.18);' : '') + '">' +
-          (sel ? '<div style="position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:#C8E000;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.4);">' +
-            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
-          '</div>' : '') +
-          '<div style="font-size:12px;font-weight:800;color:' + (sel?'var(--accent-text)':'var(--text)') + ';margin-bottom:4px;">' + op.nombre + '</div>' +
-          '<div style="font-size:10px;color:var(--text-muted);line-height:1.4;margin-bottom:6px;height:28px;overflow:hidden;">' + ingredientes + '</div>' +
-          '<div style="font-size:11px;font-weight:700;color:var(--text-secondary);">' + (op.calorias_total||0) + ' kcal</div>' +
-        '</div>';
-      });
-      html += '</div>';
-    }
+    if(isOpen){
+      if(comida.opciones && comida.opciones.length > 1){
+        html += '<div class="opciones-scroll" style="display:flex;gap:10px;overflow-x:auto;padding:8px 14px 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch;">';
+        comida.opciones.forEach(function(op, oi){
+          var sel = (estado.opciones[ci] || 0) === oi;
+          var nombre = _nombreOpcion(op);
+          var ingredientes = (op.alimentos||[]).slice(0,3).map(function(a){ return a.cantidad + ' ' + a.nombre; }).join(' · ');
+          html += '<div class="opcion-card' + (sel ? " sel" : "") + '" data-ci="' + ci + '" data-oi="' + oi + '" ' +
+            'style="position:relative;flex-shrink:0;width:160px;padding:12px 13px;border-radius:16px;cursor:pointer;transition:all .15s;' +
+            (sel ? 'transform:scale(1.02);' : '') +
+            'background:' + (sel ? 'rgba(200,224,0,0.12)' : 'var(--surface2)') + ';' +
+            'border:1.5px solid ' + (sel ? '#C8E000' : 'var(--border)') + ';' +
+            (sel ? 'box-shadow:0 4px 18px rgba(200,224,0,0.15);' : '') + '">' +
+            (sel ? '<div style="position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:#C8E000;display:flex;align-items:center;justify-content:center;">' +
+              '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>' +
+            '</div>' : '') +
+            '<div style="font-size:12px;font-weight:700;color:' + (sel?'var(--accent-text)':'var(--text)') + ';margin-bottom:4px;">' + nombre + '</div>' +
+            '<div style="font-size:10px;color:var(--text-muted);line-height:1.4;margin-bottom:6px;height:28px;overflow:hidden;">' + ingredientes + '</div>' +
+            '<div style="font-size:12px;font-weight:700;color:' + (sel?'var(--accent-text)':'var(--text-secondary)') + ';">' + (op.calorias_total||0) + ' kcal</div>' +
+          '</div>';
+        });
+        html += '</div>';
+      }
 
-    // ── Identificar con cámara (por comida) ──
-    html += '<button class="food-scan-btn" data-ci="' + ci + '" onclick="window._abrirCamaraComida(' + ci + ')" style="width:100%;margin:4px 0 10px;">' +
-      '<span style="font-size:20px;">📸</span>' +
-      '<span>Identificar con cámara</span>' +
-      '<span style="font-size:11px;background:rgba(200,224,0,0.15);color:var(--accent);border-radius:99px;padding:3px 8px;font-weight:700;">IA</span>' +
-    '</button>';
+      html += '<button class="food-scan-btn ncb-scan" data-ci="' + ci + '" style="width:calc(100% - 28px);margin:0 14px 12px;">' +
+        '<span style="font-size:18px;">📸</span>' +
+        '<span>Identificar con cámara</span>' +
+        '<span style="font-size:11px;background:rgba(200,224,0,0.15);color:var(--accent-text);border-radius:99px;padding:3px 8px;font-weight:700;">IA</span>' +
+      '</button>';
+    }
 
     // ── Resultados de escaneo asociados a esta comida ──
     var scansComida = (estado.scans||[]).filter(function(s){ return s.comida_idx === ci; });
@@ -284,6 +297,7 @@
 
   window._elegirOpcion = function(ci, oi){
     _estado.opciones[ci] = oi;
+    _openMeals[ci] = false;
     window.db.saveNutricion(_alumno.id, _diasFecha[_diaSelIdx], _estado);
     window.init_nutricion();
   };
@@ -435,9 +449,9 @@
       var wFull = wi < _estado.agua;
       html += '<button onclick="window._toggleAgua(' + wi + ')" style="background:none;border:none;cursor:pointer;padding:2px;transition:transform .15s;" title="Vaso ' + (wi+1) + '">' +
         '<svg width="32" height="46" viewBox="0 0 32 46" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-          '<path d="M6 3 L3 43 H29 L26 3 Z" stroke="' + (wFull?"rgba(90,200,250,0.7)":"rgba(255,255,255,0.2)") + '" stroke-width="1.5" fill="none" stroke-linejoin="round"/>' +
-          (wFull ? '<path d="M7.5 22 L4.5 43 H27.5 L24.5 22 Z" fill="rgba(90,200,250,0.3)"/><path d="M7.3 20.5 L24.7 20.5 C24.7 20.5 25 22 16 22 C7 22 7.3 20.5 7.3 20.5Z" fill="rgba(90,200,250,0.5)"/>' : '') +
-          '<line x1="9" y1="8" x2="7.5" y2="38" stroke="' + (wFull?"rgba(255,255,255,0.15)":"rgba(255,255,255,0.06)") + '" stroke-width="1.5" stroke-linecap="round"/>' +
+          '<path d="M6 3 L3 43 H29 L26 3 Z" stroke="' + (wFull?"rgba(0,160,220,0.7)":"rgba(0,0,0,0.18)") + '" stroke-width="1.5" fill="none" stroke-linejoin="round"/>' +
+          (wFull ? '<path d="M7.5 22 L4.5 43 H27.5 L24.5 22 Z" fill="rgba(0,160,220,0.25)"/><path d="M7.3 20.5 L24.7 20.5 C24.7 20.5 25 22 16 22 C7 22 7.3 20.5 7.3 20.5Z" fill="rgba(0,160,220,0.4)"/>' : '') +
+          '<line x1="9" y1="8" x2="7.5" y2="38" stroke="' + (wFull?"rgba(255,255,255,0.25)":"rgba(0,0,0,0.08)") + '" stroke-width="1.5" stroke-linecap="round"/>' +
         '</svg>' +
       '</button>';
     }
@@ -454,6 +468,33 @@
     html += '<div style="height:20px;"></div></div>';
     document.getElementById("page-nutricion").innerHTML = html;
     if(window.NutriUI && window.NutriUI.animarAnillos) window.NutriUI.animarAnillos();
+
+    // ── Event delegation: toggle expand/collapse de comida ──
+    // Se limpia el listener previo reemplazando el nodo con un clone
+    var pageEl = document.getElementById("page-nutricion");
+    var newPage = pageEl.cloneNode(true);
+    pageEl.parentNode.replaceChild(newPage, pageEl);
+    newPage.addEventListener("click", function(e){
+      var toggle = e.target.closest(".ncb-toggle");
+      if(toggle){
+        var ci = parseInt(toggle.getAttribute("data-ci"), 10);
+        _openMeals[ci] = !_openMeals[ci];
+        window.init_nutricion();
+        return;
+      }
+      var opCard = e.target.closest(".opcion-card");
+      if(opCard && !e.target.closest(".ncb-toggle")){
+        var ci2 = parseInt(opCard.getAttribute("data-ci"), 10);
+        var oi  = parseInt(opCard.getAttribute("data-oi"), 10);
+        window._elegirOpcion(ci2, oi);
+        return;
+      }
+      var scanBtn = e.target.closest(".ncb-scan");
+      if(scanBtn){
+        window._abrirCamaraComida(parseInt(scanBtn.getAttribute("data-ci"), 10));
+        return;
+      }
+    });
 
     // Eventos agua
     // (usados con onclick="window._toggleAgua(i)" inline)
@@ -607,6 +648,7 @@
 
   window._selDia = function(idx){
     _diaSelIdx = idx;
+    _openMeals = {};
     window.init_nutricion();
   };
 
