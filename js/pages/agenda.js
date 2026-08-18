@@ -268,7 +268,7 @@
         (function(){
           var meso = rutina.mesociclo || "";
           var parts = meso.split("–").map(function(s){ return s.trim(); });
-          if(parts.length < 2) return "<div style='font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:16px;letter-spacing:.3px;'>" + meso + "</div>";
+          if(parts.length < 2) return "<div style='font-size:12px;color:var(--text-muted);margin-bottom:16px;letter-spacing:.3px;'>" + meso + "</div>";
           var icons = ["🏋️", "🔄", "🎯", "📅"];
           return "<div style='display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;'>" +
             parts.map(function(p,i){
@@ -280,11 +280,11 @@
           "</div>";
         })() +
         "<div style='display:flex;gap:20px;'>" +
-          "<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.5);'>" +
+          "<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);'>" +
             "<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><circle cx='12' cy='12' r='10'/><path d='M12 6v6l4 2'/></svg>" +
             "~" + (diaRutina.ejercicios.length*8) + " min" +
           "</div>" +
-          "<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.5);'>" +
+          "<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);'>" +
             "<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M6 4v16M18 4v16M6 12h12'/></svg>" +
             diaRutina.ejercicios.length + " ejercicios" +
           "</div>" +
@@ -310,8 +310,8 @@
         "</button>" +
       "</div>";
 
-    // Lista ejercicios (preview), agrupados por superserie
-    html += "<div style='padding:0 20px;'>";
+    // Lista ejercicios con técnica, animación expandible
+    html += "<div style='padding:0 20px 32px;'>";
     html += "<div style='font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;'>Ejercicios · " + diaRutina.ejercicios.length + "</div>";
     var contador = 0;
     agruparPorSuperserie(diaRutina.ejercicios).forEach(function(grupo){
@@ -320,25 +320,65 @@
       }
       grupo.items.forEach(function(ej){
         contador++;
+        var svgAnim = (window.getEjercicioSVG ? window.getEjercicioSVG(ej.nombre) : "");
+        var tecnica = (window.getEjercicioTecnica ? window.getEjercicioTecnica(ej.nombre) : null);
+        var cardId = "prev-ej-" + contador;
         html +=
-          "<div style='display:flex;align-items:center;gap:14px;padding:12px 0" + (grupo.superserie ? " 12px 10px;border-left:2px solid rgba(10,132,255,0.4);margin-left:2px;" : ";") + "border-bottom:.5px solid var(--border);'>" +
-            "<span style='width:22px;font-size:14px;font-weight:600;color:var(--text-muted);'>" + contador + "</span>" +
-            renderFotoEjercicio(ej) +
-            "<div style='flex:1;'>" +
-              "<div style='font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;'>" + ej.nombre + "</div>" +
-              "<div style='font-size:12px;color:var(--text-muted);'>" + ej.series + " series · " + ej.repeticiones + " · " + ej.descanso_seg + "\" descanso</div>" +
+          "<div style='border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;background:var(--surface);'>" +
+          // Cabecera siempre visible
+          "<div id='head-" + cardId + "' style='display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;'>" +
+            "<div style='width:50px;height:50px;border-radius:12px;background:var(--surface2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;'>" +
+              (svgAnim || "<span style='font-size:22px;'>💪</span>") +
             "</div>" +
-            (ej.video_url ? "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='var(--text-dim)' stroke-width='2'><polygon points='23 7 16 12 23 17 23 7'/><rect x='1' y='5' width='15' height='14' rx='2'/></svg>" : "") +
+            "<div style='flex:1;min-width:0;'>" +
+              "<div style='font-size:15px;font-weight:700;color:var(--text);'>" + ej.nombre + "</div>" +
+              "<div style='font-size:12px;color:var(--text-muted);margin-top:2px;'>" + ej.series + " × " + ej.repeticiones + " · " + (ej.descanso_seg||90) + "\" descanso</div>" +
+              (tecnica ? "<div style='font-size:11px;color:var(--accent-text);font-weight:600;margin-top:2px;'>" + tecnica.musculos + "</div>" : "") +
+            "</div>" +
+            "<div style='color:var(--text-muted);font-size:16px;flex-shrink:0;'>›</div>" +
+          "</div>" +
+          // Cuerpo expandible (oculto por defecto)
+          "<div id='body-" + cardId + "' style='display:none;padding:0 16px 16px;'>" +
+            // Animación grande
+            "<div style='width:100%;height:140px;border-radius:12px;background:linear-gradient(135deg,var(--surface2),var(--surface3));margin-bottom:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;'>" +
+              "<div style='width:120px;height:140px;'>" + (svgAnim || "") + "</div>" +
+            "</div>" +
+            // Técnica
+            (tecnica ? (
+              "<div style='font-size:11px;font-weight:700;color:var(--accent-text);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;'>Cómo hacerlo</div>" +
+              tecnica.pasos.map(function(paso, pi){
+                return "<div style='display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;'>" +
+                  "<div style='width:22px;height:22px;border-radius:50%;background:#C8E000;color:#1C1C1E;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;'>" + (pi+1) + "</div>" +
+                  "<div style='font-size:13px;color:var(--text);line-height:1.5;'>" + paso + "</div>" +
+                "</div>";
+              }).join("")
+            ) : "") +
+            (ej.nota_tecnica ? "<div style='background:rgba(200,224,0,0.06);border-left:3px solid #C8E000;border-radius:0 8px 8px 0;padding:10px 12px;margin-top:8px;font-size:13px;color:var(--text-muted);'>ℹ️ " + ej.nota_tecnica + "</div>" : "") +
+          "</div>" +
           "</div>";
       });
     });
     html += "</div>";
 
     page().innerHTML = html;
+
+    // Toggle tarjetas técnica
+    diaRutina.ejercicios.forEach(function(ej, i){
+      var headEl = document.getElementById("head-prev-ej-" + (i+1));
+      var bodyEl = document.getElementById("body-prev-ej-" + (i+1));
+      if(headEl && bodyEl){
+        headEl.addEventListener("click", function(){
+          var open = bodyEl.style.display === "block";
+          bodyEl.style.display = open ? "none" : "block";
+          var chev = headEl.querySelector("div:last-child");
+          if(chev) chev.textContent = open ? "›" : "⌄";
+        });
+      }
+    });
+
     document.getElementById("btn-iniciar-entreno").addEventListener("click", function(){
       iniciarEntrenamiento(diaRutina, rutina);
     });
-    // Listeners para toggle kg/lbs en vista previa (no hay pesos aún, solo info)
   }
 
   // ── MODO ENTRENO ─────────────────────────────────────────
@@ -455,18 +495,18 @@
         "<div class='me-ej-head' onclick='window._toggleEjCard(" + ejIdx + ")'>" +
           renderFotoEjercicio(ej, "me-ej-thumb") +
           "<div style='flex:1;'>" +
-            "<div style='font-size:15px;font-weight:600;color:#FFF;'>" + ej.nombre + "</div>" +
-            "<div style='font-size:12px;color:rgba(255,255,255,0.35);margin-top:2px;'>" + ej.series + " series · " + ej.repeticiones + "</div>" +
+            "<div style='font-size:15px;font-weight:600;color:var(--text);'>" + ej.nombre + "</div>" +
+            "<div style='font-size:12px;color:var(--text-muted);margin-top:2px;'>" + ej.series + " series · " + ej.repeticiones + "</div>" +
           "</div>" +
           (todasDone ? "<span style='background:rgba(52,199,89,0.12);color:#34C759;border-radius:50px;padding:3px 10px;font-size:11px;font-weight:700;'>✓</span>" : "") +
-          "<div id='chev-ej-" + ejIdx + "' style='color:rgba(255,255,255,0.2);font-size:18px;margin-left:8px;transition:transform .2s;'>" + (ejIdx===0?"⌄":"›") + "</div>" +
+          "<div id='chev-ej-" + ejIdx + "' style='color:var(--text-muted);font-size:18px;margin-left:8px;transition:transform .2s;'>" + (ejIdx===0?"⌄":"›") + "</div>" +
         "</div>";
 
       // Body series
       html += "<div id='series-card-" + ejIdx + "' class='me-ej-body-expand' style='display:" + (ejIdx===0?"block":"none") + ";'>";
 
       if(ej.nota_tecnica){
-        html += "<div style='background:rgba(200,224,0,0.06);border-left:3px solid #C8E000;border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:14px;font-size:13px;color:rgba(255,255,255,0.55);'>ℹ️ " + ej.nota_tecnica + "</div>";
+        html += "<div style='background:rgba(200,224,0,0.06);border-left:3px solid #C8E000;border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:14px;font-size:13px;color:var(--text-muted);'>ℹ️ " + ej.nota_tecnica + "</div>";
       }
 
       // Historial sesión anterior
@@ -667,7 +707,44 @@
 
   window._finalizarEntreno = function(){
     var diaRutina = _workout.diaRutina, rutina = _workout.rutina;
+
+    // Validar que todos los ejercicios tengan al menos 1 serie marcada
+    var ejsIncompletos = _workout.ejercicios.filter(function(ej){
+      var key = ej.id || ej.nombre;
+      var ss = _workout.seriesData[key] || [];
+      return !ss.some(function(s){ return s.done; });
+    });
+    if(ejsIncompletos.length > 0){
+      var modal2 = document.createElement("div");
+      modal2.className = "modal-celebracion";
+      modal2.innerHTML =
+        "<div class='mc-card' style='text-align:center;'>" +
+          "<div style='font-size:44px;margin-bottom:12px;'>⚠️</div>" +
+          "<h2 style='margin-bottom:8px;'>Ejercicios pendientes</h2>" +
+          "<div style='font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;'>" +
+            "Faltan <strong>" + ejsIncompletos.length + " ejercicio" + (ejsIncompletos.length > 1 ? "s" : "") + "</strong> por completar:<br>" +
+            "<span style='font-size:12px;'>" + ejsIncompletos.map(function(e){ return e.nombre; }).join(", ") + "</span>" +
+          "</div>" +
+          "<div style='display:flex;gap:10px;'>" +
+            "<button id='btn-volver-ej' style='flex:1;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:50px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;'>Volver</button>" +
+            "<button id='btn-forzar-fin' style='flex:1;height:48px;background:rgba(255,69,58,0.1);border:1px solid rgba(255,69,58,0.3);border-radius:50px;font-size:14px;font-weight:600;color:#FF6B5B;cursor:pointer;font-family:inherit;'>Terminar igual</button>" +
+          "</div>" +
+        "</div>";
+      document.body.appendChild(modal2);
+      document.getElementById("btn-volver-ej").addEventListener("click", function(){ modal2.remove(); });
+      document.getElementById("btn-forzar-fin").addEventListener("click", function(){ modal2.remove(); _finalizarEntreno_confirmar(diaRutina, rutina); });
+      return;
+    }
+
+    _finalizarEntreno_confirmar(diaRutina, rutina);
+  };
+
+  function _finalizarEntreno_confirmar(diaRutina, rutina){
     pararCron();
+    // Guardar hora real del entreno para recordatorio inteligente
+    var ahora = new Date();
+    localStorage.setItem("fitapp_last_workout_hour", ahora.getHours());
+    localStorage.setItem("fitapp_last_workout_min",  ahora.getMinutes());
     var totalSeries = 0;
     Object.values(_workout.seriesData).forEach(function(ss){ totalSeries += ss.filter(function(s){ return s.done; }).length; });
     var duracion = Math.max(1, Math.round(_workout.cronSegundos/60));
