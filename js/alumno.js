@@ -201,8 +201,13 @@
           if(window.db.migrateGymIfNeeded) window.db.migrateGymIfNeeded();
           var alumnoSplash = window.db.getAlumnoPorId(window.ALUMNO_ID);
           if(alumnoSplash && window.mostrarSplashAlumno){
-            mostrarSplashAlumno(alumnoSplash, function(){ showPage("inicio"); });
+            mostrarSplashAlumno(alumnoSplash, function(){
+              // Mostrar onboarding si es la primera vez, si no ir a inicio
+              if(window.checkOnboarding && window.checkOnboarding()) return;
+              showPage("inicio");
+            });
           } else {
+            if(window.checkOnboarding && window.checkOnboarding()) return;
             showPage("inicio");
           }
         })
