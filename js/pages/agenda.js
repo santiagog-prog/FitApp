@@ -41,13 +41,25 @@
 
   var META_PASOS_DEFAULT = 10000;
 
+  function getDiaRutinaEfectivo(alumno, rutina, key){
+    if(!rutina) return null;
+    try {
+      var ov = localStorage.getItem("fitapp_rutina_override_"+alumno.id+"_"+key);
+      if(ov !== null){
+        var idx = parseInt(ov, 10);
+        if(!isNaN(idx) && rutina.dias[idx]) return rutina.dias[idx];
+      }
+    } catch(e){}
+    var dIdx = (new Date(key).getDay()+6) % 7;
+    return rutina.dias[dIdx % rutina.dias.length];
+  }
+
   // Resuelve las "tareas" de un día específico (entreno, nutrición, pasos)
   // Usado tanto para los puntos de color del calendario como para la
   // lista de actividades del día seleccionado.
   function tareasDelDia(alumno, rutina, registros, key){
     var tareas = [];
-    var dIdx = (new Date(key).getDay()+6) % 7;
-    var diaRutina = rutina ? rutina.dias[dIdx % rutina.dias.length] : null;
+    var diaRutina = getDiaRutinaEfectivo(alumno, rutina, key);
     var hechoEntreno = registros.some(function(r){ return r.fecha === key; });
 
     if(diaRutina && diaRutina.tipo !== "descanso"){
@@ -131,13 +143,14 @@
     "</div>";
 
     // Actividades del día seleccionado: entreno + nutrición + pasos
-    var selDate   = new Date(state.selectedDate);
-    var selDiaIdx = (selDate.getDay()+6) % 7;
-    var diaRutina = rutina ? rutina.dias[selDiaIdx % rutina.dias.length] : null;
+    var diaRutina = getDiaRutinaEfectivo(alumno, rutina, state.selectedDate);
     var tareasSel = tareasDelDia(alumno, rutina, registros, state.selectedDate);
 
     tareasSel.forEach(function(t){
       if(t.tipo === "entreno"){
+        var tieneOverride = (function(){
+          try{ return localStorage.getItem("fitapp_rutina_override_"+alumno.id+"_"+state.selectedDate) !== null; }catch(e){ return false; }
+        })();
         html += "<div class='actividad-row" + (t.done ? " completada" : "") + "' id='ag-act-rutina'>" +
           "<div class='act-icon " + (t.done ? "ok" : "pendiente") + "'>" +
             (t.done
@@ -145,11 +158,15 @@
               : "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#FF9500' stroke-width='2' stroke-linecap='round'><path d='M6 4v16M18 4v16M6 12h12M2 7h4M18 7h4M2 17h4M18 17h4'/></svg>") +
           "</div>" +
           "<div class='act-body'>" +
-            "<div class='act-nombre" + (t.done?" done":"") + "'>" + t.diaRutina.nombre + "</div>" +
+            "<div class='act-nombre" + (t.done?" done":"") + "'>" + t.diaRutina.nombre + (tieneOverride ? " <span style='font-size:10px;color:var(--accent-text);background:rgba(200,224,0,0.15);padding:2px 6px;border-radius:50px;'>cambiado</span>" : "") + "</div>" +
             "<div class='act-estado'>" + (t.done ? "Completado ✓" : t.diaRutina.ejercicios.length + " ejercicios · Toca para empezar") + "</div>" +
           "</div>" +
           "<span class='act-arrow'>›</span>" +
-        "</div>";
+        "</div>" +
+        "<button id='ag-cambiar-rutina' style='display:flex;align-items:center;gap:8px;width:calc(100% - 32px);margin:0 16px 4px;padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text-muted);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;touch-action:manipulation;'>" +
+          "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M17 1l4 4-4 4'/><path d='M3 11V9a4 4 0 014-4h14'/><path d='M7 23l-4-4 4-4'/><path d='M21 13v2a4 4 0 01-4 4H3'/></svg>" +
+          (tieneOverride ? "Restaurar rutina del día" : "Cambiar rutina de hoy") +
+        "</button>";
       } else if(t.tipo === "nutricion"){
         html += "<div class='actividad-row" + (t.done ? " completada" : "") + "' id='ag-act-nutricion'>" +
           "<div class='act-icon' style='background:rgba(52,199,89,0.12);'>" +
@@ -195,6 +212,8 @@
     });
     var actRutina = document.getElementById("ag-act-rutina");
     if(actRutina && rutina) actRutina.addEventListener("click", function(){ abrirVistaPrevia(diaRutina, rutina); });
+    var btnCambiar = document.getElementById("ag-cambiar-rutina");
+    if(btnCambiar && rutina) btnCambiar.addEventListener("click", function(){ abrirCambiarRutina(state.selectedDate, alumno, rutina); });
     var actNutricion = document.getElementById("ag-act-nutricion");
     if(actNutricion) actNutricion.addEventListener("click", function(){ window.irAPagina("nutricion"); });
     var actPasos = document.getElementById("ag-act-pasos");
@@ -259,6 +278,67 @@
     var dias = Math.round((new Date() - fechaPrev) / 86400000);
     var cuando = dias <= 0 ? "hoy" : dias === 1 ? "ayer" : "hace " + dias + " días";
     return "Última vez (" + cuando + "): mantén la misma carga y busca 1-2 repeticiones más, o sube ligeramente el peso si te sentiste cómodo.";
+  }
+
+  // ── CAMBIAR RUTINA DEL DÍA ───────────────────────────────
+  function abrirCambiarRutina(fecha, alumno, rutina){
+    var ovKey = "fitapp_rutina_override_"+alumno.id+"_"+fecha;
+    var tieneOverride = false;
+    try { tieneOverride = localStorage.getItem(ovKey) !== null; } catch(e){}
+
+    var DIAS_NOMBRE = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+    var modal = document.createElement("div");
+    modal.className = "modal-bottom";
+
+    var itemsHTML = "";
+    rutina.dias.forEach(function(dia, idx){
+      if(dia.tipo === "descanso") return;
+      itemsHTML +=
+        "<button class='ag-dia-opt' data-idx='"+idx+"' style='display:flex;align-items:center;gap:14px;width:100%;padding:14px 20px;background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;touch-action:manipulation;text-align:left;font-family:inherit;'>" +
+          "<div style='width:40px;height:40px;border-radius:12px;background:rgba(200,224,0,0.12);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;'>🏋️</div>" +
+          "<div style='flex:1;'>" +
+            "<div style='font-size:15px;font-weight:700;color:var(--text);'>" + dia.nombre + "</div>" +
+            "<div style='font-size:12px;color:var(--text-muted);margin-top:2px;'>" + dia.ejercicios.length + " ejercicios · " + DIAS_NOMBRE[idx] + "</div>" +
+          "</div>" +
+          "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='var(--text-muted)' stroke-width='2'><path d='M9 18l6-6-6-6'/></svg>" +
+        "</button>";
+    });
+
+    if(tieneOverride){
+      itemsHTML +=
+        "<button id='ag-restaurar-rutina' style='display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 20px;background:none;border:none;color:#FF453A;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;touch-action:manipulation;'>" +
+          "Restaurar rutina original del día" +
+        "</button>";
+    }
+
+    modal.innerHTML =
+      "<div class='modal-bottom-sheet'>" +
+        "<div class='modal-handle'></div>" +
+        "<div class='modal-title'>Elige el entrenamiento de hoy<button class='modal-close-btn' id='ag-cambiar-close'>×</button></div>" +
+        "<div style='padding-bottom:env(safe-area-inset-bottom,0px);'>" + itemsHTML + "</div>" +
+      "</div>";
+
+    document.body.appendChild(modal);
+    modal.addEventListener("click", function(e){ if(e.target===modal) modal.remove(); });
+    document.getElementById("ag-cambiar-close").addEventListener("click", function(){ modal.remove(); });
+
+    modal.querySelectorAll(".ag-dia-opt").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var idx = parseInt(this.getAttribute("data-idx"), 10);
+        try { localStorage.setItem(ovKey, idx); } catch(e){}
+        modal.remove();
+        window.mostrarToast && window.mostrarToast("✓ Rutina cambiada a: " + rutina.dias[idx].nombre);
+        renderLista();
+      });
+    });
+
+    var restaurar = document.getElementById("ag-restaurar-rutina");
+    if(restaurar) restaurar.addEventListener("click", function(){
+      try { localStorage.removeItem(ovKey); } catch(e){}
+      modal.remove();
+      window.mostrarToast && window.mostrarToast("Rutina restaurada al día original");
+      renderLista();
+    });
   }
 
   // ── VISTA PREVIA SESIÓN ──────────────────────────────────

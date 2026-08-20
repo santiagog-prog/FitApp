@@ -9,7 +9,7 @@
     var alumnoJs = document.querySelector("script[src*='alumno.js']");
   }
 
-  var _cardio = { activo:false, pasos:0, umbral:11, ultimoPaso:0, inicio:null, interval:null };
+  var _cardio = { activo:false, pasos:0, pasosBase:0, umbral:11, ultimoPaso:0, inicio:null, interval:null };
 
   function fechaKey(){
     var d = new Date();
@@ -150,6 +150,7 @@
   function _iniciarContador(){
     function activar(){
       _cardio.activo = true; _cardio.pasos = 0;
+      _cardio.pasosBase = getPasosHoy();
       _cardio.ultimoPaso = 0; _cardio.inicio = Date.now();
       var btn = document.getElementById("btn-toggle-cardio");
       if(btn){ btn.textContent = "⏸ Detener conteo"; btn.style.background = "#FF453A"; btn.style.color = "#FFF"; }
@@ -183,8 +184,12 @@
     if(mag > _cardio.umbral && (ahora - _cardio.ultimoPaso) > 300){
       _cardio.pasos++;
       _cardio.ultimoPaso = ahora;
-      var el = document.getElementById("pasos-vivo-numero");
-      if(el) el.textContent = _cardio.pasos;
+      // Actualizar contador de sesión
+      var elVivo = document.getElementById("pasos-vivo-numero");
+      if(elVivo) elVivo.textContent = _cardio.pasos;
+      // Actualizar display principal en tiempo real (base + sesión)
+      var elTotal = document.getElementById("pasos-hoy-display");
+      if(elTotal) elTotal.textContent = (_cardio.pasosBase + _cardio.pasos).toLocaleString("es");
     }
   }
 
@@ -194,14 +199,10 @@
     var btn = document.getElementById("btn-toggle-cardio");
     if(btn){ btn.textContent = "▶ Iniciar conteo"; btn.style.background = "#C8E000"; btn.style.color = "#1C1C1E"; }
     var durMin = Math.round((Date.now()-(_cardio.inicio||Date.now()))/60000);
-    var alumnoId = window.db.getAlumnoActual();
-    var key = "fitapp_pasos_"+alumnoId+"_"+fechaKey();
-    var existente = {pasos:0};
-    try { existente = JSON.parse(localStorage.getItem(key)||'{"pasos":0}'); } catch(e){}
-    var total = (existente.pasos||0) + _cardio.pasos;
+    var total = _cardio.pasosBase + _cardio.pasos;
     guardarPasos(total, "sensor");
     var display = document.getElementById("pasos-hoy-display");
-    if(display) display.textContent = total;
+    if(display) display.textContent = total.toLocaleString("es");
     window.mostrarToast && window.mostrarToast("✓ " + _cardio.pasos + " pasos en " + durMin + " min guardados");
     if(navigator.vibrate) navigator.vibrate([100,50,100]);
   }
