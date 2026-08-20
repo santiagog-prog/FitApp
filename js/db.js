@@ -751,20 +751,92 @@
       habitos.forEach(function(h){ self.saveHabito("a_demo1",h); });
 
       self.saveGymInfo({
-        activo:true,nombre:"TK Fitness Gym",tagline:"Tu mejor versión empieza aquí",
-        logo_url:"",direccion:"Av. Principal 123, Guayaquil, Ecuador",
-        maps_url:"https://maps.google.com/?q=TK+Fitness+Gym+Guayaquil",
-        telefono:"+593991234567",whatsapp:"+593991234567",instagram:"tkfitnessgym",
-        horarios_atencion:[{dias:"Lunes a Viernes",apertura:"06:00",cierre:"22:00"},{dias:"Sábado",apertura:"07:00",cierre:"18:00"},{dias:"Domingo",apertura:"08:00",cierre:"14:00"}],
-        clases:[{dia:0,hora:"08:00",nombre:"Spinning",instructor:"Carlos R.",duracion_min:45,plazas_total:20,plazas_disponibles:18,tipo:"cardio"}],
-        servicios:[{icono:"pesas",nombre:"Sala de pesas"},{icono:"spinning",nombre:"Spinning"},{icono:"yoga",nombre:"Yoga / Pilates"},{icono:"vestuarios",nombre:"Vestuarios"},{icono:"suplementos",nombre:"Suplementos"},{icono:"cardio",nombre:"Zona de cardio"}],
+        activo:true,
+        nombre:"Partner Gym EC",
+        tagline:"Entrena diferente. Crece en comunidad.",
+        logo_url:"",
+        sede:"Sede El Tejar",
+        direccion:"El Tejar, Quito, Ecuador",
+        maps_url:"https://maps.google.com/?q=Partner+Gym+EC+El+Tejar+Quito",
+        telefono:"+593999999999",
+        whatsapp:"+593999999999",
+        instagram:"partnergymec",
+        horarios_atencion:[
+          {dias:"Lunes a Viernes",apertura:"06:00",cierre:"21:00"},
+          {dias:"Sábado",apertura:"09:00",cierre:"12:00"}
+        ],
+        clases:[
+          // Lunes (dia:0)
+          {dia:0,hora:"06:00",nombre:"Funcional",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"fuerza"},
+          {dia:0,hora:"07:00",nombre:"Bailoterapia + Spinning",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:0,hora:"08:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:0,hora:"09:30",nombre:"Pilates",instructor:"",duracion_min:60,plazas_total:15,plazas_disponibles:10,tipo:"flexibilidad"},
+          {dia:0,hora:"19:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:0,hora:"19:15",nombre:"Funcional + Spinning",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:12,tipo:"fuerza"},
+          {dia:0,hora:"20:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          // Martes (dia:1)
+          {dia:1,hora:"06:00",nombre:"Funcional",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"fuerza"},
+          {dia:1,hora:"07:00",nombre:"Bailoterapia + Spinning",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:1,hora:"08:00",nombre:"Kick Boxing",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:12,tipo:"combate"},
+          {dia:1,hora:"08:30",nombre:"Yoga",instructor:"",duracion_min:60,plazas_total:15,plazas_disponibles:10,tipo:"flexibilidad"},
+          {dia:1,hora:"18:00",nombre:"Kick Boxing",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:12,tipo:"combate"},
+          {dia:1,hora:"19:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:1,hora:"19:15",nombre:"HYROX + Spinning",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:10,tipo:"funcional"},
+          {dia:1,hora:"20:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          // Miércoles (dia:2)
+          {dia:2,hora:"06:00",nombre:"Funcional",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"fuerza"},
+          {dia:2,hora:"07:00",nombre:"Bailoterapia + Indoor Cycling",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:2,hora:"08:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:2,hora:"09:30",nombre:"Pilates",instructor:"",duracion_min:60,plazas_total:15,plazas_disponibles:10,tipo:"flexibilidad"},
+          {dia:2,hora:"18:00",nombre:"Kick Boxing",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:12,tipo:"combate"},
+          {dia:2,hora:"19:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:2,hora:"19:15",nombre:"Funcional + Indoor Cycling",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:12,tipo:"fuerza"},
+          {dia:2,hora:"20:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          // Jueves (dia:3)
+          {dia:3,hora:"06:00",nombre:"HYROX",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:10,tipo:"funcional"},
+          {dia:3,hora:"07:00",nombre:"Bailoterapia + Spinning",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:3,hora:"08:00",nombre:"Kick Boxing",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:12,tipo:"combate"},
+          {dia:3,hora:"08:30",nombre:"Yoga",instructor:"",duracion_min:60,plazas_total:15,plazas_disponibles:10,tipo:"flexibilidad"},
+          {dia:3,hora:"18:00",nombre:"Kick Boxing",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:12,tipo:"combate"},
+          {dia:3,hora:"19:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:3,hora:"19:15",nombre:"Funcional + Spinning",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:12,tipo:"fuerza"},
+          {dia:3,hora:"20:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          // Viernes (dia:4)
+          {dia:4,hora:"06:00",nombre:"Funcional",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"fuerza"},
+          {dia:4,hora:"07:00",nombre:"Bailoterapia + Indoor Cycling",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:4,hora:"08:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:4,hora:"09:30",nombre:"Pilates",instructor:"",duracion_min:60,plazas_total:15,plazas_disponibles:10,tipo:"flexibilidad"},
+          {dia:4,hora:"19:00",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:4,hora:"19:15",nombre:"Funcional",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"fuerza"},
+          // Sábado (dia:5)
+          {dia:5,hora:"09:00",nombre:"Spinning",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:5,hora:"09:30",nombre:"Bailoterapia",instructor:"",duracion_min:60,plazas_total:20,plazas_disponibles:15,tipo:"cardio"},
+          {dia:5,hora:"10:30",nombre:"Yoga",instructor:"",duracion_min:60,plazas_total:15,plazas_disponibles:10,tipo:"flexibilidad"}
+        ],
+        servicios:[
+          {icono:"pesas",nombre:"Sala de pesas"},
+          {icono:"spinning",nombre:"Spinning / Indoor Cycling"},
+          {icono:"yoga",nombre:"Yoga y Pilates"},
+          {icono:"cardio",nombre:"Bailoterapia"},
+          {icono:"cardio",nombre:"HYROX"},
+          {icono:"cardio",nombre:"Kick Boxing"},
+          {icono:"vestuarios",nombre:"Vestuarios"}
+        ],
         galeria:[],videos_educativos:[],videos_recetas:[],
-        anuncios:[{id:"anuncio_001",titulo:"¡Bienvenido a TK Fitness!",texto:"Estamos felices de tenerte en nuestra familia.",fecha:"2026-06-01",destacado:true}],
-        normas:["Trae siempre tu toalla personal.","Limpia el equipo después de usarlo.","Respeta los turnos en las máquinas.","No se permite comida en la sala de pesas."],
-        cupones:[{id:"cup_1",titulo:"10% en suplementos",descripcion:"Válido en tienda física del gym.",descuento:"10%",codigo:"FIT10",vence:"2026-07-31"}],
-        promociones:[{id:"promo_1",titulo:"Verano sin pereza",descripcion:"Inscríbete este mes y tu segunda mensualidad tiene 20% de descuento.",fecha_fin:"2026-07-15",destacado:true}],
-        referidos:{activo:true,premio_referidor:"1 semana gratis",premio_referido:"10% descuento",descripcion:"Comparte tu código con un amigo."},
-        puntos_config:{activo:true,puntos_por_entreno:10,texto_canje:"Acumula puntos y canjéalos en recepción."}
+        anuncios:[
+          {id:"anuncio_001",titulo:"¡Bienvenido a Partner Gym EC!",texto:"Entrenamos diferente. Cada clase, cada rep, te acerca a tu mejor versión. 💪",fecha:"2026-08-01",destacado:true}
+        ],
+        normas:[
+          "Trae siempre tu toalla personal.",
+          "Limpia el equipo después de usarlo.",
+          "Respeta los turnos en las máquinas.",
+          "No se permite comida en la sala de pesas.",
+          "Reserva tu clase con anticipación."
+        ],
+        cupones:[],
+        promociones:[],
+        referidos:{activo:true,premio_referidor:"1 semana gratis",premio_referido:"10% descuento",descripcion:"Comparte tu código con un amigo y los dos ganan."},
+        puntos_config:{activo:true,puntos_por_entreno:10,texto_canje:"Acumula puntos y canjéalos en recepción de Partner Gym."}
       });
     }
   };
