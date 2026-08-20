@@ -17,8 +17,17 @@
   }
   function _pad(n){ return n<10?"0"+n:""+n; }
 
+  function _fechaISO(){
+    var d = new Date();
+    return d.getFullYear() + "-" + _pad(d.getMonth()+1) + "-" + _pad(d.getDate());
+  }
+
   function getPasosHoy(){
     var alumnoId = window.db.getAlumnoActual();
+    // Fuente primaria: Supabase (progreso_diario), misma que usa agenda
+    var prog = window.db.getProgresoDiario(alumnoId, _fechaISO());
+    if(prog && prog.pasos > 0) return prog.pasos;
+    // Fallback: localStorage (compatibilidad)
     try {
       var data = JSON.parse(localStorage.getItem("fitapp_pasos_"+alumnoId+"_"+fechaKey())||"null");
       return data ? (data.pasos||0) : 0;
@@ -27,6 +36,10 @@
 
   function guardarPasos(pasos, fuente){
     var alumnoId = window.db.getAlumnoActual();
+    var fecha = _fechaISO();
+    // Guardar en Supabase (fuente primaria compartida con agenda)
+    window.db.patchProgresoDiario(alumnoId, fecha, { pasos: pasos });
+    // También en localStorage para acceso offline/rápido
     var key = "fitapp_pasos_"+alumnoId+"_"+fechaKey();
     try {
       var existente = JSON.parse(localStorage.getItem(key)||'{"pasos":0}');
@@ -41,9 +54,12 @@
     for(var i=6; i>=0; i--){
       var d = new Date(); d.setDate(d.getDate()-i);
       var k = d.getFullYear()+""+_pad(d.getMonth()+1)+""+_pad(d.getDate());
-      var data = null;
-      try { data = JSON.parse(localStorage.getItem("fitapp_pasos_"+alumnoId+"_"+k)||"null"); } catch(e){}
-      var pasos = data ? (data.pasos||0) : 0;
+      var fechaISO = d.getFullYear()+"-"+_pad(d.getMonth()+1)+"-"+_pad(d.getDate());
+      // Leer de Supabase primero, fallback localStorage
+      var prog = window.db.getProgresoDiario(alumnoId, fechaISO);
+      var pasos = (prog && prog.pasos > 0) ? prog.pasos : (function(){
+        try { var dt=JSON.parse(localStorage.getItem("fitapp_pasos_"+alumnoId+"_"+k)||"null"); return dt?(dt.pasos||0):0; } catch(e){ return 0; }
+      })();
       var pct = Math.min(100, Math.round(pasos/10000*100));
       var dias = ["D","L","M","X","J","V","S"];
       var esHoy = i===0;

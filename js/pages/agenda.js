@@ -221,6 +221,12 @@
     document.getElementById("btn-guardar-pasos").addEventListener("click", function(){
       var val = parseInt(document.getElementById("input-pasos-dia").value, 10) || 0;
       window.db.patchProgresoDiario(alumno.id, fecha, { pasos: val });
+      // Sincronizar también en localStorage para widget de Inicio y cardio.js offline
+      try {
+        var d2 = new Date(fecha); var pad2 = function(n){ return n<10?"0"+n:""+n; };
+        var k2 = d2.getFullYear()+""+pad2(d2.getMonth()+1)+""+pad2(d2.getDate());
+        localStorage.setItem("fitapp_pasos_"+alumno.id+"_"+k2, JSON.stringify({pasos:val,fuente:"agenda"}));
+      } catch(e){}
       modal.remove();
       window.mostrarToast("✓ " + val.toLocaleString("es") + " pasos guardados");
       renderLista();
@@ -361,6 +367,7 @@
     html += "</div>";
 
     page().innerHTML = html;
+    if(window.startAllAnimaciones) setTimeout(window.startAllAnimaciones, 40);
 
     // Toggle tarjetas técnica
     diaRutina.ejercicios.forEach(function(ej, i){
@@ -495,7 +502,7 @@
         "<div class='me-ej-head' onclick='window._toggleEjCard(" + ejIdx + ")'>" +
           renderFotoEjercicio(ej, "me-ej-thumb") +
           "<div style='flex:1;'>" +
-            "<div style='font-size:15px;font-weight:600;color:var(--text);'>" + ej.nombre + "</div>" +
+            "<div style='font-size:15px;font-weight:600;color:var(--text);'>" + (window.traducirEjercicio ? window.traducirEjercicio(ej.nombre) : ej.nombre) + "</div>" +
             "<div style='font-size:12px;color:var(--text-muted);margin-top:2px;'>" + ej.series + " series · " + ej.repeticiones + "</div>" +
           "</div>" +
           (todasDone ? "<span style='background:rgba(52,199,89,0.12);color:#34C759;border-radius:50px;padding:3px 10px;font-size:11px;font-weight:700;'>✓</span>" : "") +
@@ -572,6 +579,7 @@
     "</div>";
 
     page().innerHTML = html;
+    if(window.startAllAnimaciones) setTimeout(window.startAllAnimaciones, 40);
 
     // Toggle kg/lbs: re-renderiza el modo entreno con la nueva unidad
     var btnMeKg  = document.getElementById("me-unit-kg");
@@ -853,11 +861,11 @@
         "<img src='" + foto + "' style='width:100%;height:100%;object-fit:cover;" + (cls ? "" : "border-radius:12px;") + "'>" +
       "</div>";
     }
-    // Animación SVG por tipo de ejercicio
-    var animSVG = window.getEjercicioSVG ? window.getEjercicioSVG(ej.nombre) : "";
-    if(animSVG){
+    // Canvas animation thumbnail
+    var uid2 = "th-" + Math.random().toString(36).slice(2,8);
+    if(window.getEjercicioAnimHTML){
       return "<div" + (cls ? " class='" + cls + "'" : " style='" + wrapStyle + "'") + ">" +
-        animSVG +
+        window.getEjercicioAnimHTML(ej.nombre, uid2) +
       "</div>";
     }
     return "<div" + (cls ? " class='" + cls + "'" : " style='" + wrapStyle + "'") + ">" +

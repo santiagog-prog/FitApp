@@ -304,7 +304,13 @@
     window.db.getFoodScans(alumno.id, fechaHoyStr).forEach(function(s){ kcalHoy2 += (s.calorias||0); });
     var notas = window.db.getNotas(alumno.id);
     var pasosHoy = (function(){
-      var k = (new Date()).getFullYear()+""+pad2((new Date()).getMonth()+1)+""+pad2((new Date()).getDate());
+      var d = new Date();
+      var fechaISO = d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());
+      // Fuente primaria: Supabase (misma que agenda y cardio)
+      var prog = window.db.getProgresoDiario(alumno.id, fechaISO);
+      if(prog && prog.pasos > 0) return prog.pasos;
+      // Fallback: localStorage
+      var k = d.getFullYear()+""+pad2(d.getMonth()+1)+""+pad2(d.getDate());
       try{ var dp=JSON.parse(localStorage.getItem("fitapp_pasos_"+alumno.id+"_"+k)||"null"); return dp?(dp.pasos||0):0; }catch(e){ return 0; }
     })();
 
