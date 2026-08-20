@@ -436,9 +436,21 @@
   flex-shrink:0; padding:5px 12px; border-radius:99px;
   background:var(--surface2); border:1px solid var(--border);
   font-size:12px; font-weight:600; color:var(--text-muted); cursor:pointer;
-  white-space:nowrap; transition:all .15s;
+  white-space:nowrap; transition:all .15s; touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
 }
 .opcion-pill.sel{ background:#1C1C1E; color:#fff; border-color:#1C1C1E; }
+/* Opción card en la lista de comidas */
+.opcion-card{ touch-action:manipulation; -webkit-tap-highlight-color:transparent; user-select:none; }
+.opcion-card:active{ transform:scale(0.97) !important; opacity:0.85; }
+.opcion-card.sel:active{ transform:scale(0.99) !important; }
+/* Botones generales — fix doble-tap zoom */
+button, [role="button"], .nav-tab, .hoy-card-dark, .home-sec-tile {
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+}
+/* Check de alimentos */
+.ali-check:active{ transform:scale(0.88); }
+.ali-check.done{ background:#C8E000; border-color:#C8E000; color:#1C1C1E; }
 
 .alimentos-lista{ padding:2px 0; }
 .ali-row{
