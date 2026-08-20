@@ -381,20 +381,29 @@
 
     // ── Grid de secciones ────────────────────────────────
     var SECCIONES = [
-      { id:"entrenar", tab:"agenda",    icono:"🏋️", nombre:"Entrenar",  color:"#C8E000", colorFg:"#5A8000" },
-      { id:"nutricion",tab:"nutricion", icono:"🥗", nombre:"Nutrición", color:"#30D158", colorFg:"#1A7A33" },
-      { id:"progreso", tab:"evolucion", icono:"📊", nombre:"Progreso",  color:"#0A84FF", colorFg:"#0A5FA8" },
-      { id:"habitos",  tab:"habitos",   icono:"🌿", nombre:"Hábitos",   color:"#BF5AF2", colorFg:"#7A2FA8" }
+      { tab:"agenda",    icono:"🏋️", nombre:"Entrenar",       color:"#C8E000" },
+      { tab:"nutricion", icono:"🥗", nombre:"Nutrición",      color:"#30D158" },
+      { tab:"evolucion", icono:"📊", nombre:"Progreso",       color:"#0A84FF" },
+      { tab:"habitos",   icono:"🌿", nombre:"Hábitos",        color:"#BF5AF2" }
     ];
-    html += "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 20px 20px;'>";
+    html += "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 20px 10px;'>";
     SECCIONES.forEach(function(s){
-      html += "<div class='home-sec-tile' data-tab='" + s.tab + "' style='background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px 16px;cursor:pointer;'>" +
+      html += "<div class='home-sec-tile' data-tab='" + s.tab + "' style='background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px 16px;cursor:pointer;touch-action:manipulation;'>" +
         "<div style='font-size:28px;margin-bottom:10px;'>" + s.icono + "</div>" +
         "<div style='font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.2px;'>" + s.nombre + "</div>" +
         "<div style='width:28px;height:3px;border-radius:99px;background:" + s.color + ";margin-top:8px;'></div>" +
       "</div>";
     });
     html += "</div>";
+    // Cardio/Pasos — tile ancho
+    html += "<div class='home-sec-tile' data-tab='cardio' style='display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px 18px;margin:0 20px 20px;cursor:pointer;touch-action:manipulation;'>" +
+      "<div style='font-size:28px;'>👟</div>" +
+      "<div style='flex:1;'>" +
+        "<div style='font-size:15px;font-weight:800;color:var(--text);'>Cardio y Pasos</div>" +
+        "<div style='font-size:12px;color:var(--text-muted);margin-top:2px;'>Hoy: <strong style='color:var(--accent-text);'>" + (pasosHoy > 0 ? (pasosHoy > 999 ? (Math.round(pasosHoy/100)/10)+"k" : pasosHoy) + " pasos" : "Sin registrar aún") + "</strong></div>" +
+      "</div>" +
+      "<div style='width:28px;height:3px;border-radius:99px;background:#5AC8FA;'></div>" +
+    "</div>";
 
     // ── Mini stats ───────────────────────────────────────
     var fsObj = window.calcularFitScore ? window.calcularFitScore(alumno.id, window.db.fechaHoy()) : null;

@@ -197,6 +197,8 @@
           }
           clearTimeout(_slowTimer);
           loadEl.remove();
+          // Migrar gym si sigue siendo el placeholder viejo
+          if(window.db.migrateGymIfNeeded) window.db.migrateGymIfNeeded();
           var alumnoSplash = window.db.getAlumnoPorId(window.ALUMNO_ID);
           if(alumnoSplash && window.mostrarSplashAlumno){
             mostrarSplashAlumno(alumnoSplash, function(){ showPage("inicio"); });

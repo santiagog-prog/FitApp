@@ -48,11 +48,11 @@
       var dias = ["D","L","M","X","J","V","S"];
       var esHoy = i===0;
       html += '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;width:36px;">' +
-        '<div style="font-size:10px;font-weight:600;color:' + (esHoy?"#C8E000":"rgba(255,255,255,0.35)") + ';">' + (pasos>999?(Math.round(pasos/100)/10)+"k":pasos) + '</div>' +
-        '<div style="width:8px;background:rgba(255,255,255,0.06);border-radius:4px;height:48px;display:flex;align-items:flex-end;">' +
+        '<div style="font-size:10px;font-weight:600;color:' + (esHoy?"var(--accent-text)":"var(--text-muted)") + ';">' + (pasos>999?(Math.round(pasos/100)/10)+"k":(pasos||"—")) + '</div>' +
+        '<div style="width:8px;background:var(--surface3);border-radius:4px;height:48px;display:flex;align-items:flex-end;">' +
           '<div style="width:100%;border-radius:4px;background:' + (esHoy?"#C8E000":(pct>0?"rgba(200,224,0,0.4)":"transparent")) + ';height:' + Math.max(4,pct) + '%;transition:height .4s;"></div>' +
         '</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);">' + dias[d.getDay()] + '</div>' +
+        '<div style="font-size:10px;color:var(--text-muted);">' + dias[d.getDay()] + '</div>' +
       '</div>';
     }
     html += '</div>';
@@ -63,11 +63,13 @@
     var header = document.getElementById("app-header");
     if(header){
       header.innerHTML =
-        "<div class='ah-top'><div onclick=\"window.irAPagina('mas')\" style='cursor:pointer;display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.5);font-size:14px;'>" +
+        "<div class='ah-top'><div id='cardio-back' style='cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:14px;touch-action:manipulation;'>" +
           "<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M15 18l-6-6 6-6'/></svg>Más" +
         "</div><div class='ah-icons'></div></div>" +
         "<div class='ah-subtitle'>Actividad</div>" +
         "<div class='ah-title'>Cardio y Pasos</div>";
+      var cbBack = document.getElementById("cardio-back");
+      if(cbBack) cbBack.addEventListener("click", function(){ window.irAPagina("mas"); });
     }
 
     var pasosHoy = getPasosHoy();
@@ -76,42 +78,42 @@
     var html = '<div style="padding:4px 0 calc(env(safe-area-inset-bottom,0px)+80px);">';
 
     // Resumen hoy
-    html += '<div style="margin:0 20px 16px;background:#141414;border-radius:20px;padding:24px;text-align:center;">' +
-      '<div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Pasos hoy</div>' +
+    html += '<div style="margin:0 20px 16px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;text-align:center;box-shadow:var(--shadow-card);">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">👟 Pasos hoy</div>' +
       '<div id="pasos-hoy-display" style="font-size:52px;font-weight:900;color:#C8E000;letter-spacing:-2px;line-height:1;">' + pasosHoy + '</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:4px;">Meta: 10,000 pasos</div>' +
-      '<div style="background:rgba(255,255,255,0.06);border-radius:99px;height:6px;margin:14px 0 0;overflow:hidden;">' +
+      '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Meta: 10,000 pasos · ' + pctObj + '%</div>' +
+      '<div style="background:var(--surface3);border-radius:99px;height:8px;margin:14px 0 0;overflow:hidden;">' +
         '<div style="width:'+pctObj+'%;height:100%;background:#C8E000;border-radius:99px;transition:width .6s;"></div>' +
       '</div>' +
     '</div>';
 
     // Últimos 7 días
     html += '<div style="margin:0 0 16px;">';
-    html += '<div style="padding:0 20px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Últimos 7 días</div>';
+    html += '<div style="padding:0 20px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Últimos 7 días</div>';
     html += renderResumenUltimos7();
     html += '</div>';
 
     // Registro manual
-    html += '<div style="background:#141414;border-radius:16px;padding:20px;margin:0 20px 12px;">' +
-      '<div style="font-size:15px;font-weight:700;color:#FFF;margin-bottom:4px;">Registrar pasos</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:14px;">Copia el número desde Salud (iPhone) o Google Fit</div>' +
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin:0 20px 12px;">' +
+      '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">Registrar pasos manualmente</div>' +
+      '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Copia el número desde Salud (iPhone) o Google Fit</div>' +
       '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">' +
-        '<input id="pasos-input" type="number" inputmode="numeric" placeholder="0" style="flex:1;height:56px;background:#1C1C1C;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:0 16px;color:#FFF;font-size:28px;font-weight:800;font-family:inherit;text-align:center;box-sizing:border-box;">' +
-        '<span style="font-size:13px;color:rgba(255,255,255,0.4);flex-shrink:0;">pasos</span>' +
+        '<input id="pasos-input" type="number" inputmode="numeric" placeholder="0" style="flex:1;height:56px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:0 16px;color:var(--text);font-size:28px;font-weight:800;font-family:inherit;text-align:center;box-sizing:border-box;">' +
+        '<span style="font-size:13px;color:var(--text-muted);flex-shrink:0;">pasos</span>' +
       '</div>' +
-      '<button id="btn-guardar-pasos" style="width:100%;height:48px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;">Guardar</button>' +
+      '<button id="btn-guardar-pasos" style="width:100%;height:48px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;touch-action:manipulation;">Guardar pasos</button>' +
     '</div>';
 
     // Contador en vivo con sensor real del teléfono
-    html += '<div style="background:#141414;border-radius:16px;padding:20px;margin:0 20px 12px;">' +
-      '<div style="font-size:15px;font-weight:700;color:#FFF;margin-bottom:4px;">Contador en tiempo real</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:16px;">Usa el acelerómetro de tu móvil · Llévalo en la mano o bolsillo</div>' +
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin:0 20px 12px;">' +
+      '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">⚡ Contador en tiempo real</div>' +
+      '<div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Usa el acelerómetro de tu móvil · Llévalo en el bolsillo</div>' +
       '<div style="text-align:center;padding:16px 0;">' +
         '<div id="pasos-vivo-numero" style="font-size:52px;font-weight:900;color:#C8E000;letter-spacing:-2px;line-height:1;">0</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:6px;">pasos en esta sesión</div>' +
+        '<div style="font-size:12px;color:var(--text-muted);margin-top:6px;">pasos en esta sesión</div>' +
       '</div>' +
-      '<button id="btn-toggle-cardio" style="width:100%;height:52px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;">▶ Iniciar conteo</button>' +
-      '<div id="sensor-info" style="font-size:11px;color:rgba(255,255,255,0.25);text-align:center;margin-top:10px;">En iPhone: el sistema pedirá permiso de movimiento al iniciar</div>' +
+      '<button id="btn-toggle-cardio" style="width:100%;height:52px;background:#C8E000;color:#1C1C1E;border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;touch-action:manipulation;">▶ Iniciar conteo</button>' +
+      '<div id="sensor-info" style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:10px;">En iPhone pedirá permiso de movimiento · En Android funciona automáticamente</div>' +
     '</div>';
 
     html += '</div>';
