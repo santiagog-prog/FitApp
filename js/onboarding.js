@@ -318,7 +318,43 @@
       requerido: false
     },
 
-    // ── SECCIÓN 7: MOTIVACIÓN ──────────────────────────────
+    // ── SECCIÓN 7: TU GYM ──────────────────────────────────
+    {
+      seccion: "Tu gym",
+      emoji: "🏟️",
+      pregunta: "¿A qué gimnasio vas?",
+      sub: "Tu coach puede coordinar contigo en el gym.",
+      tipo: "opciones_texto",
+      campo: "gym_nombre",
+      campo_texto: "gym_nombre_otro",
+      opciones: ["Partner Gym EC (El Tejar)","Smart Fit","Body Tech","Gold's Gym","Otro gym"],
+      placeholder: "Escribe el nombre de tu gym",
+      multi: false,
+      requerido: false
+    },
+    {
+      seccion: "Tu gym",
+      emoji: "📅",
+      pregunta: "¿Cuáles son tus días y horarios en el gym?",
+      sub: "Para ajustar la rutina a cuando realmente puedes ir.",
+      tipo: "texto_largo",
+      campo: "gym_horario",
+      placeholder: "Ej: Lunes, Miércoles y Viernes de 7am a 9am...",
+      requerido: false
+    },
+    {
+      seccion: "Tu gym",
+      emoji: "🤝",
+      pregunta: "¿Entrenas solo o acompañado?",
+      sub: "Esto afecta qué ejercicios podemos incluir.",
+      tipo: "opciones",
+      campo: "compania_gym",
+      opciones: ["Solo / Sola","Con un amigo o amiga","Con mi pareja","Con un grupo","Varía"],
+      multi: false,
+      requerido: false
+    },
+
+    // ── SECCIÓN 8: MOTIVACIÓN ──────────────────────────────
     {
       seccion: "Tu motivación",
       emoji: "🔥",

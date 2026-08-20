@@ -61,6 +61,34 @@
         '</div>' +
       '</div>';
 
+    // ── Cuadrícula de caras para acceso rápido ───────────────
+    html += '<div class="coach-card" style="margin-bottom:20px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">' +
+        '<h3 style="margin:0;">Alumnos</h3>' +
+        '<button id="dash-ver-todos" class="btn-coach secondary" style="font-size:12px;padding:6px 14px;">Ver todos →</button>' +
+      '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:14px;">';
+    alumnos.forEach(function(a){
+      var regs = window.db.getRegistros(a.id);
+      var ultimaFecha = regs.length ? regs[regs.length-1].fecha : null;
+      var diasSin = ultimaFecha ? Math.round((new Date()-new Date(ultimaFecha))/86400000) : 999;
+      var activo = diasSin <= 3;
+      var statusColor = activo ? "#34C759" : (diasSin > 7 ? "#FF453A" : "#FF9500");
+      var fotos = window.db.getFotos(a.id);
+      var fotoUrl = fotos.length ? fotos[fotos.length-1].url : null;
+      html +=
+        '<div class="dash-alumno-face" data-id="'+a.id+'" style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;width:56px;">' +
+          '<div style="position:relative;">' +
+            (fotoUrl
+              ? '<img src="'+fotoUrl+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2.5px solid '+statusColor+';">'
+              : '<div style="width:48px;height:48px;border-radius:50%;background:rgba(200,224,0,0.12);border:2.5px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#C8E000;">'+a.nombre[0].toUpperCase()+'</div>')+
+            '<div style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:'+statusColor+';border:2px solid #141414;"></div>'+
+          '</div>' +
+          '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56px;">'+a.nombre+'</div>' +
+        '</div>';
+    });
+    html += '</div></div>';
+
     html += "<div class='coach-card'><h3 style='margin-bottom:12px;'>Actividad reciente</h3><table class='coach-table'><tr><th>Alumno</th><th>Última sesión</th><th>Racha</th></tr>";
     alumnos.forEach(function(a){
       var regs = window.db.getRegistros(a.id);
@@ -167,6 +195,13 @@
 
     $("#sec-dashboard").innerHTML = html;
 
+    // Caras del dashboard → ir a detalle
+    document.querySelectorAll(".dash-alumno-face").forEach(function(f){
+      f.addEventListener("click", function(){ showSec("alumnos"); renderAlumnoDetalle(this.getAttribute("data-id")); });
+    });
+    var btnVerTodos = document.getElementById("dash-ver-todos");
+    if(btnVerTodos) btnVerTodos.addEventListener("click", function(){ showSec("alumnos"); });
+
     // Bind: selector alumno → mostrar objetivos
     var selA = document.getElementById("sel-alumno-obj");
     if(selA){
@@ -232,22 +267,193 @@
   };
 
   // ── ALUMNOS ──────────────────────────────────────────────
-  window.render_alumnos = function(){
-    var alumnos = window.db.getAlumnos();
-    var html = "<h1>Mis alumnos</h1><button class='btn-coach' id='btn-add-alumno' style='margin-bottom:18px;'>+ Agregar alumno</button>";
-    html += "<div class='alumnos-grid'>";
-    alumnos.forEach(function(a){
-      html += "<div class='alumno-card' data-id='" + a.id + "'><div class='ac-avatar'>" + a.nombre[0] + "</div>" +
-        "<h3>" + a.nombre + " " + (a.apellido||"") + "</h3><p>" + a.objetivo.replace("_"," ") + " · código " + a.codigo + "</p></div>";
-    });
-    html += "</div>";
-    $("#sec-alumnos").innerHTML = html;
+  function getIntake(alumnoId){
+    try{ return JSON.parse(localStorage.getItem("fitapp_intake_"+alumnoId)||"{}"); }catch(e){ return {}; }
+  }
 
+  function alumnoAvatarHTML(a, size){
+    size = size || 56;
+    var fotos = window.db.getFotos(a.id);
+    var fotoUrl = fotos.length ? fotos[fotos.length-1].url : null;
+    var regs = window.db.getRegistros(a.id);
+    var ultimaFecha = regs.length ? regs[regs.length-1].fecha : null;
+    var diasSin = ultimaFecha ? Math.round((new Date() - new Date(ultimaFecha)) / 86400000) : 999;
+    var activo = diasSin <= 3;
+    var statusColor = activo ? "#34C759" : (diasSin > 7 ? "#FF453A" : "#FF9500");
+    var inner = fotoUrl
+      ? '<img src="'+fotoUrl+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;border:2.5px solid '+statusColor+';">'
+      : '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:rgba(200,224,0,0.12);border:2.5px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:'+(size*0.4)+'px;font-weight:900;color:#C8E000;flex-shrink:0;">'+a.nombre[0].toUpperCase()+'</div>';
+    return '<div style="position:relative;flex-shrink:0;">'+inner+
+      '<div style="position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:50%;background:'+statusColor+';border:2px solid #141414;"></div>'+
+    '</div>';
+  }
+
+  window.render_alumnos = function(filtro){
+    filtro = filtro || "todos";
+    var alumnos = window.db.getAlumnos();
+    var rutinas = window.db.getRutinas();
+    var planes  = window.db.getPlanes();
+    var hoy = window.db.fechaHoy();
+
+    var html =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">' +
+        '<h1 style="margin:0;">Mis alumnos</h1>' +
+        '<button class="btn-coach" id="btn-add-alumno">+ Agregar</button>' +
+      '</div>';
+
+    // Filtros rápidos
+    var activos   = alumnos.filter(function(a){ var r=window.db.getRegistros(a.id); return r.length && Math.round((new Date()-new Date(r[r.length-1].fecha))/86400000)<=3; });
+    var inactivos = alumnos.filter(function(a){ var r=window.db.getRegistros(a.id); return !r.length || Math.round((new Date()-new Date(r[r.length-1].fecha))/86400000)>3; });
+    html +=
+      '<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">' +
+        '<button class="coach-fil'+(filtro==="todos"?" active":"")+'" data-fil="todos">Todos ('+alumnos.length+')</button>' +
+        '<button class="coach-fil'+(filtro==="activos"?" active":"")+'" data-fil="activos">✅ Activos ('+activos.length+')</button>' +
+        '<button class="coach-fil'+(filtro==="inactivos"?" active":"")+'" data-fil="inactivos">⚠️ Inactivos ('+inactivos.length+')</button>' +
+      '</div>';
+
+    var lista = filtro==="activos" ? activos : (filtro==="inactivos" ? inactivos : alumnos);
+
+    html += '<div class="alumnos-grid">';
+    lista.forEach(function(a){
+      var regs = window.db.getRegistros(a.id);
+      var ultimaFecha = regs.length ? regs[regs.length-1].fecha : null;
+      var diasSin = ultimaFecha ? Math.round((new Date()-new Date(ultimaFecha))/86400000) : 999;
+      var activo = diasSin <= 3;
+      var statusColor = activo ? "#34C759" : (diasSin > 7 ? "#FF453A" : "#FF9500");
+      var statusTxt   = activo ? "Activo hoy" : (diasSin===999 ? "Sin registros" : diasSin+"d sin entreno");
+      var racha = window.db.calcularRacha(a.id);
+      var rutina = window.db.getRutinaPorId(a.rutina_id);
+      var intake = getIntake(a.id);
+      var fotos = window.db.getFotos(a.id);
+      var fotoUrl = fotos.length ? fotos[fotos.length-1].url : null;
+
+      var avatarInner = fotoUrl
+        ? '<img src="'+fotoUrl+'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid '+statusColor+';">'
+        : '<div style="width:64px;height:64px;border-radius:50%;background:rgba(200,224,0,0.12);border:3px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#C8E000;">'+a.nombre[0].toUpperCase()+'</div>';
+
+      var intakeTags = "";
+      if(intake.objetivos){ var objs = Array.isArray(intake.objetivos)?intake.objetivos:[intake.objetivos]; intakeTags += '<span style="background:rgba(200,224,0,0.1);color:#C8E000;border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;margin-bottom:4px;display:inline-block;">🎯 '+objs[0]+'</span>'; }
+      if(intake.gym_nombre){ intakeTags += '<span style="background:rgba(90,200,250,0.1);color:#5AC8FA;border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;margin-bottom:4px;display:inline-block;">🏟️ '+intake.gym_nombre.split("(")[0].trim()+'</span>'; }
+      if(intake.experiencia_gym){ intakeTags += '<span style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;margin-bottom:4px;display:inline-block;">💪 '+intake.experiencia_gym+'</span>'; }
+      if(intake.condiciones_medicas && intake.condiciones_medicas.indexOf("Ninguna")===-1 && intake.condiciones_medicas.length){
+        intakeTags += '<span style="background:rgba(255,149,0,0.12);color:#FF9500;border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;margin-bottom:4px;display:inline-block;">⚠️ '+(Array.isArray(intake.condiciones_medicas)?intake.condiciones_medicas.join(", "):intake.condiciones_medicas)+'</span>';
+      }
+
+      var whatsappNum = (a.whatsapp||intake.whatsapp||"").replace(/\D/g,"");
+
+      html +=
+        '<div class="alumno-card" style="cursor:default;">' +
+          '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;">' +
+            '<div style="position:relative;flex-shrink:0;">'+avatarInner+
+              '<div style="position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;background:'+statusColor+';border:2px solid #141414;"></div>'+
+            '</div>' +
+            '<div style="flex:1;min-width:0;">' +
+              '<div style="font-size:17px;font-weight:800;color:#FFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+a.nombre+' '+(a.apellido||"")+'</div>' +
+              '<div style="font-size:11px;font-weight:700;color:'+statusColor+';margin-top:3px;">'+statusTxt+'</div>' +
+              '<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;">'+(rutina?'🏋️ '+rutina.nombre:'<span style="color:#FF9500;">⚠️ Sin rutina asignada</span>')+'</div>' +
+              (racha>0?'<div style="font-size:11px;color:#C8E000;margin-top:2px;">🔥 Racha '+racha+' días</div>':'')+
+            '</div>' +
+          '</div>' +
+          (intakeTags?'<div style="margin-bottom:12px;line-height:1;">'+intakeTags+'</div>':'')+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">' +
+            '<button class="ac-quick ac-ver" data-id="'+a.id+'" style="padding:9px 6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FFF;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">👁 Ver perfil</button>' +
+            '<button class="ac-quick ac-asignar" data-id="'+a.id+'" style="padding:9px 6px;background:rgba(200,224,0,0.1);border:1px solid rgba(200,224,0,0.25);border-radius:10px;color:#C8E000;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⚙️ Asignar</button>' +
+            (whatsappNum?'<a href="https://wa.me/'+whatsappNum+'" target="_blank" rel="noopener" style="padding:9px 6px;background:rgba(52,199,89,0.1);border:1px solid rgba(52,199,89,0.25);border-radius:10px;color:#34C759;font-size:12px;font-weight:700;text-decoration:none;text-align:center;">💬 WhatsApp</a>':'<div></div>')+
+            '<button class="ac-quick ac-notif" data-id="'+a.id+'" data-nombre="'+a.nombre+'" style="padding:9px 6px;background:rgba(90,200,250,0.1);border:1px solid rgba(90,200,250,0.2);border-radius:10px;color:#5AC8FA;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📣 Notificar</button>' +
+          '</div>' +
+        '</div>';
+    });
+
+    if(lista.length === 0){
+      html += '<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.3);">Sin alumnos en esta categoría</div>';
+    }
+    html += '</div>';
+
+    $("#sec-alumnos").innerHTML = html;
     $("#btn-add-alumno").addEventListener("click", abrirModalAlumno);
-    document.querySelectorAll(".alumno-card").forEach(function(c){
-      c.addEventListener("click", function(){ renderAlumnoDetalle(this.getAttribute("data-id")); });
+
+    document.querySelectorAll(".coach-fil").forEach(function(b){
+      b.addEventListener("click", function(){ window.render_alumnos(this.getAttribute("data-fil")); });
+    });
+    document.querySelectorAll(".ac-ver").forEach(function(b){
+      b.addEventListener("click", function(){ renderAlumnoDetalle(this.getAttribute("data-id")); });
+    });
+    document.querySelectorAll(".ac-asignar").forEach(function(b){
+      b.addEventListener("click", function(){ abrirModalAsignarRapido(this.getAttribute("data-id"), rutinas, planes); });
+    });
+    document.querySelectorAll(".ac-notif").forEach(function(b){
+      b.addEventListener("click", function(){ abrirModalNotificar(this.getAttribute("data-id"), this.getAttribute("data-nombre")); });
     });
   };
+
+  function abrirModalAsignarRapido(alumnoId, rutinas, planes){
+    var a = window.db.getAlumnoPorId(alumnoId);
+    if(!a) return;
+    var body =
+      '<div class="coach-form">' +
+        '<label>Rutina</label>' +
+        '<select id="ras-rutina">' +
+          '<option value="">— sin cambio —</option>' +
+          rutinas.map(function(r){ return '<option value="'+r.id+'"'+(a.rutina_id===r.id?' selected':'')+'>'+r.nombre+'</option>'; }).join("") +
+        '</select>' +
+        '<label style="margin-top:14px;">Plan de alimentación</label>' +
+        '<select id="ras-plan">' +
+          '<option value="">— sin cambio —</option>' +
+          planes.map(function(p){ return '<option value="'+p.id+'"'+(a.plan_alimentacion_id===p.id?' selected':'')+'>'+p.nombre+'</option>'; }).join("") +
+        '</select>' +
+        '<button class="btn-coach" id="ras-guardar" style="margin-top:20px;width:100%;">Guardar asignación</button>' +
+      '</div>';
+    coachModal("Asignar a "+a.nombre, body, function(){
+      $("#ras-guardar").addEventListener("click", function(){
+        var rut = $("#ras-rutina").value;
+        var plan = $("#ras-plan").value;
+        if(rut)  a.rutina_id = rut;
+        if(plan) a.plan_alimentacion_id = plan;
+        window.db.saveAlumno(a);
+        window.cerrarCoachModal();
+        window.mostrarToast && window.mostrarToast("✅ Asignación guardada para "+a.nombre);
+        window.render_alumnos();
+      });
+    });
+  }
+
+  function abrirModalNotificar(alumnoId, nombre){
+    var PLANTILLAS = [
+      "💪 ¡Hoy toca entreno! Te espero fuerte.",
+      "🥗 Recuerda registrar tus comidas de hoy.",
+      "📊 Es hora de tu check-in semanal. ¿Cómo te has sentido?",
+      "🔥 Llevas "+window.db.calcularRacha(alumnoId)+" días de racha. ¡No la rompas!",
+      "⚠️ Hace días que no te veo en la app. ¿Todo bien?",
+      "🎯 Revisamos tus objetivos esta semana. ¡Vas muy bien!"
+    ];
+    var body =
+      '<div class="coach-form">' +
+        '<label>Plantillas rápidas</label>' +
+        '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">' +
+          PLANTILLAS.map(function(t,i){
+            return '<button class="notif-tpl" data-txt="'+t.replace(/"/g,'&quot;')+'" style="text-align:left;padding:10px 14px;background:#1C1C1C;border:1px solid #333;border-radius:10px;color:#CCC;font-size:13px;cursor:pointer;font-family:inherit;">'+t+'</button>';
+          }).join("") +
+        '</div>' +
+        '<label>O escribe un mensaje personalizado</label>' +
+        '<textarea id="notif-texto" rows="3" placeholder="Escribe el mensaje para '+nombre+'..." style="width:100%;box-sizing:border-box;background:#1C1C1C;border:1px solid #333;border-radius:10px;color:#FFF;padding:12px;font-family:inherit;font-size:13px;resize:none;"></textarea>' +
+        '<button class="btn-coach" id="notif-enviar" style="margin-top:14px;width:100%;">📣 Enviar notificación</button>' +
+      '</div>';
+    coachModal("Notificar a "+nombre, body, function(){
+      document.querySelectorAll(".notif-tpl").forEach(function(b){
+        b.addEventListener("click", function(){
+          var ta = document.getElementById("notif-texto");
+          if(ta) ta.value = this.getAttribute("data-txt");
+        });
+      });
+      document.getElementById("notif-enviar").addEventListener("click", function(){
+        var texto = (document.getElementById("notif-texto")||{}).value||"";
+        if(!texto.trim()){ alert("Escribe un mensaje primero"); return; }
+        window.db.saveNota(alumnoId, { texto: texto, fecha: window.db.fechaHoy(), leida: false });
+        window.cerrarCoachModal();
+        window.mostrarToast && window.mostrarToast("✅ Notificación enviada a "+nombre);
+      });
+    });
+  }
 
   function abrirModalAlumno(){
     var rutinas = window.db.getRutinas(), planes = window.db.getPlanes();
@@ -1398,27 +1604,86 @@
 
   // ── INTAKES ──────────────────────────────────────────────
   window.render_intakes = function(){
-    var intakes = JSON.parse(localStorage.getItem("fitapp_intakes")||"[]");
-    var html = "<h1>Formularios Intake</h1>";
-    if(intakes.length === 0){
-      html += "<div class='coach-card'><p style='color:#777;'>Ningún alumno ha completado el formulario de intake todavía.</p></div>";
+    var alumnos = window.db.getAlumnos();
+
+    var LABELS = {
+      nombre_completo:"Nombre completo", fecha_nacimiento:"Fecha nacimiento", genero:"Género",
+      whatsapp:"WhatsApp", ocupacion:"Ocupación", peso_kg:"Peso (kg)", altura_cm:"Altura (cm)",
+      peso_objetivo_kg:"Peso objetivo (kg)", cintura_cm:"Cintura (cm)", cadera_cm:"Cadera (cm)",
+      pecho_cm:"Pecho (cm)", brazo_cm:"Brazo (cm)", horas_sueno:"Horas de sueño",
+      nivel_estres:"Nivel de estrés (1–5)", objetivos:"Objetivos", zona_prioritaria:"Zona prioritaria",
+      tiempo_objetivo:"Tiempo para lograr objetivo", experiencia_gym:"Experiencia en gym",
+      dias_disponibles:"Días disponibles", duracion_sesion:"Duración por sesión",
+      horario_entreno:"Horario de entreno", lugar_entreno:"Lugar de entreno",
+      tipos_entreno:"Tipos de entrenamiento previos", lesiones:"Lesiones", lesiones_detalle:"Detalle lesiones",
+      condiciones_medicas:"Condiciones médicas", condiciones_detalle:"Detalle condiciones",
+      medicacion:"Medicación", medicacion_detalle:"Detalle medicación", alergias:"Alergias",
+      comidas_diarias:"Comidas al día", alimentos_evitar:"Alimentos que evita",
+      hidratacion:"Hidratación", suplementos:"Suplementos", suplementos_detalle:"Detalle suplementos",
+      gym_nombre:"Gimnasio", gym_horario:"Horario en el gym", compania_gym:"Entrena con",
+      motivacion:"Motivación", que_fallo:"Qué le ha fallado antes", extra:"Notas extra",
+      fecha_intake:"Fecha de intake"
+    };
+
+    var html = "<h1>Intakes de alumnos</h1>";
+
+    var conIntake = alumnos.filter(function(a){
+      var d = getIntake(a.id); return Object.keys(d).length > 0;
+    });
+    var sinIntake = alumnos.filter(function(a){
+      var d = getIntake(a.id); return Object.keys(d).length === 0;
+    });
+
+    if(conIntake.length === 0){
+      html += '<div class="coach-card"><p style="color:#777;">Ningún alumno ha completado el onboarding en la app todavía.</p>' +
+        '<p style="color:#555;font-size:13px;">Cuando un alumno inicie la app por primera vez, sus respuestas aparecerán aquí automáticamente.</p></div>';
     } else {
-      html += "<table class='coach-table'><tr><th>Nombre</th><th>Email</th><th>Objetivo</th><th>Fecha</th><th></th></tr>";
-      intakes.forEach(function(it, i){
-        html += "<tr><td>" + (it.nombre||"—") + "</td><td>" + (it.email||"—") + "</td><td>" + (it.objetivo||"—") + "</td><td>" + (it.fecha||"—") + "</td>" +
-          "<td><button class='btn-coach secondary btn-ver-intake' data-i='" + i + "'>Ver</button></td></tr>";
+      conIntake.forEach(function(a){
+        var intake = getIntake(a.id);
+        var fotos = window.db.getFotos(a.id);
+        var fotoUrl = fotos.length ? fotos[fotos.length-1].url : null;
+        var regs = window.db.getRegistros(a.id);
+        var diasSin = regs.length ? Math.round((new Date()-new Date(regs[regs.length-1].fecha))/86400000) : 999;
+        var activo = diasSin <= 3;
+        var statusColor = activo?"#34C759":(diasSin>7?"#FF453A":"#FF9500");
+
+        html +=
+          '<div class="coach-card" style="margin-bottom:16px;">' +
+            '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #242424;">' +
+              (fotoUrl
+                ? '<img src="'+fotoUrl+'" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid '+statusColor+';">'
+                : '<div style="width:56px;height:56px;border-radius:50%;background:rgba(200,224,0,0.12);border:3px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#C8E000;">'+a.nombre[0].toUpperCase()+'</div>') +
+              '<div>' +
+                '<div style="font-size:17px;font-weight:800;color:#FFF;">'+a.nombre+' '+(a.apellido||"")+'</div>' +
+                '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;">'+(intake.fecha_intake?new Date(intake.fecha_intake).toLocaleDateString("es"):"")+'</div>' +
+              '</div>' +
+              '<button class="btn-coach secondary int-notif" data-id="'+a.id+'" data-nombre="'+a.nombre+'" style="margin-left:auto;font-size:12px;padding:7px 14px;">📣 Notificar</button>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;">' +
+              Object.keys(intake).filter(function(k){ return k!=="fecha_intake" && intake[k] && intake[k].toString().trim(); }).map(function(k){
+                var val = intake[k];
+                if(Array.isArray(val)) val = val.join(", ");
+                return '<div><div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">'+(LABELS[k]||k)+'</div>' +
+                  '<div style="font-size:13px;color:#FFF;font-weight:500;">'+val+'</div></div>';
+              }).join("") +
+            '</div>' +
+          '</div>';
       });
-      html += "</table>";
     }
-    html += "<div style='margin-top:16px;'><a class='btn-coach' href='../intake.html' target='_blank'>🔗 Enlace del formulario de intake</a></div>";
+
+    if(sinIntake.length){
+      html += '<div class="coach-card"><h3 style="margin-bottom:10px;color:rgba(255,255,255,0.4);">Sin onboarding ('+sinIntake.length+')</h3>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
+        sinIntake.map(function(a){
+          return '<span style="padding:5px 12px;background:#1C1C1C;border-radius:50px;font-size:13px;color:rgba(255,255,255,0.4);">'+a.nombre+'</span>';
+        }).join("") +
+        '</div></div>';
+    }
+
     $("#sec-intakes").innerHTML = html;
 
-    document.querySelectorAll(".btn-ver-intake").forEach(function(b){
-      b.addEventListener("click", function(){
-        var it = intakes[parseInt(this.getAttribute("data-i"),10)];
-        var rows = Object.keys(it).map(function(k){ return "<tr><td><strong>" + k + "</strong></td><td>" + it[k] + "</td></tr>"; }).join("");
-        coachModal("Intake: " + (it.nombre||""), "<table class='coach-table'>" + rows + "</table>", null);
-      });
+    document.querySelectorAll(".int-notif").forEach(function(b){
+      b.addEventListener("click", function(){ abrirModalNotificar(this.getAttribute("data-id"), this.getAttribute("data-nombre")); });
     });
   };
 

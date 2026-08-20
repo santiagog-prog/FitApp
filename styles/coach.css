@@ -28,11 +28,19 @@ body.coach-body{ background:#0F0F0F; color:#fff; min-height:100vh; }
 .btn-coach.secondary{ background:#2a2a2a; color:#fff; }
 .btn-coach.danger{ background:#c0392b; color:#fff; }
 
-.alumnos-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }
-.alumno-card{ background:#1A1A1A; border-radius:12px; padding:18px; cursor:pointer; }
+.alumnos-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+.alumno-card{ background:#1A1A1A; border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:18px; transition:border-color .2s; }
+.alumno-card:hover{ border-color:rgba(200,224,0,0.2); }
 .alumno-card .ac-avatar{ width:48px; height:48px; border-radius:50%; background:rgba(200,224,0,0.2); color:#C8E000; display:flex; align-items:center; justify-content:center; font-weight:700; margin-bottom:10px; }
 .alumno-card h3{ font-size:1rem; margin-bottom:4px; }
 .alumno-card p{ font-size:.8rem; color:#999; }
+.ac-quick{ touch-action:manipulation; transition:opacity .15s; }
+.ac-quick:active{ opacity:0.7; }
+.coach-fil{ padding:7px 14px; background:#1C1C1C; border:1px solid #333; border-radius:50px; color:#999; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; touch-action:manipulation; transition:all .15s; }
+.coach-fil.active{ background:rgba(200,224,0,0.1); border-color:rgba(200,224,0,0.3); color:#C8E000; }
+.dash-alumno-face{ transition:transform .15s; }
+.dash-alumno-face:hover{ transform:scale(1.08); }
+.notif-tpl:hover{ background:#242424 !important; color:#FFF !important; }
 
 .coach-tabs{ display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
 .coach-tabs button{ background:#1A1A1A; border:none; color:#bbb; padding:9px 16px; border-radius:8px; cursor:pointer; font-size:.85rem; }
