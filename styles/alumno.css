@@ -766,3 +766,112 @@ button, [role="button"], .nav-tab, .hoy-card-dark, .home-sec-tile {
 .next-action-card  { min-height:130px; }
 .next-action-title { font-size:20px; }
 .stats-rings svg   { width:52px; height:52px; }
+
+/* ══════════════════════════════════════════════════════════
+   ANIMACIONES — v20260820e
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Keyframes base ─────────────────────────────────────── */
+@keyframes fadeUp    { from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:translateY(0); } }
+@keyframes fadeIn    { from{ opacity:0; } to{ opacity:1; } }
+@keyframes scaleIn   { from{ opacity:0; transform:scale(0.88); } to{ opacity:1; transform:scale(1); } }
+@keyframes springIn  {
+  0%  { opacity:0; transform:scale(0.6); }
+  55% { opacity:1; transform:scale(1.12); }
+  75% { transform:scale(0.95); }
+  100%{ opacity:1; transform:scale(1); }
+}
+@keyframes slideRight{ from{ opacity:0; transform:translateX(-16px); } to{ opacity:1; transform:translateX(0); } }
+@keyframes shimmer   { from{ background-position:-400px 0; } to{ background-position:400px 0; } }
+@keyframes navPop    { from{ transform:scale(0.7) translateY(4px); opacity:0; } to{ transform:scale(1) translateY(0); opacity:1; } }
+@keyframes glow      { 0%,100%{ box-shadow:0 0 0 0 rgba(200,224,0,0); } 50%{ box-shadow:0 0 16px 4px rgba(200,224,0,0.22); } }
+@keyframes checkBounce{ 0%{ transform:scale(0) rotate(-20deg); } 55%{ transform:scale(1.25) rotate(5deg); } 80%{ transform:scale(0.9); } 100%{ transform:scale(1) rotate(0); } }
+@keyframes barFill   { from{ transform:scaleX(0); transform-origin:left; } to{ transform:scaleX(1); } }
+@keyframes confetti  {
+  0%  { opacity:1; transform:translateY(0) rotate(0deg); }
+  100%{ opacity:0; transform:translateY(120px) rotate(720deg); }
+}
+@keyframes celebracion{ from{ opacity:0; transform:scale(0.7) translateY(20px); } to{ opacity:1; transform:scale(1) translateY(0); } }
+@keyframes pulseRing { 0%{ transform:scale(1); opacity:.6; } 100%{ transform:scale(1.6); opacity:0; } }
+@keyframes timerTick { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.04); } }
+
+/* ── Clases de entrada ──────────────────────────────────── */
+.anim-fade-up  { animation:fadeUp .4s cubic-bezier(0.16,1,0.3,1) both; }
+.anim-scale-in { animation:scaleIn .3s cubic-bezier(0.16,1,0.3,1) both; }
+.anim-fade-in  { animation:fadeIn .35s ease both; }
+.anim-spring   { animation:springIn .45s cubic-bezier(0.34,1.56,0.64,1) both; }
+.anim-slide-r  { animation:slideRight .35s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* ── Delays escalonados para grids ──────────────────────── */
+.d0 { animation-delay:0s; }
+.d1 { animation-delay:.07s; }
+.d2 { animation-delay:.12s; }
+.d3 { animation-delay:.17s; }
+.d4 { animation-delay:.22s; }
+.d5 { animation-delay:.27s; }
+.d6 { animation-delay:.32s; }
+
+/* ── Feedback táctil mejorado ───────────────────────────── */
+.home-sec-tile      { transition:transform .15s cubic-bezier(0.34,1.56,0.64,1), box-shadow .15s; }
+.home-sec-tile:active{ transform:scale(0.94) !important; box-shadow:none !important; }
+.hoy-card-dark:active, .quick-link-card:active, .quick-action-card:active { transform:scale(0.96); }
+.actividad-row:active{ transform:scale(0.98); }
+.dia-pill:active    { transform:scale(0.93); }
+.opcion-pill:active { transform:scale(0.93); }
+.nav-tab:active .nt-icon { transform:scale(0.88); }
+
+/* Nav tab activo — pop animado */
+.nav-tab.active .nt-icon { animation:navPop .28s cubic-bezier(0.34,1.56,0.64,1); }
+
+/* ── Series y checks ────────────────────────────────────── */
+.me-check-btn.done { animation:checkBounce .4s cubic-bezier(0.34,1.56,0.64,1); }
+.me-serie-num.done { animation:springIn .3s cubic-bezier(0.34,1.56,0.64,1); }
+.ali-check.done    { animation:springIn .32s cubic-bezier(0.34,1.56,0.64,1); }
+.habito-tl-btn.done{ animation:springIn .35s cubic-bezier(0.34,1.56,0.64,1); }
+.habito-tl-dot.done{ animation:springIn .3s cubic-bezier(0.34,1.56,0.64,1); }
+.agua-vaso.full    { animation:springIn .28s cubic-bezier(0.34,1.56,0.64,1); }
+
+/* ── Barras de progreso animadas ────────────────────────── */
+.mbr-fill, .me-progreso-bar .fill, .progreso-semana-bar .fill {
+  transition:width 0.9s cubic-bezier(0.34,1.2,0.64,1);
+}
+.obj-prog-fill { transition:width 1s cubic-bezier(0.34,1.2,0.64,1); }
+
+/* ── Medallas ───────────────────────────────────────────── */
+.medalla.desbloqueada .med-circ { animation:springIn .5s cubic-bezier(0.34,1.56,0.64,1), glow 3s ease-in-out 1s infinite; }
+
+/* ── Skeleton loading ────────────────────────────────────── */
+.skeleton {
+  background:linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+  background-size:600px 100%;
+  animation:shimmer 1.4s infinite;
+  border-radius:8px;
+}
+
+/* ── Timer entreno ──────────────────────────────────────── */
+.me-timer-display { animation:timerTick 1s ease-in-out infinite; }
+
+/* ── Celebración al terminar entreno ────────────────────── */
+.celebracion-modal { animation:celebracion .5s cubic-bezier(0.34,1.56,0.64,1); }
+.confetti-dot {
+  position:absolute; width:8px; height:8px; border-radius:2px;
+  animation:confetti 1.2s ease-out forwards;
+}
+
+/* ── FitScore glow ───────────────────────────────────────── */
+.fitscore-home-card { transition:box-shadow .3s; }
+.fitscore-home-card:hover { box-shadow:0 0 30px rgba(200,224,0,0.15); }
+
+/* ── Bottom sheet entrada ───────────────────────────────── */
+.modal-bottom-sheet { animation:fadeUp .35s cubic-bezier(0.16,1,0.3,1); }
+
+/* ── Página de cardio — número de pasos ─────────────────── */
+#pasos-hoy-display { transition:all .2s cubic-bezier(0.34,1.56,0.64,1); }
+
+/* ── Opción card nutrición ──────────────────────────────── */
+.opcion-card { transition:transform .18s cubic-bezier(0.34,1.56,0.64,1), border-color .18s, background .18s; }
+.opcion-card.sel { animation:springIn .3s cubic-bezier(0.34,1.56,0.64,1); }
+
+/* ── Transición de página mejorada ──────────────────────── */
+.page-transition-enter { animation:pageSlideIn 0.28s cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes pageSlideIn { from{ opacity:0; transform:translateY(8px) scale(0.99); } to{ opacity:1; transform:translateY(0) scale(1); } }

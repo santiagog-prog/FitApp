@@ -66,3 +66,95 @@ body.coach-body{ background:#0F0F0F; color:#fff; min-height:100vh; }
   #coach-main{ margin-left:64px; padding:18px; }
   .coach-grid-stats{ grid-template-columns:1fr 1fr; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   ANIMACIONES COACH — v20260820e
+   ══════════════════════════════════════════════════════════ */
+
+@keyframes cardIn   { from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
+@keyframes statPop  { from{ opacity:0; transform:scale(0.7); } 60%{ transform:scale(1.08); } to{ opacity:1; transform:scale(1); } }
+@keyframes dotPulse { 0%,100%{ box-shadow:0 0 0 0 currentColor; } 50%{ box-shadow:0 0 0 5px transparent; } }
+@keyframes sideIn   { from{ opacity:0; transform:translateX(-12px); } to{ opacity:1; transform:translateX(0); } }
+@keyframes overlayIn{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes modalIn  { from{ opacity:0; transform:scale(0.94) translateY(14px); } to{ opacity:1; transform:scale(1) translateY(0); } }
+@keyframes shimmerDark{ from{ background-position:-400px 0; } to{ background-position:400px 0; } }
+
+/* ── Sidebar nav items ───────────────────────────────────── */
+#coach-sidebar nav button { transition:background .15s, border-color .15s, color .15s; }
+#coach-sidebar nav button.active { animation:sideIn .25s cubic-bezier(0.16,1,0.3,1); }
+
+/* ── Stats ───────────────────────────────────────────────── */
+.cstat { animation:cardIn .35s cubic-bezier(0.16,1,0.3,1) both; }
+.cstat:nth-child(1){ animation-delay:.04s; }
+.cstat:nth-child(2){ animation-delay:.08s; }
+.cstat:nth-child(3){ animation-delay:.12s; }
+.cstat:nth-child(4){ animation-delay:.16s; }
+.cstat .cs-val { animation:statPop .45s cubic-bezier(0.34,1.56,0.64,1) both; animation-delay:.2s; }
+
+/* ── Alumno cards ────────────────────────────────────────── */
+.alumno-card {
+  animation:cardIn .32s cubic-bezier(0.16,1,0.3,1) both;
+  transition:transform .18s cubic-bezier(0.34,1.56,0.64,1), box-shadow .18s, border-color .18s;
+}
+.alumno-card:hover { transform:translateY(-3px) scale(1.01); box-shadow:0 8px 28px rgba(0,0,0,0.4); border-color:rgba(200,224,0,0.25) !important; }
+.alumno-card:active{ transform:scale(0.97); }
+
+/* Stagger primeras 8 tarjetas */
+.alumnos-grid .alumno-card:nth-child(1){ animation-delay:.04s; }
+.alumnos-grid .alumno-card:nth-child(2){ animation-delay:.08s; }
+.alumnos-grid .alumno-card:nth-child(3){ animation-delay:.12s; }
+.alumnos-grid .alumno-card:nth-child(4){ animation-delay:.16s; }
+.alumnos-grid .alumno-card:nth-child(5){ animation-delay:.20s; }
+.alumnos-grid .alumno-card:nth-child(6){ animation-delay:.24s; }
+.alumnos-grid .alumno-card:nth-child(7){ animation-delay:.28s; }
+.alumnos-grid .alumno-card:nth-child(8){ animation-delay:.32s; }
+
+/* ── Coach cards genéricas ───────────────────────────────── */
+.coach-card { animation:cardIn .3s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* ── Status dots ─────────────────────────────────────────── */
+.status-dot-activo { animation:dotPulse 2s ease-in-out infinite; }
+
+/* ── Botones ─────────────────────────────────────────────── */
+.btn-coach { transition:transform .12s, opacity .12s, box-shadow .12s; }
+.btn-coach:hover  { transform:translateY(-1px); box-shadow:0 4px 14px rgba(200,224,0,0.25); }
+.btn-coach:active { transform:scale(0.96); opacity:.85; }
+.btn-coach.secondary:hover { box-shadow:0 4px 14px rgba(0,0,0,0.3); }
+
+/* ── Quick action buttons ────────────────────────────────── */
+.ac-quick { transition:transform .12s, background .12s; }
+.ac-quick:hover { background:rgba(255,255,255,0.12) !important; }
+
+/* ── Filter buttons ──────────────────────────────────────── */
+.coach-fil { transition:all .15s cubic-bezier(0.34,1.2,0.64,1); }
+.coach-fil:hover { border-color:#555; color:#ddd; }
+.coach-fil.active { transform:scale(1.04); }
+
+/* ── Modal overlay ───────────────────────────────────────── */
+#coach-modal-overlay { animation:overlayIn .2s ease; }
+#coach-modal-overlay .modal-box { animation:modalIn .3s cubic-bezier(0.16,1,0.3,1); }
+
+/* ── Tabs ────────────────────────────────────────────────── */
+.coach-tabs button { transition:background .15s, color .15s, transform .12s; }
+.coach-tabs button:hover { background:#222; color:#eee; }
+.coach-tabs button.active { transform:scale(1.03); }
+
+/* ── Dash face grid ──────────────────────────────────────── */
+.dash-alumno-face { transition:transform .15s cubic-bezier(0.34,1.56,0.64,1), box-shadow .15s; }
+.dash-alumno-face:hover { transform:scale(1.12); box-shadow:0 4px 12px rgba(0,0,0,0.4); }
+
+/* ── Notif templates ─────────────────────────────────────── */
+.notif-tpl { transition:background .15s, color .15s, transform .12s; }
+.notif-tpl:hover { background:#2a2a2a !important; color:#fff !important; transform:scale(1.02); }
+
+/* ── Table rows ──────────────────────────────────────────── */
+.coach-table tr { transition:background .12s; }
+.coach-table tbody tr:hover { background:rgba(255,255,255,0.03); }
+
+/* ── Skeleton dark ───────────────────────────────────────── */
+.skeleton-dark {
+  background:linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%);
+  background-size:600px 100%;
+  animation:shimmerDark 1.4s infinite;
+  border-radius:8px;
+}
