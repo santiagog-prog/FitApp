@@ -104,13 +104,14 @@
           LOGO_SVG +
         '</div>' +
       '</div>' +
-      // ── Nombre + frase abajo ──
-      '<div style="width:100%;padding:0 36px calc(env(safe-area-inset-bottom,0px)+64px);">' +
+      // ── Nombre + frase centrados abajo ──
+      '<div style="width:100%;padding:0 32px calc(env(safe-area-inset-bottom,0px)+72px);text-align:center;">' +
         '<div style="opacity:0;animation:spSlideUp .6s .3s cubic-bezier(.16,1,.3,1) both;">' +
-          '<div style="font-size:58px;font-weight:900;color:#FFFFFF;letter-spacing:-3.5px;line-height:.95;margin-bottom:14px;">FitApp</div>' +
+          '<div style="font-size:52px;font-weight:900;color:#FFFFFF;letter-spacing:-3px;line-height:1;margin-bottom:6px;">FitApp</div>' +
+          '<div style="width:32px;height:3px;border-radius:99px;background:#C8E000;margin:0 auto 16px;"></div>' +
         '</div>' +
         '<div style="opacity:0;animation:spFadeUp .5s .55s ease both;">' +
-          '<div style="font-size:16px;font-style:italic;color:rgba(255,255,255,0.38);line-height:1.5;">' +
+          '<div style="font-size:15px;font-style:italic;color:rgba(255,255,255,0.4);line-height:1.6;">' +
             '&ldquo;Esto cambiará tu vida&rdquo;' +
           '</div>' +
         '</div>' +
