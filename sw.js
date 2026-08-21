@@ -2,7 +2,7 @@
 // Strategy: pre-cache app shell on install, stale-while-revalidate for assets,
 // network-first for navigation. Works offline indefinitely.
 
-var CACHE = "fitapp-shell-v20260821b";
+var CACHE = "fitapp-shell-v20260821c";
 
 // App shell — files that must be available offline
 var SHELL = [
@@ -53,14 +53,20 @@ self.addEventListener("install", function(event){
   );
 });
 
-// ── Activate: delete old caches ───────────────────────────
+// ── Activate: delete old caches and force reload all clients ──
 self.addEventListener("activate", function(event){
   event.waitUntil(
     caches.keys().then(function(keys){
       return Promise.all(
         keys.filter(function(k){ return k !== CACHE; }).map(function(k){ return caches.delete(k); })
       );
-    }).then(function(){ return self.clients.claim(); })
+    })
+    .then(function(){ return self.clients.claim(); })
+    .then(function(){
+      return self.clients.matchAll({ type:"window" }).then(function(clients){
+        clients.forEach(function(c){ c.navigate(c.url); });
+      });
+    })
   );
 });
 
