@@ -322,7 +322,7 @@
     var html = "<div style='padding:20px 0 40px;'>";
 
     // ── SALUDO ─────────────────────────────────────────
-    html += "<div style='padding:0 20px 24px;'>" +
+    html += "<div class='anim-fade-up d0' style='padding:0 20px 24px;'>" +
       "<div style='font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:4px;'>" + saludoHora() + " · " + fechaLegible + "</div>" +
       "<div style='font-size:26px;font-weight:900;color:var(--text);letter-spacing:-0.8px;line-height:1.2;'>" + alumno.nombre + " 👋</div>" +
       (racha2 > 0 ? "<div style='display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:rgba(200,224,0,0.1);border:1px solid rgba(200,224,0,0.2);border-radius:50px;padding:5px 12px;'>" +
@@ -338,7 +338,7 @@
       var diaSem  = hoyD.getDay();
       var diffLun = (diaSem + 6) % 7;
       var labels  = ["L","M","X","J","V","S","D"];
-      html += "<div style='display:flex;gap:0;padding:0 20px 16px;'>";
+      html += "<div class='anim-fade-up d1' style='display:flex;gap:0;padding:0 20px 16px;'>";
       for(var wi = 0; wi < 7; wi++){
         var d = new Date(hoyD);
         d.setDate(hoyD.getDate() - diffLun + wi);
@@ -364,7 +364,7 @@
     // ── Entreno de hoy ───────────────────────────────────
     if(diaRutina && diaRutina.tipo !== "descanso"){
       var hechoHoyT = registros.some(function(r){ return r.fecha === fechaHoyStr; });
-      html += "<div style='margin:0 20px 16px;background:" + (hechoHoyT ? "rgba(48,209,88,0.08)" : "var(--surface)") + ";border:1.5px solid " + (hechoHoyT ? "rgba(48,209,88,0.25)" : "var(--border)") + ";border-radius:20px;padding:18px 16px;cursor:pointer;' id='btn-ir-rutina'>" +
+      html += "<div class='anim-fade-up d2' style='margin:0 20px 16px;background:" + (hechoHoyT ? "rgba(48,209,88,0.08)" : "var(--surface)") + ";border:1.5px solid " + (hechoHoyT ? "rgba(48,209,88,0.25)" : "var(--border)") + ";border-radius:20px;padding:18px 16px;cursor:pointer;' id='btn-ir-rutina'>" +
         "<div style='display:flex;align-items:center;gap:14px;'>" +
           "<div style='width:46px;height:46px;border-radius:14px;background:" + (hechoHoyT ? "rgba(48,209,88,0.15)" : "rgba(200,224,0,0.12)") + ";display:flex;align-items:center;justify-content:center;flex-shrink:0;'>" +
             (hechoHoyT
@@ -392,7 +392,7 @@
       { tab:"evolucion", icono:"📊", nombre:"Progreso",       color:"#0A84FF" },
       { tab:"habitos",   icono:"🌿", nombre:"Hábitos",        color:"#BF5AF2" }
     ];
-    html += "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 20px 10px;'>";
+    html += "<div class='anim-fade-up d3' style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 20px 10px;'>";
     SECCIONES.forEach(function(s){
       html += "<div class='home-sec-tile' data-tab='" + s.tab + "' style='background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px 16px;cursor:pointer;touch-action:manipulation;'>" +
         "<div style='font-size:28px;margin-bottom:10px;'>" + s.icono + "</div>" +
@@ -402,7 +402,7 @@
     });
     html += "</div>";
     // Cardio/Pasos — tile ancho
-    html += "<div class='home-sec-tile' data-tab='cardio' style='display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px 18px;margin:0 20px 20px;cursor:pointer;touch-action:manipulation;'>" +
+    html += "<div class='home-sec-tile anim-fade-up d4' data-tab='cardio' style='display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px 18px;margin:0 20px 20px;cursor:pointer;touch-action:manipulation;'>" +
       "<div style='font-size:28px;'>👟</div>" +
       "<div style='flex:1;'>" +
         "<div style='font-size:15px;font-weight:800;color:var(--text);'>Cardio y Pasos</div>" +
@@ -413,7 +413,7 @@
 
     // ── Mini stats ───────────────────────────────────────
     var fsObj = window.calcularFitScore ? window.calcularFitScore(alumno.id, window.db.fechaHoy()) : null;
-    html += "<div style='display:flex;gap:8px;margin:0 20px 20px;'>";
+    html += "<div class='anim-fade-up d5' style='display:flex;gap:8px;margin:0 20px 20px;'>";
     html += "<div style='flex:1;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;cursor:pointer;' id='mini-fitscore'>" +
       "<div style='font-size:22px;font-weight:900;color:#C8E000;letter-spacing:-1px;'>" + (fsObj ? Math.round(fsObj.total) : "—") + "</div>" +
       "<div style='font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;'>FitScore</div>" +

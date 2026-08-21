@@ -200,6 +200,10 @@
           // Migrar gym si sigue siendo el placeholder viejo
           if(window.db.migrateGymIfNeeded) window.db.migrateGymIfNeeded();
           var alumnoSplash = window.db.getAlumnoPorId(window.ALUMNO_ID);
+          // Auto-skip onboarding for demo user (code 1111)
+          if(alumnoSplash && alumnoSplash.codigo === "1111"){
+            localStorage.setItem("fitapp_onboarding_done_" + alumnoSplash.id, "1");
+          }
           if(alumnoSplash && window.mostrarSplashAlumno){
             mostrarSplashAlumno(alumnoSplash, function(){
               // Mostrar onboarding si es la primera vez, si no ir a inicio
