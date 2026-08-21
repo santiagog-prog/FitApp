@@ -1882,18 +1882,99 @@
     });
   };
 
+  var LOGO_SVG_COACH =
+    '<svg width="84" height="84" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">' +
+      '<rect width="96" height="96" rx="22" fill="#0F1500"/>' +
+      '<rect width="96" height="96" rx="22" fill="#162100" opacity=".8"/>' +
+      '<rect x="30" y="44" width="36" height="8" rx="4" fill="#C8E000"/>' +
+      '<rect x="19" y="38" width="12" height="20" rx="4" fill="#C8E000"/>' +
+      '<rect x="11" y="42" width="9" height="12" rx="3" fill="#C8E000" opacity=".55"/>' +
+      '<rect x="65" y="38" width="12" height="20" rx="4" fill="#C8E000"/>' +
+      '<rect x="76" y="42" width="9" height="12" rx="3" fill="#C8E000" opacity=".55"/>' +
+      '<rect x="43" y="44" width="2" height="8" rx="1" fill="#0F1500" opacity=".5"/>' +
+      '<rect x="51" y="44" width="2" height="8" rx="1" fill="#0F1500" opacity=".5"/>' +
+      '<circle cx="77" cy="19" r="6" fill="#C8E000" opacity=".25"/>' +
+      '<circle cx="77" cy="19" r="3" fill="#C8E000"/>' +
+    '</svg>';
+
+  var FRASES_COACH = [
+    "Tus alumnos llegan lejos porque tú los guías bien.",
+    "Un buen coach cambia vidas, no solo cuerpos.",
+    "La disciplina que enseñas es la que primero practicas.",
+    "Cada alumno es tu mejor resultado.",
+    "El mejor programa es el que tu alumno realmente cumple.",
+    "Liderar con ejemplo es la técnica más poderosa.",
+    "Tu energía de hoy define el entrenamiento de ellos.",
+    "La consistencia construye campeones."
+  ];
+
+  function mostrarSplashCoach(callback){
+    if(!document.getElementById("coach-splash-keyframes")){
+      var ks = document.createElement("style");
+      ks.id = "coach-splash-keyframes";
+      ks.textContent =
+        "@keyframes cspFadeIn{from{opacity:0}to{opacity:1}}" +
+        "@keyframes cspUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}" +
+        "@keyframes cspFadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.96)}}";
+      document.head.appendChild(ks);
+    }
+    var frase = FRASES_COACH[new Date().getDay() % FRASES_COACH.length];
+    var alumnos = window.db.getAlumnos();
+    var splash = document.createElement("div");
+    splash.id = "coach-splash";
+    splash.style.cssText =
+      "position:fixed;inset:0;z-index:99999;background:#080808;" +
+      "display:flex;flex-direction:column;align-items:center;" +
+      "animation:cspFadeIn .35s ease both;font-family:'Inter',sans-serif;";
+    splash.innerHTML =
+      '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 32px;width:100%;">' +
+        '<div style="opacity:0;animation:cspUp .6s .1s cubic-bezier(.34,1.56,.64,1) both;margin-bottom:28px;">' + LOGO_SVG_COACH + '</div>' +
+        '<div style="opacity:0;animation:cspUp .55s .25s ease both;">' +
+          '<div style="font-size:12px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">Bienvenido</div>' +
+          '<div style="font-size:40px;font-weight:900;color:#FFF;letter-spacing:-2px;line-height:1.05;margin-bottom:6px;">Coach 💪</div>' +
+          '<div style="font-size:14px;color:rgba(255,255,255,0.38);font-style:italic;max-width:260px;line-height:1.5;">"' + frase + '"</div>' +
+        '</div>' +
+        '<div style="opacity:0;animation:cspUp .5s .4s ease both;margin-top:28px;width:100%;max-width:300px;display:flex;flex-direction:column;gap:8px;">' +
+          '<div style="background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;">' +
+            '<span style="font-size:20px;">👥</span>' +
+            '<div style="text-align:left;">' +
+              '<div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Tus alumnos</div>' +
+              '<div style="font-size:14px;font-weight:700;color:#FFF;margin-top:1px;">' + alumnos.length + ' activos</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;">' +
+            '<span style="font-size:20px;">📊</span>' +
+            '<div style="text-align:left;">' +
+              '<div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Panel</div>' +
+              '<div style="font-size:14px;font-weight:700;color:#FFF;margin-top:1px;">FitCoach Studio</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="opacity:0;animation:cspUp .4s .55s ease both;width:100%;text-align:center;padding-bottom:calc(env(safe-area-inset-bottom,0px)+32px);">' +
+        '<button id="csp-btn-entrar" style="height:52px;padding:0 48px;background:#C8E000;color:#1C1C1E;border:none;border-radius:99px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:-.2px;">Entrar al panel →</button>' +
+      '</div>';
+    document.body.appendChild(splash);
+    function cerrar(){
+      splash.style.animation = "cspFadeOut .4s ease both";
+      setTimeout(function(){ splash.remove(); callback(); }, 400);
+    }
+    var btn = document.getElementById("csp-btn-entrar");
+    if(btn) btn.addEventListener("click", cerrar);
+    setTimeout(cerrar, 5000);
+  }
+
   document.addEventListener("DOMContentLoaded", function(){
     document.querySelectorAll("#coach-sidebar [data-sec]").forEach(function(b){
       b.addEventListener("click", function(){ showSec(this.getAttribute("data-sec")); });
     });
 
-    var mainEl = document.querySelector("#coach-app main") || document.getElementById("coach-app");
     var loadEl = document.createElement("div");
     loadEl.id = "coach-db-loading";
     loadEl.style.cssText = "position:fixed;inset:0;z-index:999;background:#0A0A0A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;";
     loadEl.innerHTML =
       '<div style="font-size:40px;">🏋️</div>' +
-      '<div style="color:#C8E000;font-weight:800;font-size:16px;">Cargando panel...</div>' +
+      '<div style="color:#C8E000;font-weight:800;font-size:16px;font-family:Inter,sans-serif;">Cargando panel...</div>' +
       '<div style="width:160px;height:3px;background:#1a1a1a;border-radius:99px;overflow:hidden;">' +
         '<div id="coach-load-bar" style="height:100%;width:0;background:#C8E000;border-radius:99px;transition:width 2s ease;"></div>' +
       '</div>';
@@ -1912,7 +1993,7 @@
             objetivo:"perdida_grasa", nivel:"principiante", activo:true
           });
         }
-        showSec("dashboard");
+        mostrarSplashCoach(function(){ showSec("dashboard"); });
       })
       .catch(function(err){
         console.error("[coach] db.initCoach error:", err);
