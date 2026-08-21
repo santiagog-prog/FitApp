@@ -204,7 +204,7 @@
           if(alumnoSplash && alumnoSplash.codigo === "1111"){
             localStorage.setItem("fitapp_onboarding_done_" + alumnoSplash.id, "1");
           }
-          if(alumnoSplash && window.mostrarSplashAlumno){
+          if(alumnoSplash){
             mostrarSplashAlumno(alumnoSplash, function(){
               // Mostrar onboarding si es la primera vez, si no ir a inicio
               if(window.checkOnboarding && window.checkOnboarding()) return;
