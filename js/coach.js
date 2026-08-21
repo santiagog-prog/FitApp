@@ -1986,11 +1986,19 @@
         loadEl.remove();
         // Seed: crear Anahi Guillen si no existe
         var alumnos = window.db.getAlumnos();
-        var yaExiste = alumnos.some(function(a){ return a.nombre==="Anahi" && (a.apellido||"").indexOf("Guillen")!==-1; });
-        if(!yaExiste){
+        var santiago = alumnos.find(function(a){ return a.codigo==="1111"; });
+        var anahi = alumnos.find(function(a){ return a.nombre==="Anahi" && (a.apellido||"").indexOf("Guillen")!==-1; });
+        if(!anahi){
           window.db.saveAlumno({
             nombre:"Anahi", apellido:"Guillen", codigo:"2468",
-            objetivo:"perdida_grasa", nivel:"principiante", activo:true
+            objetivo:"perdida_grasa", nivel:"principiante", activo:true,
+            rutina_id: santiago ? santiago.rutina_id : null,
+            plan_alimentacion_id: santiago ? santiago.plan_alimentacion_id : null
+          });
+        } else if(santiago && (!anahi.rutina_id || !anahi.plan_alimentacion_id)){
+          window.db.updateAlumno(anahi.id, {
+            rutina_id: santiago.rutina_id,
+            plan_alimentacion_id: santiago.plan_alimentacion_id
           });
         }
         mostrarSplashCoach(function(){ showSec("dashboard"); });

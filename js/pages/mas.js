@@ -121,6 +121,34 @@
     }
   };
 
+  function getAmigos(alumnoId){
+    try { return JSON.parse(localStorage.getItem("fitapp_amigos_"+alumnoId)||"[]"); } catch(e){ return []; }
+  }
+  function saveAmigos(alumnoId, ids){
+    localStorage.setItem("fitapp_amigos_"+alumnoId, JSON.stringify(ids));
+  }
+
+  function renderCardAmigo(a){
+    var fotos = window.db.getFotos ? window.db.getFotos(a.id) : [];
+    var fotoUrl = fotos.length ? fotos[fotos.length-1].url : null;
+    var racha = window.db.calcularRacha ? window.db.calcularRacha(a.id) : 0;
+    var regs = window.db.getRegistros ? window.db.getRegistros(a.id) : [];
+    var avatar = fotoUrl
+      ? '<img src="'+fotoUrl+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">'
+      : '<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#C8E000,#5A8000);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#1C1C1E;">'+a.nombre.charAt(0)+'</div>';
+    return '<div style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:10px;">' +
+      avatar +
+      '<div style="flex:1;">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--text);">'+a.nombre+' '+(a.apellido||'')+'</div>' +
+        '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">🔥 '+racha+' días · '+regs.length+' sesiones</div>' +
+      '</div>' +
+      '<div style="text-align:center;">' +
+        '<div style="font-size:22px;font-weight:900;color:var(--accent-text);">'+regs.length+'</div>' +
+        '<div style="font-size:10px;color:var(--text-muted);font-weight:600;">SESIONES</div>' +
+      '</div>' +
+    '</div>';
+  }
+
   window.init_reto = function(){
     var alumno = window.db.getAlumnoPorId(window.ALUMNO_ID);
     var header = document.getElementById("app-header");
@@ -130,57 +158,72 @@
         "<div class='ah-wordmark'>Reto entre amigos</div>" +
         "<div></div>" +
       "</div>";
-    var btnBack = document.getElementById("reto-back");
-    if(btnBack) btnBack.addEventListener("click", function(){ window.irAPagina("mas"); });
+    document.getElementById("reto-back").addEventListener("click", function(){ window.irAPagina("mas"); });
 
-    var alumnos = window.db.getAlumnos ? window.db.getAlumnos() : [];
-    var otrosHTML = "";
-    alumnos.forEach(function(a){
-      if(a.id === window.ALUMNO_ID) return;
-      var fotos = window.db.getFotos ? window.db.getFotos(a.id) : [];
-      var fotoUrl = fotos.length ? fotos[fotos.length-1].url : null;
-      var racha = window.db.calcularRacha ? window.db.calcularRacha(a.id) : 0;
-      var regs = window.db.getRegistros ? window.db.getRegistros(a.id) : [];
-      var avatarHtml = fotoUrl
-        ? '<img src="'+fotoUrl+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">'
-        : '<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#C8E000,#5A8000);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#1C1C1E;">'+a.nombre.charAt(0)+'</div>';
-      otrosHTML +=
-        '<div style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:10px;">' +
-          avatarHtml +
-          '<div style="flex:1;">' +
-            '<div style="font-size:15px;font-weight:700;color:var(--text);">'+a.nombre+' '+(a.apellido||'')+'</div>' +
-            '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">🔥 '+racha+' días de racha · '+regs.length+' sesiones</div>' +
+    function renderReto(){
+      var amigosIds = getAmigos(window.ALUMNO_ID);
+      var todosAlumnos = window.db.getAlumnos ? window.db.getAlumnos() : [];
+      var amigos = todosAlumnos.filter(function(a){ return amigosIds.indexOf(a.id) !== -1; });
+
+      var miRacha = alumno ? (window.db.calcularRacha ? window.db.calcularRacha(alumno.id) : 0) : 0;
+      var miRegs  = alumno ? (window.db.getRegistros ? window.db.getRegistros(alumno.id) : []) : [];
+      var miFotos = alumno ? (window.db.getFotos ? window.db.getFotos(alumno.id) : []) : [];
+      var miFoto  = miFotos.length ? miFotos[miFotos.length-1].url : null;
+      var miAvatar = miFoto
+        ? '<img src="'+miFoto+'" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);">'
+        : '<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C8E000,#5A8000);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#1C1C1E;">'+(alumno?alumno.nombre.charAt(0):"?")+'</div>';
+
+      var html =
+        '<div style="padding:16px 20px 100px;">' +
+          // Mi card
+          '<div style="background:linear-gradient(135deg,rgba(200,224,0,0.1),rgba(200,224,0,0.03));border:1.5px solid rgba(200,224,0,0.25);border-radius:20px;padding:18px;margin-bottom:20px;display:flex;align-items:center;gap:14px;">' +
+            miAvatar +
+            '<div style="flex:1;">' +
+              '<div style="font-size:11px;font-weight:700;color:var(--accent-text);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">Tú</div>' +
+              '<div style="font-size:18px;font-weight:800;color:var(--text);">'+(alumno?alumno.nombre:'—')+'</div>' +
+              '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">🔥 '+miRacha+' días · '+miRegs.length+' sesiones</div>' +
+            '</div>' +
           '</div>' +
-          '<div style="text-align:center;">' +
-            '<div style="font-size:22px;font-weight:900;color:var(--accent-text);">'+regs.length+'</div>' +
-            '<div style="font-size:10px;color:var(--text-muted);font-weight:600;">SESIONES</div>' +
+          // Input para agregar amigo
+          '<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:20px;">' +
+            '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">➕ Agregar amigo por código</div>' +
+            '<div style="display:flex;gap:8px;">' +
+              '<input id="reto-codigo-input" type="number" inputmode="numeric" maxlength="4" placeholder="Código de 4 dígitos"' +
+                'style="flex:1;height:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:16px;font-weight:700;padding:0 14px;font-family:inherit;outline:none;">' +
+              '<button id="reto-agregar-btn" style="height:44px;padding:0 18px;background:#C8E000;color:#1C1C1E;border:none;border-radius:12px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;">Agregar</button>' +
+            '</div>' +
+            '<div id="reto-msg" style="font-size:12px;margin-top:8px;min-height:16px;"></div>' +
           '</div>' +
+          // Lista de amigos
+          '<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Mis amigos</div>' +
+          (amigos.length ? amigos.map(renderCardAmigo).join("") : '<div style="text-align:center;padding:24px 0;color:var(--text-muted);font-size:14px;">Aún no tienes amigos agregados.<br>Ingresa su código arriba.</div>') +
         '</div>';
-    });
 
-    var miRacha = alumno ? (window.db.calcularRacha ? window.db.calcularRacha(alumno.id) : 0) : 0;
-    var miRegs  = alumno ? (window.db.getRegistros ? window.db.getRegistros(alumno.id) : []) : [];
-    var miFotos = alumno ? (window.db.getFotos ? window.db.getFotos(alumno.id) : []) : [];
-    var miFoto  = miFotos.length ? miFotos[miFotos.length-1].url : null;
-    var miAvatar = miFoto
-      ? '<img src="'+miFoto+'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);">'
-      : '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#C8E000,#5A8000);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#1C1C1E;">'+(alumno?alumno.nombre.charAt(0):"?")+'</div>';
+      document.getElementById("page-reto").innerHTML = html;
 
-    var html =
-      '<div style="padding:16px 20px 80px;">' +
-        '<div style="background:linear-gradient(135deg,rgba(200,224,0,0.12),rgba(200,224,0,0.04));border:1.5px solid rgba(200,224,0,0.25);border-radius:20px;padding:20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;">' +
-          miAvatar +
-          '<div>' +
-            '<div style="font-size:11px;font-weight:700;color:var(--accent-text);text-transform:uppercase;letter-spacing:1px;">Tú</div>' +
-            '<div style="font-size:20px;font-weight:800;color:var(--text);">'+(alumno?alumno.nombre:'—')+'</div>' +
-            '<div style="font-size:13px;color:var(--text-muted);margin-top:2px;">🔥 '+miRacha+' días · '+miRegs.length+' sesiones</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Otros alumnos</div>' +
-        (otrosHTML || '<div style="text-align:center;padding:30px;color:var(--text-muted);">Aún no hay más alumnos registrados.</div>') +
-      '</div>';
+      // Listener del botón agregar
+      document.getElementById("reto-agregar-btn").addEventListener("click", function(){
+        var codigo = (document.getElementById("reto-codigo-input").value || "").trim();
+        var msg = document.getElementById("reto-msg");
+        if(!codigo){ msg.style.color="#FF3B30"; msg.textContent="Escribe un código."; return; }
+        var todosA = window.db.getAlumnos ? window.db.getAlumnos() : [];
+        var encontrado = todosA.find(function(a){ return String(a.codigo) === String(codigo) && a.id !== window.ALUMNO_ID; });
+        if(!encontrado){ msg.style.color="#FF3B30"; msg.textContent="Código no encontrado."; return; }
+        var ids = getAmigos(window.ALUMNO_ID);
+        if(ids.indexOf(encontrado.id) !== -1){ msg.style.color="#FF9500"; msg.textContent="Ya está en tu lista."; return; }
+        ids.push(encontrado.id);
+        saveAmigos(window.ALUMNO_ID, ids);
+        msg.style.color="#34C759"; msg.textContent="✓ "+encontrado.nombre+" agregado.";
+        setTimeout(renderReto, 800);
+      });
 
-    document.getElementById("page-reto").innerHTML = html;
+      // Enter en el input
+      document.getElementById("reto-codigo-input").addEventListener("keydown", function(e){
+        if(e.key === "Enter") document.getElementById("reto-agregar-btn").click();
+      });
+    }
+
+    renderReto();
   };
 
   window._abrirHistorialVideos = function(){
