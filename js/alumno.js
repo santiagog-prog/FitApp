@@ -78,61 +78,40 @@
     '</svg>';
 
   function mostrarSplashAlumno(alumno, callback){
-    var frase = FRASES_SPLASH[new Date().getDay() % FRASES_SPLASH.length];
-
-    if(!document.getElementById("splash-keyframes")){
-      var ks = document.createElement("style");
-      ks.id = "splash-keyframes";
+    if(!document.getElementById(“splash-keyframes”)){
+      var ks = document.createElement(“style”);
+      ks.id = “splash-keyframes”;
       ks.textContent =
-        "@keyframes spFadeIn{from{opacity:0}to{opacity:1}}" +
-        "@keyframes spLogoIn{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}" +
-        "@keyframes spSlideUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}" +
-        "@keyframes spFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}" +
-        "@keyframes spBarGrow{from{width:0}to{width:100%}}" +
-        "@keyframes spFadeOut{from{opacity:1}to{opacity:0}}";
+        “@keyframes spFadeIn{from{opacity:0}to{opacity:1}}” +
+        “@keyframes spLogoIn{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:scale(1)}}” +
+        “@keyframes spSlideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}” +
+        “@keyframes spFadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}” +
+        “@keyframes spFadeOut{from{opacity:1}to{opacity:0}}”;
       document.head.appendChild(ks);
     }
 
-    var splash = document.createElement("div");
-    splash.id = "alumno-splash";
+    var splash = document.createElement(“div”);
+    splash.id = “alumno-splash”;
     splash.style.cssText =
-      "position:fixed;inset:0;z-index:99999;" +
-      "background:radial-gradient(ellipse at 50% 0%,#0e1a00 0%,#080808 65%);" +
-      "display:flex;flex-direction:column;align-items:center;" +
-      "animation:spFadeIn .5s ease both;overflow:hidden;";
+      “position:fixed;inset:0;z-index:99999;background:#080808;” +
+      “display:flex;flex-direction:column;align-items:center;” +
+      “animation:spFadeIn .4s ease both;overflow:hidden;font-family:Inter,sans-serif;”;
 
     splash.innerHTML =
-      // ── Fondo decorativo ──
-      '<div style="position:absolute;top:-120px;left:50%;transform:translateX(-50%);' +
-        'width:360px;height:360px;border-radius:50%;' +
-        'background:radial-gradient(circle,rgba(200,224,0,0.08) 0%,transparent 70%);' +
-        'pointer-events:none;"></div>' +
-      // ── Logo centrado en la parte alta ──
-      '<div style="flex:1;display:flex;align-items:center;justify-content:center;">' +
-        '<div style="opacity:0;animation:spLogoIn .7s .2s cubic-bezier(.34,1.4,.64,1) both;">' +
+      // ── Logo en el centro ──
+      '<div style=”flex:1;display:flex;align-items:center;justify-content:center;”>' +
+        '<div style=”opacity:0;animation:spLogoIn .8s .15s cubic-bezier(.34,1.5,.64,1) both;”>' +
           LOGO_SVG +
         '</div>' +
       '</div>' +
-      // ── Todo el texto abajo ──
-      '<div style="width:100%;padding:0 36px calc(env(safe-area-inset-bottom,0px)+52px);text-align:left;">' +
-        // Nombre app
-        '<div style="opacity:0;animation:spSlideUp .65s .35s cubic-bezier(.16,1,.3,1) both;">' +
-          '<div style="font-family:Inter,sans-serif;font-size:54px;font-weight:900;color:#FFFFFF;' +
-            'letter-spacing:-3px;line-height:1;margin-bottom:6px;">FitApp</div>' +
-          '<div style="width:36px;height:3px;border-radius:99px;background:#C8E000;margin-bottom:18px;"></div>' +
+      // ── Nombre + frase abajo ──
+      '<div style=”width:100%;padding:0 36px calc(env(safe-area-inset-bottom,0px)+64px);”>' +
+        '<div style=”opacity:0;animation:spSlideUp .6s .3s cubic-bezier(.16,1,.3,1) both;”>' +
+          '<div style=”font-size:58px;font-weight:900;color:#FFFFFF;letter-spacing:-3.5px;line-height:.95;margin-bottom:14px;”>FitApp</div>' +
         '</div>' +
-        // Frase
-        '<div style="opacity:0;animation:spFadeUp .55s .55s ease both;">' +
-          '<div style="font-family:Inter,sans-serif;font-size:15px;font-style:italic;' +
-            'color:rgba(255,255,255,0.42);line-height:1.6;max-width:280px;">' +
-            '“' + frase + '”' +
-          '</div>' +
-        '</div>' +
-        // Barra de progreso
-        '<div style="opacity:0;animation:spFadeUp .4s .75s ease both;margin-top:28px;">' +
-          '<div style="width:100%;height:2px;background:rgba(255,255,255,0.07);border-radius:99px;overflow:hidden;">' +
-            '<div style="height:100%;background:#C8E000;border-radius:99px;' +
-              'animation:spBarGrow 3.2s .85s cubic-bezier(.4,0,.2,1) both;"></div>' +
+        '<div style=”opacity:0;animation:spFadeUp .5s .55s ease both;”>' +
+          '<div style=”font-size:16px;font-style:italic;color:rgba(255,255,255,0.38);line-height:1.5;”>' +
+            '&ldquo;Esto cambiará tu vida&rdquo;' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -140,11 +119,11 @@
     document.body.appendChild(splash);
 
     function cerrar(){
-      splash.style.animation = "spFadeOut .45s ease both";
-      setTimeout(function(){ splash.remove(); callback(); }, 450);
+      splash.style.animation = “spFadeOut .4s ease both”;
+      setTimeout(function(){ splash.remove(); callback(); }, 400);
     }
 
-    splash.addEventListener("click", cerrar);
+    splash.addEventListener(“click”, cerrar);
     setTimeout(cerrar, 4000);
   }
 
