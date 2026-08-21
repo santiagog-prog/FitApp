@@ -79,72 +79,73 @@
 
   function mostrarSplashAlumno(alumno, callback){
     var frase = FRASES_SPLASH[new Date().getDay() % FRASES_SPLASH.length];
-    var rutina  = window.db.getRutinaPorId(alumno.rutina_id);
-    var plan    = window.db.getPlanPorId ? window.db.getPlanPorId(alumno.plan_alimentacion_id) : null;
 
     if(!document.getElementById("splash-keyframes")){
       var ks = document.createElement("style");
       ks.id = "splash-keyframes";
       ks.textContent =
         "@keyframes spFadeIn{from{opacity:0}to{opacity:1}}" +
-        "@keyframes spUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}" +
-        "@keyframes spFadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.96)}}";
+        "@keyframes spLogoIn{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}" +
+        "@keyframes spSlideUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}" +
+        "@keyframes spFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}" +
+        "@keyframes spBarGrow{from{width:0}to{width:100%}}" +
+        "@keyframes spFadeOut{from{opacity:1}to{opacity:0}}";
       document.head.appendChild(ks);
     }
 
     var splash = document.createElement("div");
-    splash.id  = "alumno-splash";
-    // Flex-column SIN justify-content:center para que el footer baje al fondo
+    splash.id = "alumno-splash";
     splash.style.cssText =
-      "position:fixed;inset:0;z-index:99999;background:#080808;" +
+      "position:fixed;inset:0;z-index:99999;" +
+      "background:radial-gradient(ellipse at 50% 0%,#0e1a00 0%,#080808 65%);" +
       "display:flex;flex-direction:column;align-items:center;" +
-      "animation:spFadeIn .35s ease both;";
+      "animation:spFadeIn .5s ease both;overflow:hidden;";
 
     splash.innerHTML =
-      // ── Centro ──
-      '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 32px;width:100%;">' +
-        // Logo
-        '<div style="opacity:0;animation:spUp .6s .1s cubic-bezier(.34,1.56,.64,1) both;margin-bottom:28px;">' + LOGO_SVG + '</div>' +
-        // Saludo
-        '<div style="opacity:0;animation:spUp .55s .25s ease both;">' +
-          '<div style="font-size:12px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">Bienvenido</div>' +
-          '<div style="font-size:40px;font-weight:900;color:#FFF;letter-spacing:-2px;line-height:1.05;margin-bottom:6px;">' + alumno.nombre + '</div>' +
-          '<div style="font-size:14px;color:rgba(255,255,255,0.38);font-style:italic;max-width:260px;line-height:1.5;">"' + frase + '"</div>' +
-        '</div>' +
-        // Cards programa
-        '<div style="opacity:0;animation:spUp .5s .4s ease both;margin-top:28px;width:100%;max-width:300px;display:flex;flex-direction:column;gap:8px;">' +
-          '<div style="background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;">' +
-            '<span style="font-size:20px;">🏋️</span>' +
-            '<div style="text-align:left;">' +
-              '<div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Tu rutina</div>' +
-              '<div style="font-size:14px;font-weight:700;color:#FFF;margin-top:1px;">' + (rutina ? rutina.nombre : 'Por asignar') + '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div style="background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;">' +
-            '<span style="font-size:20px;">🥗</span>' +
-            '<div style="text-align:left;">' +
-              '<div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">Plan alimentación</div>' +
-              '<div style="font-size:14px;font-weight:700;color:#FFF;margin-top:1px;">' + (plan ? plan.nombre : 'Por asignar') + '</div>' +
-            '</div>' +
-          '</div>' +
+      // ── Fondo decorativo ──
+      '<div style="position:absolute;top:-120px;left:50%;transform:translateX(-50%);' +
+        'width:360px;height:360px;border-radius:50%;' +
+        'background:radial-gradient(circle,rgba(200,224,0,0.08) 0%,transparent 70%);' +
+        'pointer-events:none;"></div>' +
+      // ── Logo centrado en la parte alta ──
+      '<div style="flex:1;display:flex;align-items:center;justify-content:center;">' +
+        '<div style="opacity:0;animation:spLogoIn .7s .2s cubic-bezier(.34,1.4,.64,1) both;">' +
+          LOGO_SVG +
         '</div>' +
       '</div>' +
-      // ── Footer al fondo ──
-      '<div style="opacity:0;animation:spUp .4s .55s ease both;width:100%;text-align:center;padding-bottom:calc(env(safe-area-inset-bottom,0px)+32px);">' +
-        '<button id="sp-btn-entrar" style="height:52px;padding:0 48px;background:#C8E000;color:#1C1C1E;border:none;border-radius:99px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:-.2px;">Empezar →</button>' +
+      // ── Todo el texto abajo ──
+      '<div style="width:100%;padding:0 36px calc(env(safe-area-inset-bottom,0px)+52px);text-align:left;">' +
+        // Nombre app
+        '<div style="opacity:0;animation:spSlideUp .65s .35s cubic-bezier(.16,1,.3,1) both;">' +
+          '<div style="font-family:Inter,sans-serif;font-size:54px;font-weight:900;color:#FFFFFF;' +
+            'letter-spacing:-3px;line-height:1;margin-bottom:6px;">FitApp</div>' +
+          '<div style="width:36px;height:3px;border-radius:99px;background:#C8E000;margin-bottom:18px;"></div>' +
+        '</div>' +
+        // Frase
+        '<div style="opacity:0;animation:spFadeUp .55s .55s ease both;">' +
+          '<div style="font-family:Inter,sans-serif;font-size:15px;font-style:italic;' +
+            'color:rgba(255,255,255,0.42);line-height:1.6;max-width:280px;">' +
+            '“' + frase + '”' +
+          '</div>' +
+        '</div>' +
+        // Barra de progreso
+        '<div style="opacity:0;animation:spFadeUp .4s .75s ease both;margin-top:28px;">' +
+          '<div style="width:100%;height:2px;background:rgba(255,255,255,0.07);border-radius:99px;overflow:hidden;">' +
+            '<div style="height:100%;background:#C8E000;border-radius:99px;' +
+              'animation:spBarGrow 3.2s .85s cubic-bezier(.4,0,.2,1) both;"></div>' +
+          '</div>' +
+        '</div>' +
       '</div>';
 
     document.body.appendChild(splash);
 
     function cerrar(){
-      splash.style.animation = "spFadeOut .4s ease both";
-      setTimeout(function(){ splash.remove(); callback(); }, 400);
+      splash.style.animation = "spFadeOut .45s ease both";
+      setTimeout(function(){ splash.remove(); callback(); }, 450);
     }
 
-    // Botón manual + auto-cierre a los 5 segundos
-    var btn = document.getElementById("sp-btn-entrar");
-    if(btn) btn.addEventListener("click", cerrar);
-    setTimeout(cerrar, 5000);
+    splash.addEventListener("click", cerrar);
+    setTimeout(cerrar, 4000);
   }
 
   document.addEventListener("DOMContentLoaded", function(){
