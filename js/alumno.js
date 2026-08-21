@@ -25,7 +25,7 @@
     return true;
   }
 
-  function showPage(pageId){
+  function showPage(pageId, noTransition){
     allPages.forEach(function(p){
       document.getElementById("page-" + p).style.display = "none";
       var btn = document.querySelector('[data-tab="' + p + '"]');
@@ -33,9 +33,11 @@
     });
     var el = document.getElementById("page-" + pageId);
     el.style.display = "block";
-    el.classList.remove("page-transition-enter");
-    void el.offsetWidth; // reflow
-    el.classList.add("page-transition-enter");
+    if(!noTransition){
+      el.classList.remove("page-transition-enter");
+      void el.offsetWidth; // reflow
+      el.classList.add("page-transition-enter");
+    }
     var activeBtn = document.querySelector('[data-tab="' + pageId + '"]');
     if(activeBtn) activeBtn.classList.add("active");
 
@@ -208,7 +210,7 @@
             mostrarSplashAlumno(alumnoSplash, function(){
               // Mostrar onboarding si es la primera vez, si no ir a inicio
               if(window.checkOnboarding && window.checkOnboarding()) return;
-              showPage("inicio");
+              showPage("inicio", true); // sin transición: los tiles tienen su propia animación
             });
           } else {
             if(window.checkOnboarding && window.checkOnboarding()) return;
