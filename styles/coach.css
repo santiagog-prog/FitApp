@@ -1,105 +1,183 @@
-html:has(body.coach-body){ background:#0F0F0F; }
-body.coach-body{ background:#0F0F0F; color:#fff; min-height:100vh; }
+/* ════════════════════════════════════════════════════════════
+   coach.css — Light iOS theme (igual que alumno app)
+   v20260820f
+   ════════════════════════════════════════════════════════════ */
+
+html:has(body.coach-body){ background:#F2F2F7; }
+body.coach-body{ background:#F2F2F7; color:#1C1C1E; min-height:100vh; font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; }
+
 #coach-app{ display:flex; min-height:100vh; }
-#coach-sidebar{ width:240px; background:#1A1A1A; flex-shrink:0; display:flex; flex-direction:column; padding:20px 0; position:fixed; top:0; left:0; height:100vh; }
-#coach-sidebar .cs-logo{ font-family:var(--font-display); font-size:1.5rem; padding:0 20px 24px; color:#C8E000; }
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+#coach-sidebar{
+  width:240px; background:#FFFFFF; flex-shrink:0; display:flex; flex-direction:column;
+  padding:20px 0; position:fixed; top:0; left:0; height:100vh;
+  border-right:1px solid rgba(0,0,0,0.07);
+  box-shadow:2px 0 12px rgba(0,0,0,0.04);
+}
+#coach-sidebar .cs-logo{
+  font-family:'Inter',-apple-system,sans-serif; font-size:1.4rem; font-weight:900;
+  padding:0 20px 24px; color:#5A8000; letter-spacing:-0.5px;
+  display:flex; align-items:center; gap:8px;
+}
+#coach-sidebar .cs-logo::before{
+  content:''; display:block; width:32px; height:32px; border-radius:10px;
+  background:#C8E000; flex-shrink:0;
+}
 #coach-sidebar nav{ flex:1; overflow-y:auto; }
 #coach-sidebar nav button{
-  display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:none; border:none; color:#bbb;
-  padding:13px 20px; font-size:.92rem; cursor:pointer; border-left:3px solid transparent;
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  background:none; border:none; color:#636366;
+  padding:12px 20px; font-size:.9rem; font-weight:600; cursor:pointer;
+  border-left:3px solid transparent; transition:all .15s;
+  font-family:inherit;
 }
+#coach-sidebar nav button:hover{ background:rgba(0,0,0,0.03); color:#1C1C1E; }
 #coach-sidebar nav button svg{ width:18px; height:18px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-#coach-sidebar nav button.active{ color:#fff; background:#242424; border-left-color:#C8E000; }
-#coach-sidebar .cs-foot{ padding:16px 20px; border-top:1px solid #2a2a2a; font-size:.82rem; color:#888; }
+#coach-sidebar nav button .nav-emoji{ font-size:18px; line-height:1; flex-shrink:0; }
+#coach-sidebar nav button.active{
+  color:#5A8000; background:rgba(200,224,0,0.1); border-left-color:#C8E000;
+}
+#coach-sidebar .cs-foot{ padding:16px 20px; border-top:1px solid rgba(0,0,0,0.07); font-size:.82rem; color:#8E8E93; }
+#coach-sidebar .cs-foot a{ color:#8E8E93; text-decoration:none; }
+#coach-sidebar .cs-foot a:hover{ color:#5A8000; }
+
+/* ── Main content ────────────────────────────────────────── */
 #coach-main{ flex:1; margin-left:240px; padding:28px 32px; max-width:1200px; }
-#coach-main h1{ font-family:var(--font-display); font-size:1.8rem; margin-bottom:18px; }
+#coach-main h1{ font-size:1.8rem; font-weight:800; margin-bottom:18px; letter-spacing:-0.5px; color:#1C1C1E; }
+#coach-main h3{ color:#1C1C1E; font-weight:700; }
 
-.coach-grid-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:26px; }
-.cstat{ background:#1A1A1A; border-radius:12px; padding:18px; }
-.cstat .cs-val{ font-size:1.8rem; font-weight:700; font-family:var(--font-data); color:#C8E000; }
-.cstat .cs-label{ font-size:.8rem; color:#999; margin-top:4px; }
+/* ── Stats grid ──────────────────────────────────────────── */
+.coach-grid-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+.cstat{ background:#FFFFFF; border-radius:16px; padding:18px; border:1px solid rgba(0,0,0,0.07); box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+.cstat .cs-val{ font-size:1.9rem; font-weight:900; font-family:'Inter',monospace; color:#5A8000; letter-spacing:-1px; }
+.cstat .cs-label{ font-size:.78rem; color:#8E8E93; margin-top:4px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
 
-.coach-card{ background:#1A1A1A; border-radius:12px; padding:20px; margin-bottom:16px; }
+/* ── Cards ───────────────────────────────────────────────── */
+.coach-card{ background:#FFFFFF; border-radius:16px; padding:20px; margin-bottom:16px; border:1px solid rgba(0,0,0,0.07); box-shadow:0 2px 8px rgba(0,0,0,0.04); }
 .coach-table{ width:100%; border-collapse:collapse; font-size:.88rem; }
-.coach-table th{ text-align:left; color:#999; padding:8px; border-bottom:1px solid #2a2a2a; font-weight:400; }
-.coach-table td{ padding:8px; border-bottom:1px solid #242424; }
+.coach-table th{ text-align:left; color:#8E8E93; padding:8px; border-bottom:1px solid rgba(0,0,0,0.06); font-weight:600; font-size:.78rem; text-transform:uppercase; letter-spacing:.4px; }
+.coach-table td{ padding:9px 8px; border-bottom:1px solid rgba(0,0,0,0.05); color:#1C1C1E; }
+.coach-table tbody tr:hover{ background:rgba(0,0,0,0.02); }
 
-.btn-coach{ background:#C8E000; color:#1C1C1E; border:none; border-radius:8px; padding:10px 18px; font-weight:700; cursor:pointer; font-size:.88rem; }
-.btn-coach.secondary{ background:#2a2a2a; color:#fff; }
-.btn-coach.danger{ background:#c0392b; color:#fff; }
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn-coach{ background:#C8E000; color:#1C1C1E; border:none; border-radius:10px; padding:10px 18px; font-weight:700; cursor:pointer; font-size:.88rem; font-family:inherit; transition:transform .12s, box-shadow .12s; }
+.btn-coach:hover{ transform:translateY(-1px); box-shadow:0 4px 14px rgba(200,224,0,0.3); }
+.btn-coach:active{ transform:scale(0.96); }
+.btn-coach.secondary{ background:rgba(0,0,0,0.06); color:#1C1C1E; }
+.btn-coach.secondary:hover{ background:rgba(0,0,0,0.1); box-shadow:none; }
+.btn-coach.danger{ background:rgba(255,59,48,0.1); color:#FF3B30; border:1px solid rgba(255,59,48,0.2); }
+.btn-coach.danger:hover{ background:rgba(255,59,48,0.15); box-shadow:none; }
 
-.alumnos-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
-.alumno-card{ background:#1A1A1A; border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:18px; transition:border-color .2s; }
-.alumno-card:hover{ border-color:rgba(200,224,0,0.2); }
-.alumno-card .ac-avatar{ width:48px; height:48px; border-radius:50%; background:rgba(200,224,0,0.2); color:#C8E000; display:flex; align-items:center; justify-content:center; font-weight:700; margin-bottom:10px; }
-.alumno-card h3{ font-size:1rem; margin-bottom:4px; }
-.alumno-card p{ font-size:.8rem; color:#999; }
-.ac-quick{ touch-action:manipulation; transition:opacity .15s; }
-.ac-quick:active{ opacity:0.7; }
-.coach-fil{ padding:7px 14px; background:#1C1C1C; border:1px solid #333; border-radius:50px; color:#999; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; touch-action:manipulation; transition:all .15s; }
-.coach-fil.active{ background:rgba(200,224,0,0.1); border-color:rgba(200,224,0,0.3); color:#C8E000; }
-.dash-alumno-face{ transition:transform .15s; }
-.dash-alumno-face:hover{ transform:scale(1.08); }
-.notif-tpl:hover{ background:#242424 !important; color:#FFF !important; }
+/* ── Alumnos ─────────────────────────────────────────────── */
+.alumnos-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:14px; }
+.alumno-card{
+  background:#FFFFFF; border:1px solid rgba(0,0,0,0.07); border-radius:18px; padding:18px;
+  transition:transform .18s cubic-bezier(0.34,1.56,0.64,1), box-shadow .18s, border-color .18s;
+  animation:cardIn .32s cubic-bezier(0.16,1,0.3,1) both;
+}
+.alumno-card:hover{ transform:translateY(-3px); box-shadow:0 8px 28px rgba(0,0,0,0.1); border-color:rgba(200,224,0,0.35); }
+.alumno-card:active{ transform:scale(0.97); }
 
+/* Quick action buttons light */
+.ac-quick{ touch-action:manipulation; transition:opacity .15s, transform .12s; }
+.ac-quick:active{ opacity:.7; transform:scale(0.96); }
+
+/* Filtros */
+.coach-fil{
+  padding:7px 14px; background:#FFFFFF; border:1.5px solid rgba(0,0,0,0.09); border-radius:50px;
+  color:#636366; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;
+  touch-action:manipulation; transition:all .15s cubic-bezier(0.34,1.2,0.64,1);
+}
+.coach-fil:hover{ border-color:rgba(0,0,0,0.2); color:#1C1C1E; }
+.coach-fil.active{
+  background:rgba(200,224,0,0.12); border-color:rgba(200,224,0,0.4); color:#5A8000;
+  transform:scale(1.04);
+}
+
+/* ── Tabs ────────────────────────────────────────────────── */
 .coach-tabs{ display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
-.coach-tabs button{ background:#1A1A1A; border:none; color:#bbb; padding:9px 16px; border-radius:8px; cursor:pointer; font-size:.85rem; }
-.coach-tabs button.active{ background:#C8E000; color:#1C1C1E; }
+.coach-tabs button{
+  background:#F2F2F7; border:none; color:#636366; padding:9px 16px; border-radius:10px;
+  cursor:pointer; font-size:.85rem; font-weight:600; transition:all .15s; font-family:inherit;
+}
+.coach-tabs button:hover{ background:rgba(0,0,0,0.07); color:#1C1C1E; }
+.coach-tabs button.active{ background:#C8E000; color:#1C1C1E; transform:scale(1.03); }
 
-.coach-form label{ display:block; font-size:.8rem; color:#999; margin:10px 0 4px; }
+/* ── Forms ───────────────────────────────────────────────── */
+.coach-form label{ display:block; font-size:.8rem; color:#8E8E93; margin:10px 0 4px; font-weight:600; }
 .coach-form input, .coach-form select, .coach-form textarea{
-  width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#0F0F0F; color:#fff; font-family:var(--font-ui);
+  width:100%; padding:11px 12px; border-radius:10px; border:1.5px solid rgba(0,0,0,0.1);
+  background:#F2F2F7; color:#1C1C1E; font-family:inherit; font-size:.9rem; outline:none;
+  transition:border-color .15s; box-sizing:border-box;
+}
+.coach-form input:focus, .coach-form select:focus, .coach-form textarea:focus{
+  border-color:rgba(200,224,0,0.6); background:#FFFFFF;
 }
 .coach-form .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
-#coach-modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9000; display:flex; align-items:center; justify-content:center; padding:20px; }
-#coach-modal-overlay .modal-box{ background:#1A1A1A; border-radius:14px; padding:24px; width:100%; max-width:560px; max-height:86vh; overflow-y:auto; }
-#coach-modal-overlay .modal-box h2{ font-size:1.2rem; margin-bottom:16px; }
+/* ── Modal ───────────────────────────────────────────────── */
+#coach-modal-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:9000;
+  display:flex; align-items:center; justify-content:center; padding:20px;
+  animation:overlayIn .2s ease;
+  backdrop-filter:blur(4px);
+}
+#coach-modal-overlay .modal-box{
+  background:#FFFFFF; border-radius:20px; padding:24px; width:100%;
+  max-width:560px; max-height:86vh; overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,0.15);
+  animation:modalIn .3s cubic-bezier(0.16,1,0.3,1);
+}
+#coach-modal-overlay .modal-box h2{ font-size:1.2rem; margin-bottom:16px; font-weight:800; color:#1C1C1E; }
 
-.dia-builder-block{ background:#0F0F0F; border-radius:10px; padding:14px; margin-bottom:12px; border:1px solid #2a2a2a; }
-.ejercicio-builder-row{ background:#1A1A1A; border-radius:8px; padding:10px; margin-bottom:8px; font-size:.85rem; display:flex; justify-content:space-between; align-items:center; }
+/* ── Builder ─────────────────────────────────────────────── */
+.dia-builder-block{ background:#F2F2F7; border-radius:12px; padding:14px; margin-bottom:12px; border:1px solid rgba(0,0,0,0.06); }
+.ejercicio-builder-row{ background:#FFFFFF; border-radius:10px; padding:10px; margin-bottom:8px; font-size:.85rem; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(0,0,0,0.06); }
 
+/* ── Dash face grid ──────────────────────────────────────── */
+.dash-alumno-face{ transition:transform .15s cubic-bezier(0.34,1.56,0.64,1); }
+.dash-alumno-face:hover{ transform:scale(1.12); }
+
+/* ── Notif templates ─────────────────────────────────────── */
+.notif-tpl{ transition:all .15s; }
+.notif-tpl:hover{ background:#F2F2F7 !important; color:#1C1C1E !important; transform:scale(1.02); }
+
+/* ── Responsive ──────────────────────────────────────────── */
 @media(max-width:800px){
   #coach-sidebar{ width:64px; }
   #coach-sidebar .cs-logo{ display:none; }
   #coach-sidebar nav button span.label{ display:none; }
+  #coach-sidebar nav button .nav-emoji{ font-size:22px; }
   #coach-main{ margin-left:64px; padding:18px; }
   .coach-grid-stats{ grid-template-columns:1fr 1fr; }
+  .alumnos-grid{ grid-template-columns:1fr; }
 }
 
 /* ══════════════════════════════════════════════════════════
-   ANIMACIONES COACH — v20260820e
+   ANIMACIONES — v20260820f
    ══════════════════════════════════════════════════════════ */
 
 @keyframes cardIn   { from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
 @keyframes statPop  { from{ opacity:0; transform:scale(0.7); } 60%{ transform:scale(1.08); } to{ opacity:1; transform:scale(1); } }
-@keyframes dotPulse { 0%,100%{ box-shadow:0 0 0 0 currentColor; } 50%{ box-shadow:0 0 0 5px transparent; } }
-@keyframes sideIn   { from{ opacity:0; transform:translateX(-12px); } to{ opacity:1; transform:translateX(0); } }
 @keyframes overlayIn{ from{ opacity:0; } to{ opacity:1; } }
 @keyframes modalIn  { from{ opacity:0; transform:scale(0.94) translateY(14px); } to{ opacity:1; transform:scale(1) translateY(0); } }
-@keyframes shimmerDark{ from{ background-position:-400px 0; } to{ background-position:400px 0; } }
+@keyframes sideIn   { from{ opacity:0; transform:translateX(-12px); } to{ opacity:1; transform:translateX(0); } }
+@keyframes shimmerLight{ from{ background-position:-400px 0; } to{ background-position:400px 0; } }
 
-/* ── Sidebar nav items ───────────────────────────────────── */
-#coach-sidebar nav button { transition:background .15s, border-color .15s, color .15s; }
-#coach-sidebar nav button.active { animation:sideIn .25s cubic-bezier(0.16,1,0.3,1); }
+/* Sidebar nav active */
+#coach-sidebar nav button.active{ animation:sideIn .25s cubic-bezier(0.16,1,0.3,1); }
 
-/* ── Stats ───────────────────────────────────────────────── */
-.cstat { animation:cardIn .35s cubic-bezier(0.16,1,0.3,1) both; }
+/* Stats stagger */
+.cstat{ animation:cardIn .35s cubic-bezier(0.16,1,0.3,1) both; }
 .cstat:nth-child(1){ animation-delay:.04s; }
 .cstat:nth-child(2){ animation-delay:.08s; }
 .cstat:nth-child(3){ animation-delay:.12s; }
 .cstat:nth-child(4){ animation-delay:.16s; }
-.cstat .cs-val { animation:statPop .45s cubic-bezier(0.34,1.56,0.64,1) both; animation-delay:.2s; }
+.cstat .cs-val{ animation:statPop .45s cubic-bezier(0.34,1.56,0.64,1) both; animation-delay:.2s; }
 
-/* ── Alumno cards ────────────────────────────────────────── */
-.alumno-card {
-  animation:cardIn .32s cubic-bezier(0.16,1,0.3,1) both;
-  transition:transform .18s cubic-bezier(0.34,1.56,0.64,1), box-shadow .18s, border-color .18s;
-}
-.alumno-card:hover { transform:translateY(-3px) scale(1.01); box-shadow:0 8px 28px rgba(0,0,0,0.4); border-color:rgba(200,224,0,0.25) !important; }
-.alumno-card:active{ transform:scale(0.97); }
-
-/* Stagger primeras 8 tarjetas */
+/* Cards stagger */
+.coach-card{ animation:cardIn .3s cubic-bezier(0.16,1,0.3,1) both; }
 .alumnos-grid .alumno-card:nth-child(1){ animation-delay:.04s; }
 .alumnos-grid .alumno-card:nth-child(2){ animation-delay:.08s; }
 .alumnos-grid .alumno-card:nth-child(3){ animation-delay:.12s; }
@@ -109,52 +187,10 @@ body.coach-body{ background:#0F0F0F; color:#fff; min-height:100vh; }
 .alumnos-grid .alumno-card:nth-child(7){ animation-delay:.28s; }
 .alumnos-grid .alumno-card:nth-child(8){ animation-delay:.32s; }
 
-/* ── Coach cards genéricas ───────────────────────────────── */
-.coach-card { animation:cardIn .3s cubic-bezier(0.16,1,0.3,1) both; }
-
-/* ── Status dots ─────────────────────────────────────────── */
-.status-dot-activo { animation:dotPulse 2s ease-in-out infinite; }
-
-/* ── Botones ─────────────────────────────────────────────── */
-.btn-coach { transition:transform .12s, opacity .12s, box-shadow .12s; }
-.btn-coach:hover  { transform:translateY(-1px); box-shadow:0 4px 14px rgba(200,224,0,0.25); }
-.btn-coach:active { transform:scale(0.96); opacity:.85; }
-.btn-coach.secondary:hover { box-shadow:0 4px 14px rgba(0,0,0,0.3); }
-
-/* ── Quick action buttons ────────────────────────────────── */
-.ac-quick { transition:transform .12s, background .12s; }
-.ac-quick:hover { background:rgba(255,255,255,0.12) !important; }
-
-/* ── Filter buttons ──────────────────────────────────────── */
-.coach-fil { transition:all .15s cubic-bezier(0.34,1.2,0.64,1); }
-.coach-fil:hover { border-color:#555; color:#ddd; }
-.coach-fil.active { transform:scale(1.04); }
-
-/* ── Modal overlay ───────────────────────────────────────── */
-#coach-modal-overlay { animation:overlayIn .2s ease; }
-#coach-modal-overlay .modal-box { animation:modalIn .3s cubic-bezier(0.16,1,0.3,1); }
-
-/* ── Tabs ────────────────────────────────────────────────── */
-.coach-tabs button { transition:background .15s, color .15s, transform .12s; }
-.coach-tabs button:hover { background:#222; color:#eee; }
-.coach-tabs button.active { transform:scale(1.03); }
-
-/* ── Dash face grid ──────────────────────────────────────── */
-.dash-alumno-face { transition:transform .15s cubic-bezier(0.34,1.56,0.64,1), box-shadow .15s; }
-.dash-alumno-face:hover { transform:scale(1.12); box-shadow:0 4px 12px rgba(0,0,0,0.4); }
-
-/* ── Notif templates ─────────────────────────────────────── */
-.notif-tpl { transition:background .15s, color .15s, transform .12s; }
-.notif-tpl:hover { background:#2a2a2a !important; color:#fff !important; transform:scale(1.02); }
-
-/* ── Table rows ──────────────────────────────────────────── */
-.coach-table tr { transition:background .12s; }
-.coach-table tbody tr:hover { background:rgba(255,255,255,0.03); }
-
-/* ── Skeleton dark ───────────────────────────────────────── */
-.skeleton-dark {
-  background:linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%);
+/* Skeleton light */
+.skeleton-light{
+  background:linear-gradient(90deg, #F2F2F7 25%, #E8E8ED 50%, #F2F2F7 75%);
   background-size:600px 100%;
-  animation:shimmerDark 1.4s infinite;
+  animation:shimmerLight 1.4s infinite;
   border-radius:8px;
 }

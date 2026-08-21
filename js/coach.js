@@ -1,4 +1,4 @@
-// ════════════════════════════════════════════════════════════
+﻿// ════════════════════════════════════════════════════════════
 // coach.js — Panel del entrenador. Router de secciones + CRUD.
 // ════════════════════════════════════════════════════════════
 (function(){
@@ -45,19 +45,19 @@
     var fechaStr = diasStr[ahora.getDay()] + " " + ahora.getDate() + " " + mesesStr[ahora.getMonth()] + " " + ahora.getFullYear();
 
     var html =
-      '<div style="background:linear-gradient(135deg,#141F00 0%,#0D0D0D 60%,#111900 100%);border:1px solid rgba(200,224,0,0.15);border-radius:20px;padding:24px 28px;margin-bottom:24px;position:relative;overflow:hidden;">' +
+      '<div style="background:linear-gradient(135deg,#F3FFB0 0%,#FFFFFF 55%,#F2F2F7 100%);border:1.5px solid rgba(200,224,0,0.35);border-radius:20px;padding:24px 28px;margin-bottom:24px;position:relative;overflow:hidden;">' +
         '<div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(200,224,0,0.12) 0%,transparent 70%);pointer-events:none;border-radius:50%;"></div>' +
-        '<div style="font-size:11px;font-weight:700;color:rgba(200,224,0,0.6);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;">Creator Studio</div>' +
-        '<div style="font-size:28px;font-weight:900;color:#FFF;letter-spacing:-1px;line-height:1.1;margin-bottom:4px;">Panel del Coach</div>' +
-        '<div style="font-size:13px;color:rgba(255,255,255,0.35);">' + fechaStr + '</div>' +
+        '<div style="font-size:11px;font-weight:700;color:#5A8000;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;">Creator Studio</div>' +
+        '<div style="font-size:28px;font-weight:900;color:#1C1C1E;letter-spacing:-1px;line-height:1.1;margin-bottom:4px;">Panel del Coach</div>' +
+        '<div style="font-size:13px;color:#8E8E93;">' + fechaStr + '</div>' +
         '<div style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">' +
-          '<div><div style="font-size:32px;font-weight:900;color:#C8E000;letter-spacing:-1px;">' + alumnos.length + '</div><div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Alumnos</div></div>' +
-          '<div style="width:1px;background:rgba(255,255,255,0.06);"></div>' +
-          '<div><div style="font-size:32px;font-weight:900;color:#C8E000;letter-spacing:-1px;">' + rutinas.length + '</div><div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Rutinas</div></div>' +
-          '<div style="width:1px;background:rgba(255,255,255,0.06);"></div>' +
-          '<div><div style="font-size:32px;font-weight:900;color:#C8E000;letter-spacing:-1px;">' + planes.length + '</div><div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Planes</div></div>' +
-          '<div style="width:1px;background:rgba(255,255,255,0.06);"></div>' +
-          '<div><div style="font-size:32px;font-weight:900;color:#C8E000;letter-spacing:-1px;">' + entrenaronHoy + '</div><div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Hoy</div></div>' +
+          '<div><div style="font-size:32px;font-weight:900;color:#5A8000;letter-spacing:-1px;">' + alumnos.length + '</div><div style="font-size:11px;color:#8E8E93;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Alumnos</div></div>' +
+          '<div style="width:1px;background:rgba(0,0,0,0.08);"></div>' +
+          '<div><div style="font-size:32px;font-weight:900;color:#5A8000;letter-spacing:-1px;">' + rutinas.length + '</div><div style="font-size:11px;color:#8E8E93;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Rutinas</div></div>' +
+          '<div style="width:1px;background:rgba(0,0,0,0.08);"></div>' +
+          '<div><div style="font-size:32px;font-weight:900;color:#5A8000;letter-spacing:-1px;">' + planes.length + '</div><div style="font-size:11px;color:#8E8E93;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Planes</div></div>' +
+          '<div style="width:1px;background:rgba(0,0,0,0.08);"></div>' +
+          '<div><div style="font-size:32px;font-weight:900;color:#5A8000;letter-spacing:-1px;">' + entrenaronHoy + '</div><div style="font-size:11px;color:#8E8E93;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">Hoy</div></div>' +
         '</div>' +
       '</div>';
 
@@ -81,10 +81,10 @@
           '<div style="position:relative;">' +
             (fotoUrl
               ? '<img src="'+fotoUrl+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2.5px solid '+statusColor+';">'
-              : '<div style="width:48px;height:48px;border-radius:50%;background:rgba(200,224,0,0.12);border:2.5px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#C8E000;">'+a.nombre[0].toUpperCase()+'</div>')+
-            '<div style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:'+statusColor+';border:2px solid #141414;"></div>'+
+              : '<div style="width:48px;height:48px;border-radius:50%;background:rgba(200,224,0,0.12);border:2.5px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#5A8000;">'+a.nombre[0].toUpperCase()+'</div>')+
+            '<div style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:'+statusColor+';border:2px solid #F2F2F7;"></div>'+
           '</div>' +
-          '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56px;">'+a.nombre+'</div>' +
+          '<div style="font-size:10px;font-weight:700;color:#636366;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56px;">'+a.nombre+'</div>' +
         '</div>';
     });
     html += '</div></div>';
@@ -106,7 +106,7 @@
     if(inactivos.length){
       html += "<div class='coach-card'><h3 style='margin-bottom:12px;'>⚠️ +3 días sin entrenar</h3>";
       inactivos.forEach(function(a){
-        html += "<div style='display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #242424;'>" +
+        html += "<div style='display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06);'>" +
           "<span>" + a.nombre + " " + (a.apellido||"") + "</span>" +
           "<a class='btn-coach secondary' target='_blank' rel='noopener' href='https://wa.me/?text=" + encodeURIComponent("Hola " + a.nombre + ", ¿todo bien? Hace días que no te veo entrenar 💪") + "'>WhatsApp</a></div>";
       });
@@ -120,9 +120,9 @@
       try { videos = JSON.parse(localStorage.getItem("fitapp_videos_tecnica_"+alumno.id)||"[]"); } catch(e){}
       videos.filter(function(v){ return !v.revisado; }).forEach(function(v){
         totalPend++;
-        pendientesHtml += '<div style="background:#1C1C1C;border-radius:12px;padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">' +
+        pendientesHtml += '<div style="background:#FFFFFF;border:1px solid rgba(0,0,0,0.07);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">' +
           '<div><div style="font-size:14px;font-weight:600;">' + alumno.nombre + ' — ' + v.ejercicio + '</div>' +
-          '<div style="font-size:12px;color:#777;margin-top:3px;">' + v.fecha + (v.hora?" · "+v.hora:"") + ' · ' + (v.tamano_mb||"?") + ' MB</div></div>' +
+          '<div style="font-size:12px;color:#8E8E93;margin-top:3px;">' + v.fecha + (v.hora?" · "+v.hora:"") + ' · ' + (v.tamano_mb||"?") + ' MB</div></div>' +
           '<button class="btn-coach secondary" onclick="window._marcarVideoRevisado(\''+alumno.id+'\',\''+v.id+'\')">Revisado</button>' +
         '</div>';
       });
@@ -178,16 +178,16 @@
         { tipo:"sueno",    nombre:"Horas de sueño",     unidad:"horas",  meta:8,     icono:"😴" },
         { tipo:"entreno",  nombre:"Sesiones semanales", unidad:"sesiones",meta:4,    icono:"🏋️" }
       ];
-      html += '<select id="sel-alumno-obj" style="width:100%;height:40px;background:#1C1C1C;border:1px solid #333;border-radius:10px;color:#FFF;padding:0 12px;font-family:inherit;font-size:14px;margin-bottom:12px;">';
+      html += '<select id="sel-alumno-obj" style="width:100%;height:40px;background:#FFFFFF;border:1px solid rgba(0,0,0,0.09);border-radius:10px;color:#1C1C1E;padding:0 12px;font-family:inherit;font-size:14px;margin-bottom:12px;">';
       alumnos.forEach(function(a){ html += '<option value="' + a.id + '">' + a.nombre + ' ' + (a.apellido||"") + '</option>'; });
       html += '</select>';
       html += '<div id="obj-alumno-list"></div>';
-      html += '<div style="margin-top:10px;background:#1C1C1C;border-radius:12px;padding:12px;">';
+      html += '<div style="margin-top:10px;background:#FFFFFF;border-radius:12px;padding:12px;">';
       html += '<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Agregar objetivo</div>';
-      html += '<select id="sel-tipo-obj" style="width:100%;height:36px;background:#242424;border:1px solid #333;border-radius:8px;color:#FFF;padding:0 10px;font-family:inherit;font-size:13px;margin-bottom:8px;">';
+      html += '<select id="sel-tipo-obj" style="width:100%;height:36px;background:#F0F0F5;border:1px solid rgba(0,0,0,0.09);border-radius:8px;color:#1C1C1E;padding:0 10px;font-family:inherit;font-size:13px;margin-bottom:8px;">';
       TIPOS_OBJ.forEach(function(t){ html += '<option value="' + t.tipo + '">' + t.icono + ' ' + t.nombre + '</option>'; });
       html += '</select>';
-      html += '<input id="inp-meta-obj" type="number" placeholder="Meta (ej: 10000)" style="width:100%;height:36px;background:#242424;border:1px solid #333;border-radius:8px;color:#FFF;padding:0 10px;font-family:inherit;font-size:13px;margin-bottom:8px;">';
+      html += '<input id="inp-meta-obj" type="number" placeholder="Meta (ej: 10000)" style="width:100%;height:36px;background:#F0F0F5;border:1px solid rgba(0,0,0,0.09);border-radius:8px;color:#1C1C1E;padding:0 10px;font-family:inherit;font-size:13px;margin-bottom:8px;">';
       html += '<button id="btn-add-obj" class="btn-coach" style="width:100%;height:36px;font-size:13px;">+ Agregar objetivo</button>';
       html += '</div>';
     }
@@ -217,7 +217,7 @@
         if(!objs.length){ listEl.innerHTML = '<div style="color:#555;font-size:13px;padding:4px 0;">Sin objetivos asignados</div>'; return; }
         listEl.innerHTML = objs.map(function(o){
           var ic = (TIPOS_OBJ_LOCAL.find(function(t){ return t.tipo===o.tipo; })||{}).icono || "🎯";
-          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #242424;">' +
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06);">' +
             '<div style="font-size:13px;">' + ic + ' ' + o.nombre + ' — <span style="color:#C8E000;font-weight:700;">' + (o.meta||0).toLocaleString() + ' ' + (o.unidad||"") + '</span></div>' +
             '<button onclick="window._deleteObjetivoCoach(\'' + aid + '\',\'' + o.id + '\')" style="background:none;border:none;color:#FF453A;font-size:18px;cursor:pointer;">✕</button>' +
           '</div>';
@@ -282,9 +282,9 @@
     var statusColor = activo ? "#34C759" : (diasSin > 7 ? "#FF453A" : "#FF9500");
     var inner = fotoUrl
       ? '<img src="'+fotoUrl+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;border:2.5px solid '+statusColor+';">'
-      : '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:rgba(200,224,0,0.12);border:2.5px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:'+(size*0.4)+'px;font-weight:900;color:#C8E000;flex-shrink:0;">'+a.nombre[0].toUpperCase()+'</div>';
+      : '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:rgba(200,224,0,0.12);border:2.5px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:'+(size*0.4)+'px;font-weight:900;color:#5A8000;flex-shrink:0;">'+a.nombre[0].toUpperCase()+'</div>';
     return '<div style="position:relative;flex-shrink:0;">'+inner+
-      '<div style="position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:50%;background:'+statusColor+';border:2px solid #141414;"></div>'+
+      '<div style="position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:50%;background:'+statusColor+';border:2px solid #F2F2F7;"></div>'+
     '</div>';
   }
 
@@ -329,12 +329,12 @@
 
       var avatarInner = fotoUrl
         ? '<img src="'+fotoUrl+'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid '+statusColor+';">'
-        : '<div style="width:64px;height:64px;border-radius:50%;background:rgba(200,224,0,0.12);border:3px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#C8E000;">'+a.nombre[0].toUpperCase()+'</div>';
+        : '<div style="width:64px;height:64px;border-radius:50%;background:rgba(200,224,0,0.12);border:3px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#5A8000;">'+a.nombre[0].toUpperCase()+'</div>';
 
       var intakeTags = "";
-      if(intake.objetivos){ var objs = Array.isArray(intake.objetivos)?intake.objetivos:[intake.objetivos]; intakeTags += '<span style="background:rgba(200,224,0,0.1);color:#C8E000;border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;margin-bottom:4px;display:inline-block;">🎯 '+objs[0]+'</span>'; }
+      if(intake.objetivos){ var objs = Array.isArray(intake.objetivos)?intake.objetivos:[intake.objetivos]; intakeTags += '<span style="background:rgba(200,224,0,0.15);color:#5A8000;border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;margin-bottom:4px;display:inline-block;">🎯 '+objs[0]+'</span>'; }
       if(intake.gym_nombre){ intakeTags += '<span style="background:rgba(90,200,250,0.1);color:#5AC8FA;border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;margin-bottom:4px;display:inline-block;">🏟️ '+intake.gym_nombre.split("(")[0].trim()+'</span>'; }
-      if(intake.experiencia_gym){ intakeTags += '<span style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;margin-bottom:4px;display:inline-block;">💪 '+intake.experiencia_gym+'</span>'; }
+      if(intake.experiencia_gym){ intakeTags += '<span style="background:rgba(0,0,0,0.05);color:#636366;border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;margin-bottom:4px;display:inline-block;">💪 '+intake.experiencia_gym+'</span>'; }
       if(intake.condiciones_medicas && intake.condiciones_medicas.indexOf("Ninguna")===-1 && intake.condiciones_medicas.length){
         intakeTags += '<span style="background:rgba(255,149,0,0.12);color:#FF9500;border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700;margin-right:4px;margin-bottom:4px;display:inline-block;">⚠️ '+(Array.isArray(intake.condiciones_medicas)?intake.condiciones_medicas.join(", "):intake.condiciones_medicas)+'</span>';
       }
@@ -345,27 +345,27 @@
         '<div class="alumno-card" style="cursor:default;">' +
           '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;">' +
             '<div style="position:relative;flex-shrink:0;">'+avatarInner+
-              '<div style="position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;background:'+statusColor+';border:2px solid #141414;"></div>'+
+              '<div style="position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;background:'+statusColor+';border:2px solid #F2F2F7;"></div>'+
             '</div>' +
             '<div style="flex:1;min-width:0;">' +
-              '<div style="font-size:17px;font-weight:800;color:#FFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+a.nombre+' '+(a.apellido||"")+'</div>' +
+              '<div style="font-size:17px;font-weight:800;color:#1C1C1E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+a.nombre+' '+(a.apellido||"")+'</div>' +
               '<div style="font-size:11px;font-weight:700;color:'+statusColor+';margin-top:3px;">'+statusTxt+'</div>' +
-              '<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;">'+(rutina?'🏋️ '+rutina.nombre:'<span style="color:#FF9500;">⚠️ Sin rutina asignada</span>')+'</div>' +
+              '<div style="font-size:11px;color:#8E8E93;margin-top:4px;">'+(rutina?'🏋️ '+rutina.nombre:'<span style="color:#FF9500;">⚠️ Sin rutina asignada</span>')+'</div>' +
               (racha>0?'<div style="font-size:11px;color:#C8E000;margin-top:2px;">🔥 Racha '+racha+' días</div>':'')+
             '</div>' +
           '</div>' +
           (intakeTags?'<div style="margin-bottom:12px;line-height:1;">'+intakeTags+'</div>':'')+
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">' +
-            '<button class="ac-quick ac-ver" data-id="'+a.id+'" style="padding:9px 6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#FFF;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">👁 Ver perfil</button>' +
-            '<button class="ac-quick ac-asignar" data-id="'+a.id+'" style="padding:9px 6px;background:rgba(200,224,0,0.1);border:1px solid rgba(200,224,0,0.25);border-radius:10px;color:#C8E000;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⚙️ Asignar</button>' +
-            (whatsappNum?'<a href="https://wa.me/'+whatsappNum+'" target="_blank" rel="noopener" style="padding:9px 6px;background:rgba(52,199,89,0.1);border:1px solid rgba(52,199,89,0.25);border-radius:10px;color:#34C759;font-size:12px;font-weight:700;text-decoration:none;text-align:center;">💬 WhatsApp</a>':'<div></div>')+
-            '<button class="ac-quick ac-notif" data-id="'+a.id+'" data-nombre="'+a.nombre+'" style="padding:9px 6px;background:rgba(90,200,250,0.1);border:1px solid rgba(90,200,250,0.2);border-radius:10px;color:#5AC8FA;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📣 Notificar</button>' +
+            '<button class="ac-quick ac-ver" data-id="'+a.id+'" style="padding:9px 6px;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08);border-radius:10px;color:#1C1C1E;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">👁 Ver perfil</button>' +
+            '<button class="ac-quick ac-asignar" data-id="'+a.id+'" style="padding:9px 6px;background:rgba(200,224,0,0.12);border:1px solid rgba(200,224,0,0.35);border-radius:10px;color:#5A8000;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⚙️ Asignar</button>' +
+            (whatsappNum?'<a href="https://wa.me/'+whatsappNum+'" target="_blank" rel="noopener" style="padding:9px 6px;background:rgba(52,199,89,0.08);border:1px solid rgba(52,199,89,0.25);border-radius:10px;color:#2A9E47;font-size:12px;font-weight:700;text-decoration:none;text-align:center;">💬 WhatsApp</a>':'<div></div>')+
+            '<button class="ac-quick ac-notif" data-id="'+a.id+'" data-nombre="'+a.nombre+'" style="padding:9px 6px;background:rgba(0,122,255,0.07);border:1px solid rgba(0,122,255,0.18);border-radius:10px;color:#007AFF;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📣 Notificar</button>' +
           '</div>' +
         '</div>';
     });
 
     if(lista.length === 0){
-      html += '<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.3);">Sin alumnos en esta categoría</div>';
+      html += '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#8E8E93;">Sin alumnos en esta categoría</div>';
     }
     html += '</div>';
 
@@ -431,11 +431,11 @@
         '<label>Plantillas rápidas</label>' +
         '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">' +
           PLANTILLAS.map(function(t,i){
-            return '<button class="notif-tpl" data-txt="'+t.replace(/"/g,'&quot;')+'" style="text-align:left;padding:10px 14px;background:#1C1C1C;border:1px solid #333;border-radius:10px;color:#CCC;font-size:13px;cursor:pointer;font-family:inherit;">'+t+'</button>';
+            return '<button class="notif-tpl" data-txt="'+t.replace(/"/g,'&quot;')+'" style="text-align:left;padding:10px 14px;background:#F2F2F7;border:1px solid rgba(0,0,0,0.09);border-radius:10px;color:#636366;font-size:13px;cursor:pointer;font-family:inherit;">'+t+'</button>';
           }).join("") +
         '</div>' +
         '<label>O escribe un mensaje personalizado</label>' +
-        '<textarea id="notif-texto" rows="3" placeholder="Escribe el mensaje para '+nombre+'..." style="width:100%;box-sizing:border-box;background:#1C1C1C;border:1px solid #333;border-radius:10px;color:#FFF;padding:12px;font-family:inherit;font-size:13px;resize:none;"></textarea>' +
+        '<textarea id="notif-texto" rows="3" placeholder="Escribe el mensaje para '+nombre+'..." style="width:100%;box-sizing:border-box;background:#F2F2F7;border:1px solid rgba(0,0,0,0.09);border-radius:10px;color:#1C1C1E;padding:12px;font-family:inherit;font-size:13px;resize:none;"></textarea>' +
         '<button class="btn-coach" id="notif-enviar" style="margin-top:14px;width:100%;">📣 Enviar notificación</button>' +
       '</div>';
     coachModal("Notificar a "+nombre, body, function(){
@@ -581,14 +581,14 @@
         dias7.forEach(function(d){
           var isHoy = d.key === hoy7;
           semanaHTML +=
-            '<div style="flex:1;min-width:38px;background:' + (isHoy ? 'rgba(200,224,0,0.08)' : '#141414') + ';border:1px solid ' + (isHoy ? 'rgba(200,224,0,0.3)' : 'rgba(255,255,255,0.06)') + ';border-radius:12px;padding:8px 4px;text-align:center;">' +
-            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:6px;">' + d.label + '</div>' +
+            '<div style="flex:1;min-width:38px;background:' + (isHoy ? 'rgba(200,224,0,0.15)' : '#141414') + ';border:1px solid ' + (isHoy ? 'rgba(200,224,0,0.3)' : 'rgba(0,0,0,0.06)') + ';border-radius:12px;padding:8px 4px;text-align:center;">' +
+            '<div style="font-size:10px;color:#8E8E93;margin-bottom:6px;">' + d.label + '</div>' +
             '<div style="font-size:14px;">' + (d.entrenó ? '🏋️' : '—') + '</div>' +
             '<div style="font-size:14px;margin-top:2px;">' + (d.nutri ? '🥗' : '—') + '</div>' +
             '</div>';
         });
         semanaHTML += '</div>';
-        semanaHTML += '<div style="display:flex;gap:12px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.4);">' +
+        semanaHTML += '<div style="display:flex;gap:12px;margin-bottom:16px;font-size:12px;color:#8E8E93;">' +
           '<span>🏋️ Entrenó</span><span>🥗 Registró nutrición</span></div>';
 
         // Last workout
@@ -599,31 +599,31 @@
           var stars = '';
           if(lastReg.rating){ for(var si=0;si<5;si++) stars += (si < lastReg.rating ? '★' : '☆'); }
           workoutHTML =
-            '<div style="background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;margin-bottom:16px;">' +
+            '<div style="background:#F2F2F7;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px;margin-bottom:16px;">' +
             '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
               '<div><div style="font-size:14px;font-weight:700;">' + (lastReg.sesion_nombre||lastReg.dia_numero||'Entrenamiento') + '</div>' +
-              '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">' + lastReg.fecha + (lastReg.duracion_min ? ' · ' + lastReg.duracion_min + ' min' : '') + '</div></div>' +
+              '<div style="font-size:12px;color:#8E8E93;margin-top:2px;">' + lastReg.fecha + (lastReg.duracion_min ? ' · ' + lastReg.duracion_min + ' min' : '') + '</div></div>' +
               (stars ? '<div style="color:#C8E000;font-size:18px;letter-spacing:1px;">' + stars + '</div>' : '') +
             '</div>' +
-            (lastReg.nota ? '<div style="background:rgba(200,224,0,0.06);border-radius:8px;padding:8px 12px;font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:10px;border-left:3px solid #C8E000;">' + lastReg.nota + '</div>' : '') +
+            (lastReg.nota ? '<div style="background:rgba(200,224,0,0.06);border-radius:8px;padding:8px 12px;font-size:13px;color:#636366;margin-bottom:10px;border-left:3px solid #C8E000;">' + lastReg.nota + '</div>' : '') +
             (ejsData.length ?
               '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
-              '<tr style="color:rgba(255,255,255,0.35);"><th style="text-align:left;padding:4px 0;font-weight:600;">Ejercicio</th><th style="text-align:center;padding:4px;">Series</th><th style="text-align:center;padding:4px;">Reps</th><th style="text-align:right;padding:4px;">Peso</th></tr>' +
+              '<tr style="color:#8E8E93;"><th style="text-align:left;padding:4px 0;font-weight:600;">Ejercicio</th><th style="text-align:center;padding:4px;">Series</th><th style="text-align:center;padding:4px;">Reps</th><th style="text-align:right;padding:4px;">Peso</th></tr>' +
               ejsData.map(function(ej){
                 var setsArr = ej.sets || [];
                 var totalReps = setsArr.reduce(function(s,st){ return s + (parseInt(st.reps)||0); }, 0);
                 var maxPeso = setsArr.reduce(function(mx,st){ return Math.max(mx, parseFloat(st.peso)||0); }, 0);
-                return '<tr style="border-top:1px solid rgba(255,255,255,0.05);">' +
-                  '<td style="padding:6px 0;color:#FFF;">' + (ej.nombre||ej.name||'—') + '</td>' +
-                  '<td style="text-align:center;color:rgba(255,255,255,0.6);">' + setsArr.length + '</td>' +
-                  '<td style="text-align:center;color:rgba(255,255,255,0.6);">' + (totalReps||ej.repeticiones||'—') + '</td>' +
+                return '<tr style="border-top:1px solid rgba(0,0,0,0.06);">' +
+                  '<td style="padding:6px 0;color:#1C1C1E;">' + (ej.nombre||ej.name||'—') + '</td>' +
+                  '<td style="text-align:center;color:#636366;">' + setsArr.length + '</td>' +
+                  '<td style="text-align:center;color:#636366;">' + (totalReps||ej.repeticiones||'—') + '</td>' +
                   '<td style="text-align:right;color:#C8E000;font-weight:700;">' + (maxPeso ? maxPeso + ' kg' : '—') + '</td>' +
                 '</tr>';
               }).join('') +
-              '</table>' : '<div style="color:rgba(255,255,255,0.3);font-size:13px;">Sin detalle de ejercicios</div>') +
+              '</table>' : '<div style="color:#8E8E93;font-size:13px;">Sin detalle de ejercicios</div>') +
             '</div>';
         } else {
-          workoutHTML = '<div style="background:#141414;border-radius:12px;padding:16px;color:rgba(255,255,255,0.3);font-size:13px;margin-bottom:16px;">Sin entrenamientos registrados todavía</div>';
+          workoutHTML = '<div style="background:#F2F2F7;border-radius:12px;padding:16px;color:#8E8E93;font-size:13px;margin-bottom:16px;">Sin entrenamientos registrados todavía</div>';
         }
 
         // Today's nutrition
@@ -631,7 +631,7 @@
         var nutHTML = '';
         if(nutPlan && nutPlan.comidas && nutPlan.comidas.length){
           var totalKcal = 0, metaKcal = nutPlan.calorias_objetivo || 0;
-          nutHTML = '<div style="background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;">' +
+          nutHTML = '<div style="background:#F2F2F7;border:1px solid rgba(0,0,0,0.07);border-radius:16px;padding:16px;">' +
             '<div style="font-size:13px;font-weight:700;margin-bottom:10px;">Nutrición hoy</div>';
           nutPlan.comidas.forEach(function(comida, ci){
             var opIdx = nutHoy.opciones && nutHoy.opciones[ci] !== undefined ? nutHoy.opciones[ci] : null;
@@ -643,9 +643,9 @@
               totalKcal += comida.opciones[opIdx].calorias_total || 0;
             }
             nutHTML +=
-              '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+              '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.06);">' +
               '<div>' +
-                '<span style="font-size:13px;color:' + (eaten ? '#FFF' : 'rgba(255,255,255,0.35)') + ';">' + comida.nombre + '</span>' +
+                '<span style="font-size:13px;color:' + (eaten ? '#1C1C1E' : '#8E8E93') + ';">' + comida.nombre + '</span>' +
                 (opNombre ? '<span style="font-size:11px;color:#C8E000;margin-left:6px;">· ' + opNombre + '</span>' : '') +
               '</div>' +
               '<span style="font-size:18px;">' + (eaten ? '✅' : '⬜') + '</span>' +
@@ -654,15 +654,15 @@
           var pct = metaKcal ? Math.min(100, Math.round(totalKcal / metaKcal * 100)) : 0;
           nutHTML +=
             '<div style="margin-top:10px;">' +
-            '<div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;">' +
+            '<div style="display:flex;justify-content:space-between;font-size:12px;color:#8E8E93;margin-bottom:4px;">' +
               '<span>' + totalKcal + ' kcal consumidas</span><span>Meta: ' + metaKcal + ' kcal</span>' +
             '</div>' +
-            '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;">' +
+            '<div style="height:6px;background:rgba(0,0,0,0.05);border-radius:99px;overflow:hidden;">' +
               '<div style="height:100%;width:' + pct + '%;background:#C8E000;border-radius:99px;"></div>' +
             '</div>' +
             '</div></div>';
         } else {
-          nutHTML = '<div style="background:#141414;border-radius:12px;padding:16px;color:rgba(255,255,255,0.3);font-size:13px;">Sin plan de alimentación asignado</div>';
+          nutHTML = '<div style="background:#F2F2F7;border-radius:12px;padding:16px;color:#8E8E93;font-size:13px;">Sin plan de alimentación asignado</div>';
         }
 
         html = '<div class="coach-card">' +
@@ -698,22 +698,22 @@
           (rut ? rut.dias.map(function(dia, di){
             return "<div style='margin-bottom:16px;'>" +
               "<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.07);'>" +
-                "<span style='font-size:12px;font-weight:700;color:#C8E000;text-transform:uppercase;letter-spacing:0.5px;'>" + dia.nombre + " <span style='color:rgba(255,255,255,0.3);font-weight:400;text-transform:none;letter-spacing:0;'>" + (dia.tipo||"") + "</span></span>" +
+                "<span style='font-size:12px;font-weight:700;color:#5A8000;text-transform:uppercase;letter-spacing:0.5px;'>" + dia.nombre + " <span style='color:#8E8E93;font-weight:400;text-transform:none;letter-spacing:0;'>" + (dia.tipo||"") + "</span></span>" +
                 "<button class='btn-coach secondary btn-add-ej-dia' data-di='" + di + "' style='font-size:11px;padding:4px 10px;'>+ Ejercicio</button>" +
               "</div>" +
               (dia.ejercicios && dia.ejercicios.length ? dia.ejercicios.map(function(ej, ei){
                 return "<div style='display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#1C1C1E;border-radius:10px;margin-bottom:6px;'>" +
                   "<div style='flex:1;min-width:0;'>" +
                     "<div style='font-size:14px;font-weight:600;'>" + ej.nombre + "</div>" +
-                    "<div style='font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;'>" + (ej.series||3) + " series × " + (ej.repeticiones||"12") + (ej.descanso_seg ? " · " + ej.descanso_seg + "s descanso" : "") + (ej.peso_sugerido ? " · " + ej.peso_sugerido + "kg sugerido" : "") + "</div>" +
+                    "<div style='font-size:12px;color:#8E8E93;margin-top:2px;'>" + (ej.series||3) + " series × " + (ej.repeticiones||"12") + (ej.descanso_seg ? " · " + ej.descanso_seg + "s descanso" : "") + (ej.peso_sugerido ? " · " + ej.peso_sugerido + "kg sugerido" : "") + "</div>" +
                     (ej.nota_tecnica ? "<div style='font-size:11px;color:rgba(200,224,0,0.65);margin-top:4px;line-height:1.4;'>💡 " + ej.nota_tecnica.slice(0,80) + (ej.nota_tecnica.length>80?"…":"") + "</div>" : "") +
                   "</div>" +
                   "<button class='btn-coach secondary btn-edit-ej' data-di='" + di + "' data-ei='" + ei + "' style='font-size:11px;padding:5px 10px;flex-shrink:0;'>✏️ Editar</button>" +
                   "<button class='btn-del-ej' data-di='" + di + "' data-ei='" + ei + "' style='background:none;border:none;color:#FF453A;cursor:pointer;font-size:18px;flex-shrink:0;padding:4px;'>✕</button>" +
                 "</div>";
-              }).join("") : "<p style='font-size:13px;color:rgba(255,255,255,0.25);margin:6px 0;'>Sin ejercicios en este día</p>") +
+              }).join("") : "<p style='font-size:13px;color:#8E8E93;margin:6px 0;'>Sin ejercicios en este día</p>") +
             "</div>";
-          }).join("") : "<p style='color:rgba(255,255,255,0.3);text-align:center;padding:20px 0;'>Asigna una rutina para editarla aquí</p>") +
+          }).join("") : "<p style='color:#8E8E93;text-align:center;padding:20px 0;'>Asigna una rutina para editarla aquí</p>") +
         "</div>";
       } else if(tabActivo === "alimentacion"){
         var plan = window.db.getPlanPorId(a.plan_alimentacion_id);
@@ -724,10 +724,10 @@
           "</div>" +
           (plan ? (
             "<div style='display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;'>" +
-              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Kcal objetivo</div><div style='font-size:18px;font-weight:800;color:#C8E000;'>" + (plan.calorias_objetivo||0) + "</div></div>" +
-              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Proteína</div><div style='font-size:18px;font-weight:800;color:#30D158;'>" + ((plan.macros||{}).proteina||0) + "g</div></div>" +
-              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Carbohidratos</div><div style='font-size:18px;font-weight:800;color:#0A84FF;'>" + ((plan.macros||{}).carbohidratos||0) + "g</div></div>" +
-              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Grasas</div><div style='font-size:18px;font-weight:800;color:#FF9F0A;'>" + ((plan.macros||{}).grasas||0) + "g</div></div>" +
+              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:#8E8E93;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Kcal objetivo</div><div style='font-size:18px;font-weight:800;color:#C8E000;'>" + (plan.calorias_objetivo||0) + "</div></div>" +
+              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:#8E8E93;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Proteína</div><div style='font-size:18px;font-weight:800;color:#30D158;'>" + ((plan.macros||{}).proteina||0) + "g</div></div>" +
+              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:#8E8E93;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Carbohidratos</div><div style='font-size:18px;font-weight:800;color:#0A84FF;'>" + ((plan.macros||{}).carbohidratos||0) + "g</div></div>" +
+              "<div style='background:#1C1C1E;border-radius:10px;padding:10px 14px;'><div style='font-size:10px;color:#8E8E93;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;'>Grasas</div><div style='font-size:18px;font-weight:800;color:#FF9F0A;'>" + ((plan.macros||{}).grasas||0) + "g</div></div>" +
             "</div>" +
             "<button class='btn-coach secondary' id='btn-edit-macros' style='width:100%;margin-bottom:14px;'>✏️ Editar kcal y macros</button>" +
             "<div id='comidas-list'>" +
@@ -735,8 +735,8 @@
               return "<div style='background:#1C1C1E;border-radius:12px;padding:12px 14px;margin-bottom:8px;'>" +
                 "<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;'>" +
                   "<div>" +
-                    "<div style='font-size:14px;font-weight:700;'>" + comida.nombre + (comida.hora ? " <span style='color:rgba(255,255,255,0.3);font-size:12px;font-weight:400;'>· " + comida.hora + "</span>" : "") + "</div>" +
-                    "<div style='font-size:12px;color:rgba(255,255,255,0.35);margin-top:2px;'>" + (comida.opciones||[]).length + " opciones</div>" +
+                    "<div style='font-size:14px;font-weight:700;'>" + comida.nombre + (comida.hora ? " <span style='color:#8E8E93;font-size:12px;font-weight:400;'>· " + comida.hora + "</span>" : "") + "</div>" +
+                    "<div style='font-size:12px;color:#8E8E93;margin-top:2px;'>" + (comida.opciones||[]).length + " opciones</div>" +
                   "</div>" +
                   "<div style='display:flex;gap:6px;'>" +
                     "<button class='btn-coach secondary btn-edit-comida' data-ci='" + ci + "' style='font-size:11px;padding:5px 10px;'>✏️</button>" +
@@ -745,8 +745,8 @@
                 "</div>" +
                 (comida.opciones||[]).map(function(op, oi){
                   return "<div style='display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:4px;'>" +
-                    "<div style='flex:1;font-size:12px;color:rgba(255,255,255,0.6);'>" + op.nombre + "</div>" +
-                    "<div style='font-size:11px;color:rgba(255,255,255,0.3);'>" + (op.calorias_total||0) + " kcal</div>" +
+                    "<div style='flex:1;font-size:12px;color:#636366;'>" + op.nombre + "</div>" +
+                    "<div style='font-size:11px;color:#8E8E93;'>" + (op.calorias_total||0) + " kcal</div>" +
                     "<button class='btn-edit-opcion btn-coach secondary' data-ci='" + ci + "' data-oi='" + oi + "' style='font-size:10px;padding:3px 8px;'>✏️</button>" +
                     "<button class='btn-del-opcion' data-ci='" + ci + "' data-oi='" + oi + "' style='background:none;border:none;color:#FF453A;cursor:pointer;font-size:14px;padding:2px 4px;'>✕</button>" +
                   "</div>";
@@ -756,7 +756,7 @@
             }).join("") +
             "</div>" +
             "<button class='btn-coach secondary' id='btn-add-comida' style='width:100%;margin-top:6px;'>+ Agregar comida</button>"
-          ) : "<p style='color:rgba(255,255,255,0.3);text-align:center;padding:20px 0;'>Asigna un plan para editarlo aquí</p>") +
+          ) : "<p style='color:#8E8E93;text-align:center;padding:20px 0;'>Asigna un plan para editarlo aquí</p>") +
         "</div>";
       } else if(tabActivo === "progreso"){
         var pesos = window.db.getPesos(a.id), regs = window.db.getRegistros(a.id), medallas = window.db.getMedallas(a.id);
@@ -790,12 +790,12 @@
         html = "<div class='coach-card'>" + pesoGrafico +
           "<p>" + regs.length + " entrenamientos · racha " + window.db.calcularRacha(a.id) + " días · " + medallas.length + "/" + window.db.MEDALLAS_DEF.length + " medallas</p>" +
           "<div style='margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;'>" +
-          medallas.map(function(m){ return "<span style='background:#1C1C1C;border-radius:8px;padding:6px 10px;font-size:12px;'>" + m.icono + " " + m.nombre + "</span>"; }).join("") +
+          medallas.map(function(m){ return "<span style='background:#FFFFFF;border-radius:8px;padding:6px 10px;font-size:12px;'>" + m.icono + " " + m.nombre + "</span>"; }).join("") +
           "</div></div>";
       } else if(tabActivo === "notas"){
         var notas = window.db.getNotas(a.id);
-        html = "<div class='coach-card'>" + notas.map(function(n){ return "<p style='margin-bottom:8px;border-bottom:1px solid #242424;padding-bottom:8px;'>" + n.fecha + " — " + n.texto + "</p>"; }).join("") +
-          "<textarea id='nueva-nota' placeholder='Escribe una nota de seguimiento...' style='width:100%;margin-top:10px;padding:10px;border-radius:8px;background:#0F0F0F;color:#fff;border:1px solid #333;'></textarea>" +
+        html = "<div class='coach-card'>" + notas.map(function(n){ return "<p style='margin-bottom:8px;border-bottom:1px solid rgba(0,0,0,0.06);padding-bottom:8px;'>" + n.fecha + " — " + n.texto + "</p>"; }).join("") +
+          "<textarea id='nueva-nota' placeholder='Escribe una nota de seguimiento...' style='width:100%;margin-top:10px;padding:10px;border-radius:8px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);'></textarea>" +
           "<button class='btn-coach' id='btn-enviar-nota' style='margin-top:8px;'>Enviar nota</button></div>";
       }
       box.innerHTML = html;
@@ -819,7 +819,7 @@
         var btnCambiarRut = document.getElementById("btn-cambiar-rutina");
         if(btnCambiarRut) btnCambiarRut.addEventListener("click", function(){
           var rutinas = window.db.getRutinas();
-          coachModal("Cambiar rutina", "<select id='sel-rutina' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;'>" +
+          coachModal("Cambiar rutina", "<select id='sel-rutina' style='width:100%;padding:10px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;'>" +
             rutinas.map(function(r){ return "<option value='"+r.id+"'" + (r.id===a.rutina_id?" selected":"") + ">"+r.nombre+"</option>"; }).join("") +
             "</select><button class='btn-coach' id='guardar-rutina-sel' style='margin-top:14px;'>Guardar</button>", function(){
             document.getElementById("guardar-rutina-sel").addEventListener("click", function(){
@@ -838,8 +838,8 @@
               "<div class='row2'><div><label>Series</label><input id='ee-series' type='number' value='" + (ej.series||3) + "'></div><div><label>Reps / RIR</label><input id='ee-reps' value='" + (ej.repeticiones||"12") + "'></div></div>" +
               "<div class='row2'><div><label>Descanso (seg)</label><input id='ee-desc' type='number' value='" + (ej.descanso_seg||90) + "'></div><div><label>Peso sugerido (kg)</label><input id='ee-peso' type='number' step='0.5' value='" + (ej.peso_sugerido||0) + "'></div></div>" +
               "<label>Video URL (YouTube / TikTok)</label><input id='ee-vid' value='" + (ej.video_url||"") + "' placeholder='https://...'>" +
-              "<label>💡 Técnica TikTok</label><p style='font-size:11px;color:rgba(255,255,255,0.35);margin:-6px 0 6px;'>Escribe cues, errores comunes y tips estilo TikTok trainer</p>" +
-              "<textarea id='ee-tec' style='width:100%;min-height:130px;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;resize:vertical;font-family:inherit;font-size:13px;' placeholder='🔥 Cue: empuja el suelo, no jales la barra&#10;⚠️ Error: no redondees la espalda baja&#10;✅ Tip: exhala en el esfuerzo, inhala en la bajada'>" + (ej.nota_tecnica||"") + "</textarea>" +
+              "<label>💡 Técnica TikTok</label><p style='font-size:11px;color:#8E8E93;margin:-6px 0 6px;'>Escribe cues, errores comunes y tips estilo TikTok trainer</p>" +
+              "<textarea id='ee-tec' style='width:100%;min-height:130px;padding:10px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;resize:vertical;font-family:inherit;font-size:13px;' placeholder='🔥 Cue: empuja el suelo, no jales la barra&#10;⚠️ Error: no redondees la espalda baja&#10;✅ Tip: exhala en el esfuerzo, inhala en la bajada'>" + (ej.nota_tecnica||"") + "</textarea>" +
               "<button class='btn-coach' id='ee-guardar' style='margin-top:14px;'>Guardar cambios</button>" +
             "</div>", function(){
               document.getElementById("ee-guardar").addEventListener("click", function(){
@@ -872,13 +872,13 @@
           btn.addEventListener("click", function(){
             var di = parseInt(this.getAttribute("data-di"),10);
             coachModal("➕ Agregar ejercicio", "<div class='coach-form'>" +
-              "<label>Ejercicio</label><select id='ae-bib' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;'>" +
+              "<label>Ejercicio</label><select id='ae-bib' style='width:100%;padding:10px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;'>" +
               ejBib2.map(function(e){ return "<option value='"+e.id+"'>"+e.nombre+" ("+e.grupo+")</option>"; }).join("") + "</select>" +
               "<div class='row2'><div><label>Series</label><input id='ae-series' type='number' value='3'></div><div><label>Reps / RIR</label><input id='ae-reps' value='12'></div></div>" +
               "<div class='row2'><div><label>Descanso (seg)</label><input id='ae-desc' type='number' value='90'></div><div><label>Peso sugerido (kg)</label><input id='ae-peso' type='number' step='0.5' value='0'></div></div>" +
               "<label>Video URL (opcional)</label><input id='ae-vid' placeholder='https://...'>" +
               "<label>💡 Técnica TikTok</label>" +
-              "<textarea id='ae-tec' style='width:100%;min-height:100px;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;resize:vertical;font-family:inherit;font-size:13px;' placeholder='Tips de técnica para este ejercicio...'></textarea>" +
+              "<textarea id='ae-tec' style='width:100%;min-height:100px;padding:10px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;resize:vertical;font-family:inherit;font-size:13px;' placeholder='Tips de técnica para este ejercicio...'></textarea>" +
               "<button class='btn-coach' id='ae-confirmar' style='margin-top:14px;'>Agregar</button>" +
             "</div>", function(){
               document.getElementById("ae-confirmar").addEventListener("click", function(){
@@ -907,7 +907,7 @@
         var btnCambiarPlan = document.getElementById("btn-cambiar-plan");
         if(btnCambiarPlan) btnCambiarPlan.addEventListener("click", function(){
           var planes = window.db.getPlanes();
-          coachModal("Cambiar plan", "<select id='sel-plan' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;'>" +
+          coachModal("Cambiar plan", "<select id='sel-plan' style='width:100%;padding:10px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;'>" +
             planes.map(function(p){ return "<option value='"+p.id+"'" + (p.id===a.plan_alimentacion_id?" selected":"") + ">"+p.nombre+"</option>"; }).join("") +
             "</select><button class='btn-coach' id='guardar-plan-sel' style='margin-top:14px;'>Guardar</button>", function(){
             document.getElementById("guardar-plan-sel").addEventListener("click", function(){
@@ -943,7 +943,7 @@
               coachModal("✏️ Editar comida", "<div class='coach-form'>" +
                 "<label>Nombre</label><input id='ec-nom' value='" + (com.nombre||"").replace(/'/g,"&#39;") + "'>" +
                 "<label>Hora</label><input id='ec-hora' type='time' value='" + (com.hora||"12:00") + "'>" +
-                "<label>Descripción</label><textarea id='ec-desc' style='width:100%;padding:8px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;min-height:60px;'>" + (com.descripcion||"") + "</textarea>" +
+                "<label>Descripción</label><textarea id='ec-desc' style='width:100%;padding:8px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;min-height:60px;'>" + (com.descripcion||"") + "</textarea>" +
                 "<button class='btn-coach' id='ec-guardar' style='margin-top:14px;'>Guardar</button>" +
               "</div>", function(){
                 document.getElementById("ec-guardar").addEventListener("click", function(){
@@ -975,10 +975,10 @@
                 "<label>Nombre de la opción</label><input id='eo-nom' value='" + (op.nombre||"").replace(/'/g,"&#39;") + "'>" +
                 "<label>Kcal totales</label><input id='eo-kcal' type='number' value='" + (op.calorias_total||0) + "'>" +
                 "<label>Alimentos (uno por línea: cantidad nombre kcal prot carb gras)</label>" +
-                "<textarea id='eo-ings' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;min-height:140px;font-family:monospace;font-size:12px;'>" +
+                "<textarea id='eo-ings' style='width:100%;padding:10px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;min-height:140px;font-family:monospace;font-size:12px;'>" +
                 (op.alimentos||[]).map(function(al){ return (al.cantidad||"") + " | " + al.nombre + " | " + (al.calorias||0) + " kcal | P:" + (al.proteina||0) + "g | C:" + (al.carbos||0) + "g | G:" + (al.grasas||0) + "g"; }).join("\n") +
                 "</textarea>" +
-                "<p style='font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;'>Formato: cantidad | nombre | kcal | P:Xg | C:Xg | G:Xg</p>" +
+                "<p style='font-size:10px;color:#8E8E93;margin-top:4px;'>Formato: cantidad | nombre | kcal | P:Xg | C:Xg | G:Xg</p>" +
                 "<button class='btn-coach' id='eo-guardar' style='margin-top:14px;'>Guardar</button>" +
               "</div>", function(){
                 document.getElementById("eo-guardar").addEventListener("click", function(){
@@ -1019,7 +1019,7 @@
                 "<label>Nombre de la opción</label><input id='ao-nom' placeholder='Ej: Avena proteica con banana 🔥'>" +
                 "<label>Kcal totales</label><input id='ao-kcal' type='number' value='0'>" +
                 "<label>Alimentos (uno por línea)</label>" +
-                "<textarea id='ao-ings' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;min-height:120px;font-family:monospace;font-size:12px;' placeholder='70g | Avena en hojuelas | 266 kcal | P:10g | C:47g | G:5g\n1 unidad | Banana | 89 kcal | P:1g | C:23g | G:0g'></textarea>" +
+                "<textarea id='ao-ings' style='width:100%;padding:10px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;min-height:120px;font-family:monospace;font-size:12px;' placeholder='70g | Avena en hojuelas | 266 kcal | P:10g | C:47g | G:5g\n1 unidad | Banana | 89 kcal | P:1g | C:23g | G:0g'></textarea>" +
                 "<button class='btn-coach' id='ao-guardar' style='margin-top:14px;'>Agregar opción</button>" +
               "</div>", function(){
                 document.getElementById("ao-guardar").addEventListener("click", function(){
@@ -1044,7 +1044,7 @@
             coachModal("➕ Nueva comida", "<div class='coach-form'>" +
               "<label>Nombre</label><input id='nc-nom' placeholder='Ej: Desayuno'>" +
               "<label>Hora</label><input id='nc-hora' type='time' value='08:00'>" +
-              "<label>Descripción</label><textarea id='nc-desc' style='width:100%;padding:8px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;min-height:60px;'></textarea>" +
+              "<label>Descripción</label><textarea id='nc-desc' style='width:100%;padding:8px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;min-height:60px;'></textarea>" +
               "<button class='btn-coach' id='nc-guardar' style='margin-top:14px;'>Crear comida</button>" +
             "</div>", function(){
               document.getElementById("nc-guardar").addEventListener("click", function(){
@@ -1134,12 +1134,12 @@
       function abrirSelectorEjercicio(diIdx){
         var biblioteca = window.db.getEjercicios();
         var sub = el("<div id='coach-modal-overlay'><div class='modal-box'><h2>Agregar ejercicio</h2>" +
-          "<select id='sel-ej-bib' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;margin-bottom:10px;'>" +
+          "<select id='sel-ej-bib' style='width:100%;padding:10px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;margin-bottom:10px;'>" +
           biblioteca.map(function(e){ return "<option value='"+e.id+"'>"+e.nombre+" ("+e.grupo+")</option>"; }).join("") + "</select>" +
           "<div class='row2'><input id='ej-series' type='number' placeholder='Series' value='3'><input id='ej-reps' placeholder='Reps/RIR' value='12/RIR 2'></div>" +
           "<div class='row2'><input id='ej-descanso' type='number' placeholder='Descanso seg' value='90'><input id='ej-video' placeholder='URL de vídeo (opcional)'></div>" +
-          "<input id='ej-foto' placeholder='URL de imagen del ejercicio (opcional)' style='width:100%;margin-top:8px;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;'>" +
-          "<textarea id='ej-nota' placeholder='Nota técnica' style='width:100%;margin-top:8px;padding:8px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;'></textarea>" +
+          "<input id='ej-foto' placeholder='URL de imagen del ejercicio (opcional)' style='width:100%;margin-top:8px;padding:10px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;'>" +
+          "<textarea id='ej-nota' placeholder='Nota técnica' style='width:100%;margin-top:8px;padding:8px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;'></textarea>" +
           "<button class='btn-coach' id='ej-confirmar' style='margin-top:12px;'>Agregar</button></div></div>");
         document.body.appendChild(sub);
         sub.addEventListener("click", function(e){ if(e.target===sub) sub.remove(); });
@@ -1325,7 +1325,7 @@
           "</div>";
         }).join("") : "<p style='color:#555;font-size:13px;'>Sin mensajes todavía.</p>") +
         "</div>" +
-        "<textarea id='msg-nuevo' style='width:100%;padding:10px;background:#0F0F0F;color:#fff;border:1px solid #333;border-radius:8px;min-height:70px;font-family:inherit;font-size:13px;' placeholder='Escribe un mensaje para " + a.nombre + "...'></textarea>" +
+        "<textarea id='msg-nuevo' style='width:100%;padding:10px;background:#0F0F0F;color:#1C1C1E;border:1px solid rgba(0,0,0,0.09);border-radius:8px;min-height:70px;font-family:inherit;font-size:13px;' placeholder='Escribe un mensaje para " + a.nombre + "...'></textarea>" +
         "<button class='btn-coach' id='msg-enviar' style='margin-top:8px;width:100%;'>Enviar mensaje</button></div>";
       $("#hilo-mensajes").innerHTML = hiloHtml;
       $("#msg-enviar").addEventListener("click", function(){
@@ -1410,11 +1410,11 @@
           return "<div style='background:" + col.bg + ";border:1px solid " + col.border + ";border-radius:18px;padding:20px;position:relative;overflow:hidden;'>" +
             "<div style='position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:" + col.accent + ";opacity:.07;border-radius:50%;'></div>" +
             "<div style='font-size:10px;font-weight:700;color:" + col.accent + ";text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;'>Cupón</div>" +
-            "<div style='font-size:17px;font-weight:800;color:#FFF;margin-bottom:4px;'>" + c.titulo + "</div>" +
+            "<div style='font-size:17px;font-weight:800;color:#1C1C1E;margin-bottom:4px;'>" + c.titulo + "</div>" +
             "<div style='font-size:22px;font-weight:900;color:" + col.accent + ";letter-spacing:-1px;margin:8px 0;'>" + (c.descuento||"") + "</div>" +
-            "<div style='background:rgba(255,255,255,0.06);border-radius:8px;padding:6px 12px;display:inline-block;font-size:13px;font-weight:700;color:#FFF;letter-spacing:2px;margin-bottom:8px;'>" + (c.codigo||"") + "</div>" +
-            (expires ? "<div style='font-size:11px;color:rgba(255,255,255,0.35);'>" + expires + "</div>" : "") +
-            "<button class='btn-quitar-cupon' data-i='" + i + "' style='position:absolute;top:10px;right:10px;width:24px;height:24px;background:rgba(255,255,255,0.1);border:none;border-radius:50%;color:#FFF;cursor:pointer;font-size:14px;line-height:1;'>×</button>" +
+            "<div style='background:rgba(255,255,255,0.06);border-radius:8px;padding:6px 12px;display:inline-block;font-size:13px;font-weight:700;color:#1C1C1E;letter-spacing:2px;margin-bottom:8px;'>" + (c.codigo||"") + "</div>" +
+            (expires ? "<div style='font-size:11px;color:#8E8E93;'>" + expires + "</div>" : "") +
+            "<button class='btn-quitar-cupon' data-i='" + i + "' style='position:absolute;top:10px;right:10px;width:24px;height:24px;background:rgba(255,255,255,0.1);border:none;border-radius:50%;color:#1C1C1E;cursor:pointer;font-size:14px;line-height:1;'>×</button>" +
           "</div>";
         }).join("") + "</div>";
       document.querySelectorAll(".btn-quitar-cupon").forEach(function(b){
@@ -1428,14 +1428,14 @@
       if(!gym.clases.length){ $("#gy-clases-list").innerHTML="<p style='color:#777;font-size:.85rem;'>Sin clases programadas.</p>"; return; }
       $("#gy-clases-list").innerHTML = gym.clases.map(function(c, i){
         var waMsg = encodeURIComponent("Hola! Quiero reservar la clase de " + c.nombre + " el " + c.dia + " a las " + c.hora);
-        return "<div style='background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;'>" +
+        return "<div style='background:#F2F2F7;border:1px solid rgba(0,0,0,0.07);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;'>" +
           "<div>" +
-            "<div style='font-size:14px;font-weight:700;color:#FFF;'>" + c.nombre + "</div>" +
-            "<div style='font-size:12px;color:rgba(255,255,255,0.4);margin-top:3px;'>" + c.dia + " · " + c.hora + (c.duracion?" · "+c.duracion+" min":"") + (c.instructor?" · "+c.instructor:"") + "</div>" +
+            "<div style='font-size:14px;font-weight:700;color:#1C1C1E;'>" + c.nombre + "</div>" +
+            "<div style='font-size:12px;color:#8E8E93;margin-top:3px;'>" + c.dia + " · " + c.hora + (c.duracion?" · "+c.duracion+" min":"") + (c.instructor?" · "+c.instructor:"") + "</div>" +
           "</div>" +
           "<div style='display:flex;gap:8px;align-items:center;'>" +
             "<a href='https://wa.me/" + waNum + "?text=" + waMsg + "' target='_blank' rel='noopener' style='font-size:12px;background:rgba(37,211,102,0.15);color:#25D166;border:1px solid rgba(37,211,102,0.3);border-radius:99px;padding:5px 12px;text-decoration:none;font-weight:600;'>WhatsApp</a>" +
-            "<button class='btn-del-clase' data-i='" + i + "' style='background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:18px;'>×</button>" +
+            "<button class='btn-del-clase' data-i='" + i + "' style='background:none;border:none;color:#8E8E93;cursor:pointer;font-size:18px;'>×</button>" +
           "</div>" +
         "</div>";
       }).join("");
@@ -1535,17 +1535,17 @@
     var rec = gym.videos_recetas    || [];
 
     function videoRow(v, arr, tipo, i){
-      return "<div style='background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;margin-bottom:10px;display:flex;gap:0;'>" +
-        (v.thumbnail ? "<img src='" + v.thumbnail + "' style='width:100px;min-width:100px;object-fit:cover;'>" : "<div style='width:100px;min-width:100px;background:#1C1C1C;display:flex;align-items:center;justify-content:center;font-size:28px;'>▶</div>") +
+      return "<div style='background:#F2F2F7;border:1px solid rgba(0,0,0,0.07);border-radius:14px;overflow:hidden;margin-bottom:10px;display:flex;gap:0;'>" +
+        (v.thumbnail ? "<img src='" + v.thumbnail + "' style='width:100px;min-width:100px;object-fit:cover;'>" : "<div style='width:100px;min-width:100px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:28px;'>▶</div>") +
         "<div style='flex:1;padding:12px 14px;'>" +
-          "<div style='font-size:14px;font-weight:700;color:#FFF;margin-bottom:2px;'>" + v.titulo + "</div>" +
-          (v.subtitulo ? "<div style='font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;'>" + v.subtitulo + "</div>" : "") +
+          "<div style='font-size:14px;font-weight:700;color:#1C1C1E;margin-bottom:2px;'>" + v.titulo + "</div>" +
+          (v.subtitulo ? "<div style='font-size:12px;color:#8E8E93;margin-bottom:4px;'>" + v.subtitulo + "</div>" : "") +
           "<div style='display:flex;align-items:center;gap:8px;'>" +
             (v.categoria ? "<span style='font-size:10px;background:rgba(200,224,0,0.12);color:#C8E000;border-radius:99px;padding:2px 10px;font-weight:600;'>" + v.categoria + "</span>" : "") +
-            (v.url ? "<a href='" + v.url + "' target='_blank' style='font-size:11px;color:rgba(255,255,255,0.35);text-decoration:none;'>Ver en YouTube ↗</a>" : "") +
+            (v.url ? "<a href='" + v.url + "' target='_blank' style='font-size:11px;color:#8E8E93;text-decoration:none;'>Ver en YouTube ↗</a>" : "") +
           "</div>" +
         "</div>" +
-        "<button data-tipo='" + tipo + "' data-i='" + i + "' class='btn-del-video' style='background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;padding:0 14px;font-size:20px;'>×</button>" +
+        "<button data-tipo='" + tipo + "' data-i='" + i + "' class='btn-del-video' style='background:none;border:none;color:#8E8E93;cursor:pointer;padding:0 14px;font-size:20px;'>×</button>" +
       "</div>";
     }
     function secHTML(titulo, arr, tipo){
@@ -1649,13 +1649,13 @@
 
         html +=
           '<div class="coach-card" style="margin-bottom:16px;">' +
-            '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #242424;">' +
+            '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid rgba(0,0,0,0.06);">' +
               (fotoUrl
                 ? '<img src="'+fotoUrl+'" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid '+statusColor+';">'
                 : '<div style="width:56px;height:56px;border-radius:50%;background:rgba(200,224,0,0.12);border:3px solid '+statusColor+';display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#C8E000;">'+a.nombre[0].toUpperCase()+'</div>') +
               '<div>' +
-                '<div style="font-size:17px;font-weight:800;color:#FFF;">'+a.nombre+' '+(a.apellido||"")+'</div>' +
-                '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;">'+(intake.fecha_intake?new Date(intake.fecha_intake).toLocaleDateString("es"):"")+'</div>' +
+                '<div style="font-size:17px;font-weight:800;color:#1C1C1E;">'+a.nombre+' '+(a.apellido||"")+'</div>' +
+                '<div style="font-size:11px;color:#8E8E93;margin-top:3px;">'+(intake.fecha_intake?new Date(intake.fecha_intake).toLocaleDateString("es"):"")+'</div>' +
               '</div>' +
               '<button class="btn-coach secondary int-notif" data-id="'+a.id+'" data-nombre="'+a.nombre+'" style="margin-left:auto;font-size:12px;padding:7px 14px;">📣 Notificar</button>' +
             '</div>' +
@@ -1663,8 +1663,8 @@
               Object.keys(intake).filter(function(k){ return k!=="fecha_intake" && intake[k] && intake[k].toString().trim(); }).map(function(k){
                 var val = intake[k];
                 if(Array.isArray(val)) val = val.join(", ");
-                return '<div><div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">'+(LABELS[k]||k)+'</div>' +
-                  '<div style="font-size:13px;color:#FFF;font-weight:500;">'+val+'</div></div>';
+                return '<div><div style="font-size:10px;font-weight:700;color:#8E8E93;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">'+(LABELS[k]||k)+'</div>' +
+                  '<div style="font-size:13px;color:#1C1C1E;font-weight:500;">'+val+'</div></div>';
               }).join("") +
             '</div>' +
           '</div>';
@@ -1672,10 +1672,10 @@
     }
 
     if(sinIntake.length){
-      html += '<div class="coach-card"><h3 style="margin-bottom:10px;color:rgba(255,255,255,0.4);">Sin onboarding ('+sinIntake.length+')</h3>' +
+      html += '<div class="coach-card"><h3 style="margin-bottom:10px;color:#8E8E93;">Sin onboarding ('+sinIntake.length+')</h3>' +
         '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
         sinIntake.map(function(a){
-          return '<span style="padding:5px 12px;background:#1C1C1C;border-radius:50px;font-size:13px;color:rgba(255,255,255,0.4);">'+a.nombre+'</span>';
+          return '<span style="padding:5px 12px;background:#FFFFFF;border-radius:50px;font-size:13px;color:#8E8E93;">'+a.nombre+'</span>';
         }).join("") +
         '</div></div>';
     }
@@ -1731,7 +1731,7 @@
       if(!modos2.length){ listEl.innerHTML = "<p style='color:#555;font-size:13px;'>Sin gimnasios adicionales.</p>"; return; }
       listEl.innerHTML = modos2.map(function(g){
         var activo = g.id === (localStorage.getItem("fitapp_gym_activo")||"");
-        return "<div style='display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #242424;'>" +
+        return "<div style='display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06);'>" +
           "<span style='font-size:13px;" + (activo ? "color:#C8E000;font-weight:700;" : "") + "'>" + (activo ? "✓ " : "") + g.nombre + "</span>" +
           "<div style='display:flex;gap:6px;'>" +
           "<button class='btn-coach secondary' style='font-size:11px;padding:5px 10px;' onclick='localStorage.setItem(\"fitapp_gym_activo\",\"" + g.id + "\");window.render_gym();'>Activar</button>" +
@@ -1801,7 +1801,7 @@
       vencenProx.forEach(function(v){
         var label = v.diasRestantes < 0 ? "Vencido hace " + Math.abs(v.diasRestantes) + " días" : (v.diasRestantes === 0 ? "Vence hoy" : "Vence en " + v.diasRestantes + " día" + (v.diasRestantes!==1?"s":""));
         var color = v.diasRestantes < 0 ? "#FF453A" : (v.diasRestantes <= 2 ? "#C8E000" : "#C8E000");
-        html += "<div style='display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #242424;'>" +
+        html += "<div style='display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);'>" +
           "<div><div style='font-weight:600;'>" + v.alumno.nombre + " " + (v.alumno.apellido||"") + "</div>" +
           "<div style='font-size:12px;color:" + color + ";margin-top:2px;'>" + label + " · $" + (v.precio||0) + "/mes</div></div>" +
           "<button class='btn-coach' style='font-size:12px;padding:7px 14px;' onclick='window.marcarPagoRecibido(\"" + v.alumno.id + "\")'>✓ Marcar pagado</button>" +
@@ -1916,3 +1916,5 @@
       });
   });
 })();
+
+
