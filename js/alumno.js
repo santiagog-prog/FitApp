@@ -6,7 +6,7 @@
   function safe(fn, name){ try{ fn(); }catch(e){ console.error("[alumno] " + name, e); } }
 
   var tabPages = ["inicio", "agenda", "nutricion", "evolucion", "mas"];
-  var allPages = tabPages.concat(["perfil", "gym", "fotos", "habitos", "videos", "cardio", "editar"]);
+  var allPages = tabPages.concat(["perfil", "gym", "fotos", "habitos", "videos", "cardio", "editar", "reto"]);
   var initialized = {};
 
   window.ALUMNO_ID = null;

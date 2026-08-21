@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FitApp</title>
+<!-- Auto-login: si ya hay sesión activa, redirige SIN mostrar la pantalla de login -->
+<script>try{var _as=JSON.parse(localStorage.getItem("fitapp_alumno_actual"));if(_as)location.replace("alumno/index.html");}catch(e){}</script>
 <link rel="manifest" href="manifest.json?v=20260618">
 <meta name="theme-color" content="#0A0A0A">
 <meta name="apple-mobile-web-app-capable" content="yes">

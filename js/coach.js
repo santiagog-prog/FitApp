@@ -1903,6 +1903,15 @@
     window.db.initCoach()
       .then(function(){
         loadEl.remove();
+        // Seed: crear Anahi Guillen si no existe
+        var alumnos = window.db.getAlumnos();
+        var yaExiste = alumnos.some(function(a){ return a.nombre==="Anahi" && (a.apellido||"").indexOf("Guillen")!==-1; });
+        if(!yaExiste){
+          window.db.saveAlumno({
+            nombre:"Anahi", apellido:"Guillen", codigo:"2468",
+            objetivo:"perdida_grasa", nivel:"principiante", activo:true
+          });
+        }
         showSec("dashboard");
       })
       .catch(function(err){

@@ -43,15 +43,21 @@
 
     var html = '<div style="padding:16px 0 80px;">';
 
-    // Avatar + nombre
+    // Foto de perfil real
+    var fotos = (window.db.getFotos && alumno) ? window.db.getFotos(alumno.id) : [];
+    var fotoUrl = fotos.length ? fotos[fotos.length-1].url : null;
+    var avatarHtml = fotoUrl
+      ? '<img src="'+fotoUrl+'" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2.5px solid var(--accent);flex-shrink:0;">'
+      : '<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C8E000,#5A8000);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#1C1C1E;flex-shrink:0;">'+(alumno && alumno.nombre ? alumno.nombre.charAt(0).toUpperCase() : "S")+'</div>';
+
     html += '<div style="display:flex;align-items:center;gap:14px;padding:0 20px 20px;">' +
-      '<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#C8E000,#5A8000);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#1C1C1E;flex-shrink:0;">' +
-        (alumno && alumno.nombre ? alumno.nombre.charAt(0).toUpperCase() : "S") +
-      '</div>' +
-      '<div>' +
-        '<div style="font-size:17px;font-weight:700;color:var(--text);">' + (alumno ? alumno.nombre + " " + alumno.apellido : "—") + '</div>' +
+      avatarHtml +
+      '<div style="flex:1;">' +
+        '<div style="font-size:17px;font-weight:700;color:var(--text);">' + (alumno ? alumno.nombre + " " + (alumno.apellido||"") : "—") + '</div>' +
         '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Código: <strong style="color:var(--accent-text);">' + (alumno ? alumno.codigo : "—") + '</strong></div>' +
+        (gymInfo && gymInfo.nombre ? '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">🏟️ '+gymInfo.nombre+'</div>' : '') +
       '</div>' +
+      '<button id="mas-btn-salir" style="padding:6px 14px;background:rgba(255,59,48,0.08);border:1px solid rgba(255,59,48,0.2);border-radius:99px;color:#FF3B30;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Salir</button>' +
     '</div>';
 
     html += '<div style="padding:0 20px;">';
@@ -74,10 +80,7 @@
     html += itemRow("building", "#34C759", "Mi gimnasio",       gymInfo && gymInfo.nombre ? gymInfo.nombre : "Horarios y clases", "mas-btn-gym");
 
     var wa = gymInfo && gymInfo.whatsapp ? gymInfo.whatsapp.replace(/[^0-9]/g,"") : "";
-    if(wa){
-      var msg = encodeURIComponent("Hola! Tengo una consulta sobre mi entrenamiento.");
-      html += itemRow("chat",   "#25D366", "Hablar con mi coach","Contacto directo por WhatsApp",       "mas-btn-coach");
-    }
+    html += itemRow("chat", "#25D366", "Hablar con mi coach", wa ? "Contacto directo por WhatsApp" : "Escríbele a tu entrenador", "mas-btn-coach");
 
     html += '</div></div>';
 
@@ -90,18 +93,94 @@
     nav("mas-btn-editar",  "editar");
     nav("mas-btn-habitos", "habitos");
     nav("mas-btn-cardio",  "cardio");
-    nav("mas-btn-reto",    "perfil");
+    nav("mas-btn-reto",    "reto");
     nav("mas-btn-gym",     "gym");
 
     var btnVideos = document.getElementById("mas-btn-videos");
     if(btnVideos) btnVideos.addEventListener("click", window._abrirHistorialVideos);
 
     var btnCoach = document.getElementById("mas-btn-coach");
-    if(btnCoach && wa){
+    if(btnCoach){
       btnCoach.addEventListener("click", function(){
-        window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent("Hola! Tengo una consulta sobre mi entrenamiento."), "_blank");
+        if(wa){
+          window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent("Hola! Tengo una consulta sobre mi entrenamiento."), "_blank");
+        } else {
+          window.mostrarToast && window.mostrarToast("Tu coach no tiene WhatsApp registrado aún");
+        }
       });
     }
+
+    var btnSalir = document.getElementById("mas-btn-salir");
+    if(btnSalir){
+      btnSalir.addEventListener("click", function(){
+        if(confirm("¿Cerrar sesión?")){
+          window.db.clearSesion();
+          location.href = "../index.html";
+        }
+      });
+    }
+  };
+
+  window.init_reto = function(){
+    var alumno = window.db.getAlumnoPorId(window.ALUMNO_ID);
+    var header = document.getElementById("app-header");
+    header.innerHTML =
+      "<div class='ah-top'>" +
+        "<button id='reto-back' style='background:none;border:none;font-size:22px;cursor:pointer;padding:4px;color:var(--text);'>‹</button>" +
+        "<div class='ah-wordmark'>Reto entre amigos</div>" +
+        "<div></div>" +
+      "</div>";
+    var btnBack = document.getElementById("reto-back");
+    if(btnBack) btnBack.addEventListener("click", function(){ window.irAPagina("mas"); });
+
+    var alumnos = window.db.getAlumnos ? window.db.getAlumnos() : [];
+    var otrosHTML = "";
+    alumnos.forEach(function(a){
+      if(a.id === window.ALUMNO_ID) return;
+      var fotos = window.db.getFotos ? window.db.getFotos(a.id) : [];
+      var fotoUrl = fotos.length ? fotos[fotos.length-1].url : null;
+      var racha = window.db.calcularRacha ? window.db.calcularRacha(a.id) : 0;
+      var regs = window.db.getRegistros ? window.db.getRegistros(a.id) : [];
+      var avatarHtml = fotoUrl
+        ? '<img src="'+fotoUrl+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">'
+        : '<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#C8E000,#5A8000);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#1C1C1E;">'+a.nombre.charAt(0)+'</div>';
+      otrosHTML +=
+        '<div style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:10px;">' +
+          avatarHtml +
+          '<div style="flex:1;">' +
+            '<div style="font-size:15px;font-weight:700;color:var(--text);">'+a.nombre+' '+(a.apellido||'')+'</div>' +
+            '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">🔥 '+racha+' días de racha · '+regs.length+' sesiones</div>' +
+          '</div>' +
+          '<div style="text-align:center;">' +
+            '<div style="font-size:22px;font-weight:900;color:var(--accent-text);">'+regs.length+'</div>' +
+            '<div style="font-size:10px;color:var(--text-muted);font-weight:600;">SESIONES</div>' +
+          '</div>' +
+        '</div>';
+    });
+
+    var miRacha = alumno ? (window.db.calcularRacha ? window.db.calcularRacha(alumno.id) : 0) : 0;
+    var miRegs  = alumno ? (window.db.getRegistros ? window.db.getRegistros(alumno.id) : []) : [];
+    var miFotos = alumno ? (window.db.getFotos ? window.db.getFotos(alumno.id) : []) : [];
+    var miFoto  = miFotos.length ? miFotos[miFotos.length-1].url : null;
+    var miAvatar = miFoto
+      ? '<img src="'+miFoto+'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);">'
+      : '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#C8E000,#5A8000);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#1C1C1E;">'+(alumno?alumno.nombre.charAt(0):"?")+'</div>';
+
+    var html =
+      '<div style="padding:16px 20px 80px;">' +
+        '<div style="background:linear-gradient(135deg,rgba(200,224,0,0.12),rgba(200,224,0,0.04));border:1.5px solid rgba(200,224,0,0.25);border-radius:20px;padding:20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;">' +
+          miAvatar +
+          '<div>' +
+            '<div style="font-size:11px;font-weight:700;color:var(--accent-text);text-transform:uppercase;letter-spacing:1px;">Tú</div>' +
+            '<div style="font-size:20px;font-weight:800;color:var(--text);">'+(alumno?alumno.nombre:'—')+'</div>' +
+            '<div style="font-size:13px;color:var(--text-muted);margin-top:2px;">🔥 '+miRacha+' días · '+miRegs.length+' sesiones</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Otros alumnos</div>' +
+        (otrosHTML || '<div style="text-align:center;padding:30px;color:var(--text-muted);">Aún no hay más alumnos registrados.</div>') +
+      '</div>';
+
+    document.getElementById("page-reto").innerHTML = html;
   };
 
   window._abrirHistorialVideos = function(){
