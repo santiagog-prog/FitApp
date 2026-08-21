@@ -2,7 +2,7 @@
 // Strategy: pre-cache app shell on install, stale-while-revalidate for assets,
 // network-first for navigation. Works offline indefinitely.
 
-var CACHE = "fitapp-shell-v20260821g";
+var CACHE = "fitapp-shell-v20260821h";
 
 // App shell — files that must be available offline
 var SHELL = [

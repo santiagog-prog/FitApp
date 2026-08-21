@@ -98,20 +98,16 @@
       "animation:spFadeIn .4s ease both;overflow:hidden;font-family:Inter,sans-serif;";
 
     splash.innerHTML =
-      // ── Logo en el centro ──
-      '<div style="flex:1;display:flex;align-items:center;justify-content:center;">' +
-        '<div style="opacity:0;animation:spLogoIn .8s .15s cubic-bezier(.34,1.5,.64,1) both;">' +
+      '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:0 32px;">' +
+        '<div style="opacity:0;animation:spLogoIn .8s .1s cubic-bezier(.34,1.5,.64,1) both;">' +
           LOGO_SVG +
         '</div>' +
-      '</div>' +
-      // ── Nombre + frase centrados abajo ──
-      '<div style="width:100%;padding:0 32px calc(env(safe-area-inset-bottom,0px)+72px);text-align:center;">' +
-        '<div style="opacity:0;animation:spSlideUp .6s .3s cubic-bezier(.16,1,.3,1) both;">' +
-          '<div style="font-size:52px;font-weight:900;color:#FFFFFF;letter-spacing:-3px;line-height:1;margin-bottom:6px;">FitApp</div>' +
-          '<div style="width:32px;height:3px;border-radius:99px;background:#C8E000;margin:0 auto 16px;"></div>' +
+        '<div style="opacity:0;animation:spSlideUp .6s .35s cubic-bezier(.16,1,.3,1) both;text-align:center;">' +
+          '<div style="font-size:52px;font-weight:900;color:#FFFFFF;letter-spacing:-3px;line-height:1;margin-bottom:8px;">FitApp</div>' +
+          '<div style="width:36px;height:3px;border-radius:99px;background:#C8E000;margin:0 auto;"></div>' +
         '</div>' +
-        '<div style="opacity:0;animation:spFadeUp .5s .55s ease both;">' +
-          '<div style="font-size:15px;font-style:italic;color:rgba(255,255,255,0.4);line-height:1.6;">' +
+        '<div style="opacity:0;animation:spFadeUp .5s .6s ease both;text-align:center;">' +
+          '<div style="font-size:15px;font-style:italic;color:rgba(255,255,255,0.38);line-height:1.6;">' +
             '&ldquo;Esto cambiará tu vida&rdquo;' +
           '</div>' +
         '</div>' +
