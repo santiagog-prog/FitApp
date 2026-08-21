@@ -1990,16 +1990,17 @@
         var anahi = alumnos.find(function(a){ return a.nombre==="Anahi" && (a.apellido||"").indexOf("Guillen")!==-1; });
         if(!anahi){
           window.db.saveAlumno({
-            nombre:"Anahi", apellido:"Guillen", codigo:"2468",
+            nombre:"Anahi", apellido:"Guillen", codigo:"1919",
             objetivo:"perdida_grasa", nivel:"principiante", activo:true,
             rutina_id: santiago ? santiago.rutina_id : null,
             plan_alimentacion_id: santiago ? santiago.plan_alimentacion_id : null
           });
-        } else if(santiago && (!anahi.rutina_id || !anahi.plan_alimentacion_id)){
-          window.db.updateAlumno(anahi.id, {
-            rutina_id: santiago.rutina_id,
-            plan_alimentacion_id: santiago.plan_alimentacion_id
-          });
+        } else {
+          var cambios = {};
+          if(anahi.codigo !== "1919") cambios.codigo = "1919";
+          if(santiago && !anahi.rutina_id) cambios.rutina_id = santiago.rutina_id;
+          if(santiago && !anahi.plan_alimentacion_id) cambios.plan_alimentacion_id = santiago.plan_alimentacion_id;
+          if(Object.keys(cambios).length) window.db.updateAlumno(anahi.id, cambios);
         }
         mostrarSplashCoach(function(){ showSec("dashboard"); });
       })
