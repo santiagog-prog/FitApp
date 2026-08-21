@@ -188,7 +188,7 @@
           '<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:20px;">' +
             '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">➕ Agregar amigo por código</div>' +
             '<div style="display:flex;gap:8px;">' +
-              '<input id="reto-codigo-input" type="number" inputmode="numeric" maxlength="4" placeholder="Código de 4 dígitos"' +
+              '<input id="reto-codigo-input" type="tel" inputmode="numeric" maxlength="4" placeholder="Código de 4 dígitos"' +
                 'style="flex:1;height:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:16px;font-weight:700;padding:0 14px;font-family:inherit;outline:none;">' +
               '<button id="reto-agregar-btn" style="height:44px;padding:0 18px;background:#C8E000;color:#1C1C1E;border:none;border-radius:12px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;">Agregar</button>' +
             '</div>' +
@@ -203,11 +203,11 @@
 
       // Listener del botón agregar
       document.getElementById("reto-agregar-btn").addEventListener("click", function(){
-        var codigo = (document.getElementById("reto-codigo-input").value || "").trim();
+        var codigo = (document.getElementById("reto-codigo-input").value || "").trim().replace(/\D/g,"");
         var msg = document.getElementById("reto-msg");
-        if(!codigo){ msg.style.color="#FF3B30"; msg.textContent="Escribe un código."; return; }
+        if(!codigo || codigo.length < 1){ msg.style.color="#FF3B30"; msg.textContent="Escribe un código."; return; }
         var todosA = window.db.getAlumnos ? window.db.getAlumnos() : [];
-        var encontrado = todosA.find(function(a){ return String(a.codigo) === String(codigo) && a.id !== window.ALUMNO_ID; });
+        var encontrado = todosA.find(function(a){ return String(a.codigo).trim() === codigo && String(a.id) !== String(window.ALUMNO_ID); });
         if(!encontrado){ msg.style.color="#FF3B30"; msg.textContent="Código no encontrado."; return; }
         var ids = getAmigos(window.ALUMNO_ID);
         if(ids.indexOf(encontrado.id) !== -1){ msg.style.color="#FF9500"; msg.textContent="Ya está en tu lista."; return; }

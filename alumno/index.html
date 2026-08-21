@@ -102,7 +102,7 @@
 <script src="../js/pages/gym.js?v=20260617f"></script>
 <script src="../js/pages/fotos.js?v=20260617f"></script>
 <script src="../js/pages/habitos.js?v=20260617f"></script>
-<script src="../js/pages/mas.js?v=20260821a"></script>
+<script src="../js/pages/mas.js?v=20260821b"></script>
 <script src="../js/pages/cardio.js?v=20260820b"></script>
 <script src="../js/pages/editar.js?v=20260817a"></script>
 <script src="../js/onboarding.js?v=20260820d"></script>
@@ -110,16 +110,24 @@
 <script>
 // ── Service Worker + Notificaciones ──────────────────────
 if("serviceWorker" in navigator){
-  // No explicit scope — defaults to /FitApp/ (the SW file's directory), which is correct
   navigator.serviceWorker.register("../sw.js")
     .then(function(reg){
-      // Pedir permiso de notificaciones al usuario
+      // Auto-actualizar cuando hay nueva versión del SW
+      reg.addEventListener("updatefound", function(){
+        var newWorker = reg.installing;
+        newWorker.addEventListener("statechange", function(){
+          if(newWorker.state === "installed" && navigator.serviceWorker.controller){
+            // Hay update listo — recargar para aplicarlo
+            window.location.reload();
+          }
+        });
+      });
       if("Notification" in window && Notification.permission === "default"){
         setTimeout(function(){
           Notification.requestPermission().then(function(perm){
             if(perm === "granted") _scheduleNotifs(reg);
           });
-        }, 5000); // Pide permiso 5s después de abrir
+        }, 5000);
       } else if(Notification.permission === "granted"){
         _scheduleNotifs(reg);
       }
