@@ -78,39 +78,39 @@
     '</svg>';
 
   function mostrarSplashAlumno(alumno, callback){
-    if(!document.getElementById(“splash-keyframes”)){
-      var ks = document.createElement(“style”);
-      ks.id = “splash-keyframes”;
+    if(!document.getElementById("splash-keyframes")){
+      var ks = document.createElement("style");
+      ks.id = "splash-keyframes";
       ks.textContent =
-        “@keyframes spFadeIn{from{opacity:0}to{opacity:1}}” +
-        “@keyframes spLogoIn{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:scale(1)}}” +
-        “@keyframes spSlideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}” +
-        “@keyframes spFadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}” +
-        “@keyframes spFadeOut{from{opacity:1}to{opacity:0}}”;
+        "@keyframes spFadeIn{from{opacity:0}to{opacity:1}}" +
+        "@keyframes spLogoIn{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:scale(1)}}" +
+        "@keyframes spSlideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}" +
+        "@keyframes spFadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}" +
+        "@keyframes spFadeOut{from{opacity:1}to{opacity:0}}";
       document.head.appendChild(ks);
     }
 
-    var splash = document.createElement(“div”);
-    splash.id = “alumno-splash”;
+    var splash = document.createElement("div");
+    splash.id = "alumno-splash";
     splash.style.cssText =
-      “position:fixed;inset:0;z-index:99999;background:#080808;” +
-      “display:flex;flex-direction:column;align-items:center;” +
-      “animation:spFadeIn .4s ease both;overflow:hidden;font-family:Inter,sans-serif;”;
+      "position:fixed;inset:0;z-index:99999;background:#080808;" +
+      "display:flex;flex-direction:column;align-items:center;" +
+      "animation:spFadeIn .4s ease both;overflow:hidden;font-family:Inter,sans-serif;";
 
     splash.innerHTML =
       // ── Logo en el centro ──
-      '<div style=”flex:1;display:flex;align-items:center;justify-content:center;”>' +
-        '<div style=”opacity:0;animation:spLogoIn .8s .15s cubic-bezier(.34,1.5,.64,1) both;”>' +
+      '<div style="flex:1;display:flex;align-items:center;justify-content:center;">' +
+        '<div style="opacity:0;animation:spLogoIn .8s .15s cubic-bezier(.34,1.5,.64,1) both;">' +
           LOGO_SVG +
         '</div>' +
       '</div>' +
       // ── Nombre + frase abajo ──
-      '<div style=”width:100%;padding:0 36px calc(env(safe-area-inset-bottom,0px)+64px);”>' +
-        '<div style=”opacity:0;animation:spSlideUp .6s .3s cubic-bezier(.16,1,.3,1) both;”>' +
-          '<div style=”font-size:58px;font-weight:900;color:#FFFFFF;letter-spacing:-3.5px;line-height:.95;margin-bottom:14px;”>FitApp</div>' +
+      '<div style="width:100%;padding:0 36px calc(env(safe-area-inset-bottom,0px)+64px);">' +
+        '<div style="opacity:0;animation:spSlideUp .6s .3s cubic-bezier(.16,1,.3,1) both;">' +
+          '<div style="font-size:58px;font-weight:900;color:#FFFFFF;letter-spacing:-3.5px;line-height:.95;margin-bottom:14px;">FitApp</div>' +
         '</div>' +
-        '<div style=”opacity:0;animation:spFadeUp .5s .55s ease both;”>' +
-          '<div style=”font-size:16px;font-style:italic;color:rgba(255,255,255,0.38);line-height:1.5;”>' +
+        '<div style="opacity:0;animation:spFadeUp .5s .55s ease both;">' +
+          '<div style="font-size:16px;font-style:italic;color:rgba(255,255,255,0.38);line-height:1.5;">' +
             '&ldquo;Esto cambiará tu vida&rdquo;' +
           '</div>' +
         '</div>' +
@@ -119,11 +119,11 @@
     document.body.appendChild(splash);
 
     function cerrar(){
-      splash.style.animation = “spFadeOut .4s ease both”;
+      splash.style.animation = "spFadeOut .4s ease both";
       setTimeout(function(){ splash.remove(); callback(); }, 400);
     }
 
-    splash.addEventListener(“click”, cerrar);
+    splash.addEventListener("click", cerrar);
     setTimeout(cerrar, 4000);
   }
 
