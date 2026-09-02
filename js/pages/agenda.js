@@ -425,10 +425,13 @@
           "</div>" +
           // Cuerpo expandible (oculto por defecto)
           "<div id='body-" + cardId + "' style='display:none;padding:0 16px 16px;'>" +
-            // Animación grande
-            "<div style='width:100%;height:140px;border-radius:12px;background:linear-gradient(135deg,var(--surface2),var(--surface3));margin-bottom:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;'>" +
-              "<div style='width:120px;height:140px;'>" + (svgAnim || "") + "</div>" +
-            "</div>" +
+            // Animación grande — canvas 60fps
+            (window.getEjercicioAnimHTML ? (function(){
+              var uid3 = "body-anim-" + cardId;
+              return "<div style='width:100%;height:200px;border-radius:14px;background:linear-gradient(135deg,rgba(200,224,0,0.06),var(--surface2));margin-bottom:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;'>" +
+                window.getEjercicioAnimHTML(ej.nombre, uid3) +
+              "</div>";
+            })() : "") +
             // Técnica
             (tecnica ? (
               "<div style='font-size:11px;font-weight:700;color:var(--accent-text);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;'>Cómo hacerlo</div>" +
@@ -459,6 +462,10 @@
           bodyEl.style.display = open ? "none" : "block";
           var chev = headEl.querySelector("div:last-child");
           if(chev) chev.textContent = open ? "›" : "⌄";
+          // Iniciar animación al abrir
+          if(!open && window.startAllAnimaciones){
+            setTimeout(window.startAllAnimaciones, 30);
+          }
         });
       }
     });
@@ -541,7 +548,7 @@
     var html =
       "<div style='padding:0 20px 12px;display:flex;align-items:center;justify-content:space-between;'>" +
         "<div style='text-align:center;'>" +
-          "<div id='me-timer-display' style='font-size:28px;font-weight:800;color:var(--accent);font-family:\"Space Mono\",monospace;letter-spacing:2px;'>00:00</div>" +
+          "<div id='me-timer-display' style='font-size:28px;font-weight:800;color:var(--accent);font-family:\"Space Mono\",monospace;letter-spacing:2px;'>" + pad2(Math.floor(_workout.cronSegundos/60)) + ":" + pad2(_workout.cronSegundos%60) + "</div>" +
           "<div style='font-size:10px;color:var(--text-muted);'>TIEMPO DE ENTRENO</div>" +
         "</div>" +
         // Toggle kg/lbs
@@ -972,6 +979,11 @@
   }
 
   window.init_agenda = function(){
+    // Si hay un entrenamiento activo, regresar a él en vez de mostrar la lista
+    if(_workout.cronInterval && _workout.diaRutina){
+      renderModoEntreno(_workout.diaRutina, _workout.rutina);
+      return;
+    }
     state.weekOffset = 0;
     state.selectedDate = null;
     renderLista();
